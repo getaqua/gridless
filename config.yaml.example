@@ -1,0 +1,6 @@
+database:
+  host: localhost
+  port: 27017
+  name: gridless
+auth:
+  secret: #some unique, obscure, super-secure string

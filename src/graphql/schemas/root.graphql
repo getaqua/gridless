@@ -1,0 +1,170 @@
+# ==========
+# Procedures
+# ==========
+type Query {
+    """
+    Get a user's profile data. Returns null/None if it doesn't exist,
+    or if you don't have permission to access it.
+    """
+    getUser(userid: String!): GetUserResponse!
+    """
+    Get the logged-in user.f"{info.context.host}//{flow.get('id','')}"
+    """
+    getMe: ThisUser
+    """
+    Get a Flow. Returns null/None if it doesn't exist,
+    or if you don't have permission to access it.
+    """
+    getFlow(flowid: String!): Flow
+    """
+    System information about the gridless server.
+    """
+    getSystemInfo: SystemInfo!
+}
+type Mutation {
+    createFlow(flow: NewFlow): Flow
+}
+
+# ================
+# Basic primitives
+# ================
+"""
+FlowEntities are a meta-type that groups Flows and Users,
+since Aqua considers users a special type of Flow.
+"""
+interface FlowEntity {
+    name: String!
+    id: ID!
+    alternative_ids: [String!]!
+}
+"""
+A Flow is a collection of Members, Content, and Rooms,
+along with access controls, badges, and posting as the Flow.
+"""
+type Flow implements FlowEntity {
+    name: String!
+    description: String
+    id: ID!
+    alternative_ids: [String!]!
+    # Coming soon, maybe: permissions, display settings, and such
+}
+"""
+A Room is a collection of Members (usually identical to its parent Flow)
+and Messages, along with access controls. Rooms are primarily used for
+instant messaging.
+"""
+interface Room {
+    id: ID!
+    name: String!
+}
+type ChatRoom implements Room {
+    id: ID!
+    name: String!
+    # messages(limit: Int): [Message]!
+}
+
+# ===========
+# Input Types
+# ===========
+"""Used in the creation of new Flows."""
+input NewFlow {
+    """The name of the Flow to create."""
+    name: String!
+    """
+    The **user-configurable** part of the ID.
+    It's equivalent to a username.
+    """
+    id: String!
+    """
+    Presets that are used to generate default settings for the Flow.
+    """
+    preset: FlowPreset!
+    """
+    The description, topic, or biography of the Flow.
+    """
+    description: String
+}
+input UpdatedSettings {
+    """Whether to allow registration."""
+    registrationEnabled: Boolean
+    """Whether or not to only add to the allowHostnames field."""
+    patchAllowHostnames: Boolean
+    """
+    The hostnames to allow to CNAME to this server.
+    Domains that are allowed here and do this will bear that domain
+    to users who sign up there.
+    """
+    allowHostname: [String!]!
+}
+
+# =============
+# Utility types
+# =============
+"""
+ISO-8601 formatted date and time.
+"""
+scalar Date
+"""
+A preset with which to configure a Flow's initial settings.
+"""
+enum FlowPreset {
+    """Anyone can read, post, and join. Can optionally require approval. Comparable to a subreddit."""
+    community
+    """An invite-only group."""
+    private_group
+    """Similar to "stories" on other platforms."""
+    story
+    """
+    All users post anonymously (under the group's name) by default.
+    Viewing is public. Joining and posting are invite-only.
+    """
+    channel
+    """An invite-only group where members post anonymously by default."""
+    anonymous_group
+    """
+    Blog Flows have a blog- or news-like home page. 
+    Viewing is public. Joining and posting are invite-only.
+    """
+    blog
+    """A private collection, group, or list."""
+    collection
+}
+"""The type of link used in a LinkContent."""
+enum LinkType {
+    """The link is a Content or Flow on Aqua."""
+    share
+    """The link is to a remote image or video."""
+    media
+    """The link is a link to a Web site."""
+    web
+}
+"""
+AlbumEntries are used in ImageContent.
+"""
+type AlbumEntry {
+    """The URL of the image."""
+    url: String!
+    """
+    The Markdown caption of the image. 
+    No block elements are supported.
+    """
+    caption: String
+}
+type SystemInfo {
+    """
+    The version of gridless this is running on.
+    """
+    version: String!
+    """
+    The name of the gridless server.
+    """
+    name: String!
+}
+
+# =============
+# Query Helpers
+# =============
+type GetUserResponse {
+    error: Error
+    data: User
+}

@@ -1,0 +1,25 @@
+type Error {
+    code: ErrorCode!
+    message: String
+}
+
+enum ErrorCode {
+    """
+    The resource you were looking for does not exist.
+    """
+    NOT_FOUND
+    """
+    You do not have permission to perform this action.
+    """
+    PERMISSION_DENIED
+    """
+    This resource or action does not exist,
+    or you don't have permission to read/write it.
+    """
+    NO_ACCESS
+    """
+    This error was not checked for in the code.
+    This is developer error on Gridless's side.
+    """
+    UNKNOWN_ERROR
+}

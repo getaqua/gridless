@@ -1,0 +1,71 @@
+"""
+An object describing a user account on the platform. 
+Users are a special type of Flow and as such 
+will have similar properties.
+"""
+type User implements FlowEntity {
+    name: String!
+    nickname: String
+    id: ID!
+    alternative_ids: [String!]!
+}
+
+"""
+This is the currently logged in user.
+It contains information on the auth token used,
+as well as other user-private information.
+"""
+type ThisUser {
+    """
+    The User object corresponding to ThisUser.
+    """
+    user: User!
+    """
+    The username the user should use for login.
+    """
+    username: String!
+    # """
+    # The E-Mail address associated with the user.
+    # Used for password resets, among other things.
+    # """
+    # email: String
+    # """
+    # The phone number associated with the user.
+    # Can be used for reverse lookups.
+    # """
+    # tel: String
+    verifiedEmail: Boolean!
+    #twofactorEnabled: Boolean!
+    """
+    The permissions that this token has.
+    """
+    tokenPermissions: TokenPermissions
+}
+type TokenPermissions {
+    """
+    Whether the token can be used to
+    read the current user's "secure" data,
+    such as email, phone number, and AUID
+    (App-Unique ID).
+    """
+    readUser: Boolean!
+    """
+    Whether the token can be used to
+    create new Flows under the current User.
+    """
+    createFlow: Boolean!
+    """
+    Whether the token can be used to
+    list private Flows, such as Friends.
+    """
+    listPrivateFlows: Boolean!
+    """
+    The Flows that the token is authorized to post to.
+    """
+    postToFlows: [ID!]!
+    """
+    Whether the token can be used to
+    post to a user's personal Flow (their profile).
+    """
+    postToProfile: Boolean!
+}
