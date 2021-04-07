@@ -7554,6 +7554,7 @@ fsevents@^1.2.7:
     mongoose: ^5.12.1
     nodemon: ^2.0.7
     nunjucks: ^3.2.3
+    password-validator: ^5.1.1
     src: "link:./src"
     ts-jest: ^26.5.4
     ts-node: ^9.1.1
@@ -11295,6 +11296,13 @@ fsevents@^1.2.7:
   version: 0.1.1
   resolution: "pascalcase@npm:0.1.1"
   checksum: 268a9dbf9cd934fcd0ba02733b7d6176834b13a608bbcd295550636b3c6371a6047875175b457e705b283e81ec171884c9cd86d1fd6c49f70f66fbc3783dc0c1
+  languageName: node
+  linkType: hard
+
+"password-validator@npm:^5.1.1":
+  version: 5.1.1
+  resolution: "password-validator@npm:5.1.1"
+  checksum: fbbc73550ca2ac10372497bb029a9cb17554b62adab2f0daea559834451071254cc88e0363d9a9d8b393e55cc70efb4255d17558841c1db71479a3927582214d
   languageName: node
   linkType: hard
 

@@ -55,6 +55,7 @@
     "mongoose": "^5.12.1",
     "nodemon": "^2.0.7",
     "nunjucks": "^3.2.3",
+    "password-validator": "^5.1.1",
     "src": "link:./src",
     "ts-jest": "^26.5.4",
     "ts-node": "^9.1.1",
