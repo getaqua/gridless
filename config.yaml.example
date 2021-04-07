@@ -4,3 +4,4 @@ database:
   name: gridless
 auth:
   secret: #some unique, obscure, super-secure string
+sitename: Aqua Development #you can put whatever you want here

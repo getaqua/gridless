@@ -1,0 +1,55 @@
+{% extends 'auth.j2' %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<h5 class="card-title">Login to {{ sitename }}</h5>
+<form method="POST" action="/_gridless/login">
+<!-- Username input -->
+<div class="form-outline mb-4">
+  <input type="username" name="username" id="loginUsername" class="form-control">
+  <label class="form-label" for="loginUsername" style="margin-left: 0px;">Username</label>
+<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 88.8px;"></div><div class="form-notch-trailing"></div></div></div>
+
+<!-- Password input -->
+<div class="form-outline mb-4">
+  <input type="password" name="password" id="loginPassword" class="form-control">
+  <label class="form-label" for="loginPassword" style="margin-left: 0px;">Password</label>
+<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 64.8px;"></div><div class="form-notch-trailing"></div></div></div>
+
+{% if redirect_url != None %}<!-- Hidden NEXT input -->
+<input name="redirect_url" value="{{ redirect_url }}" type="hidden">{% endif %}
+
+<!-- 2 column grid layout for inline styling -->
+<div class="row mb-4">
+  <div class="col d-flex justify-content-center">
+    <!-- Checkbox -->
+    <div class="form-check">
+      <input class="form-check-input" name="rememberMe" type="checkbox" value="" id="form2Example3" checked="">
+      <label class="form-check-label" for="loginRememberMe">
+        Remember me
+      </label>
+    </div>
+  </div>
+
+  <div class="col">
+    <!-- Simple link -->
+    <a href="/_gridless/forgot/password">Forgot password?</a>
+  </div>
+</div>
+
+<!-- Submit button -->
+<div class="row mb-4">
+  <div class="col d-flex justify-content-center">
+    <a href="/_gridless/register" class="btn btn-link  mb-4">
+      Register
+    </a>
+  </div>
+
+  <div class="col">
+    <button type="submit" class="btn btn-primary btn-block mb-4">
+      Log in
+    </button>
+  </div>
+</div>
+
+</form>
+{% endblock %}

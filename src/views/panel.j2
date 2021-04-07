@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <!-- MDB -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.2.0/mdb.min.css" rel="stylesheet" />
+    <!-- MDC Components -->
+    <link href="https://unpkg.com/@material/textfield@latest/dist/mdc.textfield.min.css" rel="stylesheet" />
+    <!-- JQuery -->
+    <script src="/static/jquery.js"></script>
+
+    <link href="/static/dashboard.css" rel="stylesheet"> <!-- TODO: figure out what in this is actually necessary -->
+
+    <title>{% block title %}Title{% endblock%} | {{ sitename }}</title>
+  </head>
+  <body>
+
+{%- macro tab(name, code, icon, selected=false) -%}
+  <li class="nav-item" role="presentation">
+    <button href="#" class="nav-link{% if selected == true %} active{% endif %}" id="{{ code }}-tab" data-bs-toggle="tab" data-bs-target="#{{ code }}-page" role="tab" aria-controls="{{ code }}-page" aria-selected="{% if selected %}true{% else %}false{% endif %}">
+      <span class="iconify" data-icon="{{ icon }}"></span>
+      {{ name }}{% if selected %} <span class="sr-only">(current)</span>{% endif %}
+    </button>
+  </li>
+{%- endmacro -%}
+{% macro tabPage(code, selected=false) -%}
+  <div class="tab-pane{% if selected == true %} show active{% endif %} fade" id="{{ code }}-page" role="tabpanel" aria-labelledby="{{ code }}-tab">
+    {{ caller() }}
+  </div>
+{%- endmacro -%}
+
+<!-- TODO: minimize the below, make macros, and place these here blocks down there -->
+    <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
+      <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">{{ sitename }}</a>
+      {# <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search"> #}
+      <ul class="navbar-nav px-3">
+        <li class="nav-item text-nowrap">
+          <a class="nav-link" href="#">Sign out</a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+          <div class="sidebar-sticky">
+            <ul class="nav flex-column nav-tabs" role="tablist">
+              {% block tabdefs -%}
+              {# <li class="nav-item">
+                <a class="nav-link active" href="#">
+                  <span class="iconify" data-icon="feather:home" data-inline="true"></span>
+                  Dashboard <span class="sr-only">(current)</span>
+                </a>
+              </li> #}
+              {{ tab( 'Dashboard', 'home', 'mdi:home', selected=true ) }}
+              {# <li class="nav-item">
+                <a class="nav-link" href="#">
+                  <span class="iconify" data-icon="feather:file" data-inline="true"></span>
+                  Orders
+                </a>
+              </li> #}
+              {{ tab('Orders', 'orders', 'mdi:file') }}
+              {{ tab('Products', 'products', 'mdi:cart') }}
+              {{ tab('Customers', 'customers', 'mdi:account-multiple') }}
+              {{ tab('Reports', 'reports', 'ant-design:bar-chart-outlined') }}
+              {{ tab('Integrations', 'integrations', 'mdi:buffer') }}
+              {%- endblock %}
+            </ul>
+{# 
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+              <span>Saved reports</span>
+              <a class="d-flex align-items-center text-muted" href="#">
+                <span class="iconify" data-icon="feather:plus-circle" data-inline="true"></span>
+              </a>
+            </h6>
+            <ul class="nav flex-column mb-2">
+              <li class="nav-item">
+                <a class="nav-link" href="#">
+                  <span class="iconify" data-icon="feather:file-text" data-inline="true"></span>
+                  Current month
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">
+                  <span class="iconify" data-icon="feather:file-text" data-inline="true"></span>
+                  Last quarter
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">
+                  <span class="iconify" data-icon="feather:file-text" data-inline="true"></span>
+                  Social engagement
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">
+                  <span class="iconify" data-icon="feather:file-text" data-inline="true"></span>
+                  Year-end sale
+                </a>
+              </li>
+            </ul> #}
+          </div>
+        </nav>
+
+        <div role="main" class="tab-content col-md-9 ml-sm-auto col-lg-10 px-4">
+          {% block content -%}
+            {% call tabPage("home", selected=true) %}
+              <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Dashboard</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                  <div class="btn-group mr-2">
+                    <button class="btn btn-sm btn-outline-secondary">Share</button>
+                    <button class="btn btn-sm btn-outline-secondary">Export</button>
+                  </div>
+                  <button class="btn btn-sm btn-outline-secondary dropdown-toggle">
+                    <span class="iconify" data-icon="feather:calendar" data-inline="true"></span>
+                    This week
+                  </button>
+                </div>
+              </div>
+
+              <h2>Section title</h2>
+              <div class="table-responsive">
+                <table class="table table-striped table-sm">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Header</th>
+                      <th>Header</th>
+                      <th>Header</th>
+                      <th>Header</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>1,001</td>
+                      <td>Lorem</td>
+                      <td>ipsum</td>
+                      <td>dolor</td>
+                      <td>sit</td>
+                    </tr>
+                    <tr>
+                      <td>1,002</td>
+                      <td>amet</td>
+                      <td>consectetur</td>
+                      <td>adipiscing</td>
+                      <td>elit</td>
+                    </tr>
+                    <tr>
+                      <td>1,003</td>
+                      <td>Integer</td>
+                      <td>nec</td>
+                      <td>odio</td>
+                      <td>Praesent</td>
+                    </tr>
+                    <tr>
+                      <td>1,003</td>
+                      <td>libero</td>
+                      <td>Sed</td>
+                      <td>cursus</td>
+                      <td>ante</td>
+                    </tr>
+                    <tr>
+                      <td>1,004</td>
+                      <td>dapibus</td>
+                      <td>diam</td>
+                      <td>Sed</td>
+                      <td>nisi</td>
+                    </tr>
+                    <tr>
+                      <td>1,005</td>
+                      <td>Nulla</td>
+                      <td>quis</td>
+                      <td>sem</td>
+                      <td>at</td>
+                    </tr>
+                    <tr>
+                      <td>1,006</td>
+                      <td>nibh</td>
+                      <td>elementum</td>
+                      <td>imperdiet</td>
+                      <td>Duis</td>
+                    </tr>
+                    <tr>
+                      <td>1,007</td>
+                      <td>sagittis</td>
+                      <td>ipsum</td>
+                      <td>Praesent</td>
+                      <td>mauris</td>
+                    </tr>
+                    <tr>
+                      <td>1,008</td>
+                      <td>Fusce</td>
+                      <td>nec</td>
+                      <td>tellus</td>
+                      <td>sed</td>
+                    </tr>
+                    <tr>
+                      <td>1,009</td>
+                      <td>augue</td>
+                      <td>semper</td>
+                      <td>porta</td>
+                      <td>Mauris</td>
+                    </tr>
+                    <tr>
+                      <td>1,010</td>
+                      <td>massa</td>
+                      <td>Vestibulum</td>
+                      <td>lacinia</td>
+                      <td>arcu</td>
+                    </tr>
+                    <tr>
+                      <td>1,011</td>
+                      <td>eget</td>
+                      <td>nulla</td>
+                      <td>Class</td>
+                      <td>aptent</td>
+                    </tr>
+                    <tr>
+                      <td>1,012</td>
+                      <td>taciti</td>
+                      <td>sociosqu</td>
+                      <td>ad</td>
+                      <td>litora</td>
+                    </tr>
+                    <tr>
+                      <td>1,013</td>
+                      <td>torquent</td>
+                      <td>per</td>
+                      <td>conubia</td>
+                      <td>nostra</td>
+                    </tr>
+                    <tr>
+                      <td>1,014</td>
+                      <td>per</td>
+                      <td>inceptos</td>
+                      <td>himenaeos</td>
+                      <td>Curabitur</td>
+                    </tr>
+                    <tr>
+                      <td>1,015</td>
+                      <td>sodales</td>
+                      <td>ligula</td>
+                      <td>in</td>
+                      <td>libero</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            {% endcall %}
+            {% call tabPage("orders") %}
+              <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Page 2</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                  <div class="btn-group mr-2">
+                    <button class="btn btn-sm btn-outline-secondary">Share</button>
+                    <button class="btn btn-sm btn-outline-secondary">Export</button>
+                  </div>
+                  <button class="btn btn-sm btn-outline-secondary dropdown-toggle">
+                    <span class="iconify" data-icon="feather:calendar" data-inline="true"></span>
+                    This week
+                  </button>
+                </div>
+              </div>
+            {% endcall %}
+          {%- endblock %}
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Icons; powered by Iconify -->
+    <script src="https://code.iconify.design/1/1.0.7/iconify.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
+    <script src="https://getbootstrap.com/docs/4.1/assets/js/vendor/popper.min.js"></script>
+    <!-- MDB -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.2.0/mdb.min.js"></script>
+  </body>
+</html>

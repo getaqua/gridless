@@ -1,0 +1,90 @@
+{% extends 'auth.j2' %}
+{% block title %}Register{% endblock %}
+{% block content %}
+<h5 class="card-title">Sign up for an account on {{ sitename }}</h5>
+<form method="POST" action="/_gridless/register">
+  <!-- Username input -->
+  <div class="form-floating mb-4" style="margin-bottom: 2rem !important">
+    <input type="username" name="username" id="registrationUsername" class="form-control">
+    <label class="form-label" for="loginUsername" style="margin-left: 0px;">Username</label>
+    <div class="valid-feedback" id="registrationUsernameSuccessful">
+      This username is available!
+    </div>
+    <div class="invalid-feedback" id="registrationUsernameError">
+      No error yet.
+    </div>
+  <div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 88.8px;"></div><div class="form-notch-trailing"></div></div></div>
+
+  <!-- Email input -->
+  <div class="form-floating mb-4">
+    <input type="email" name="emailAddress" id="registrationEmail" class="form-control">
+    <label class="form-label" for="registrationEmail" style="margin-left: 0px;">Email Address</label>
+  <div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 88.8px;"></div><div class="form-notch-trailing"></div></div></div>
+
+  <!-- Password input -->
+  <div class="form-floating mb-4">
+    <input type="password" name="password" id="registrationPassword" class="form-control">
+    <label class="form-label" for="loginPassword" style="margin-left: 0px;">Password</label>
+    <div class="valid-feedback" id="registrationPasswordSuccessful">
+      This password is valid!
+    </div>
+    <div class="invalid-feedback" id="registrationPasswordError">
+      No error yet.
+    </div>
+  <div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 64.8px;"></div><div class="form-notch-trailing"></div></div></div>
+
+  {% if redirect_url != None %}<!-- Hidden NEXT input -->
+  <input name="redirect_url" value="{{ redirect_url }}" type="hidden">{% endif %}
+
+  <!-- Submit button -->
+  <div class="row mb-4">
+    <div class="col d-flex justify-content-center">
+      <a href="/_gridless/login" class="btn btn-link  mb-4">
+        Log in
+      </a>
+    </div>
+
+    <div class="col">
+      <button type="submit" class="btn btn-primary btn-block mb-4">
+        Register
+      </button>
+    </div>
+  </div>
+  <script>
+    document.querySelector("#registrationUsername").addEventListener("blur", () => {
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 204) {
+          document.getElementById("registrationUsername").className = "form-control is-valid"
+        }
+        if (this.readyState == 4 && this.status == 400) {
+          document.getElementById("registrationUsername").className = "form-control is-invalid"
+          if (xhttp.responseText == `{"error":"INVALID_USERNAME"}\n`) document.getElementById("registrationUsernameError").innerHTML = "This username is invalid."
+          else if (xhttp.responseText == `{"error":"USERNAME_TAKEN"}\n`) document.getElementById("registrationUsernameError").innerHTML = "This username is not available."
+          else if (xhttp.responseText == `{"error":"USERNAME_MISSING"}\n`) document.getElementById("registrationUsernameError").innerHTML = "You need a username."
+          else document.getElementById("registrationUsernameError").innerHTML = "An unknown error occurred while checking the availability of this username."
+        }
+      };
+      xhttp.open("GET", "/_gridless/register?check=username&username="+encodeURIComponent(document.getElementById("registrationUsername").value), true);
+      xhttp.send(); 
+    });
+    document.querySelector("#registrationPassword").addEventListener("blur", () => {
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 204) {
+          document.getElementById("registrationPassword").className = "form-control is-valid"
+        }
+        if (this.readyState == 4 && this.status == 400) {
+          document.getElementById("registrationPassword").className = "form-control is-invalid"
+          if (xhttp.responseText == `{"error":"INVALID_PASSWORD"}\n`) document.getElementById("registrationPasswordError").innerHTML = 
+            `This password does not meet <a href="/_gridless/register/password_requirements">the requirements</a>.`
+          else if (xhttp.responseText == `{"error":"PASSWORD_MISSING"}\n`) document.getElementById("registrationPasswordError").innerHTML = "You need a password."
+          else document.getElementById("registrationPasswordError").innerHTML = "An unknown error occurred while checking the validity of this password."
+        }
+      };
+      xhttp.open("GET", "/_gridless/register?check=password&password="+encodeURIComponent(document.getElementById("registrationPassword").value), true);
+      xhttp.send(); 
+    });
+  </script>
+</form>
+{% endblock %}

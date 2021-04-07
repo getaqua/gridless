@@ -6,7 +6,7 @@ type Query {
     Get a user's profile data. Returns null/None if it doesn't exist,
     or if you don't have permission to access it.
     """
-    getUser(userid: String!): GetUserResponse!
+    getUser(userid: String!): User
     """
     Get the logged-in user.f"{info.context.host}//{flow.get('id','')}"
     """

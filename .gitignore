@@ -1,5 +1,26 @@
-node_modules/
 coverage/
+
+
+# NPM
+node_modules/
+# Yarn
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+
+# Private files
 .env
 _tests
 config.yaml
+
+# Remove built JS files
+*.js
+src/**.js
+*.jsx
+src/**.jsx
+!ssr.config.js
+!src/views/static/**.js

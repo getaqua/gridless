@@ -1,0 +1,93 @@
+{% extends 'panel.j2' %}
+{% block title %}Developers{% endblock %}
+{% block tabdefs %}
+{{ tab("Applications", "apps", "mdi:cellphone-cog", selected=true) }}
+{{ tab("Bots", "bots", "mdi:robot-outline") }}
+{% endblock %}
+{% block content %}
+{% call tabPage("apps", selected=true) %}
+{{ devpg("Application") }}
+{# <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Applications</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+    <button class="btn btn-sm btn-outline-primary">
+        <span class="iconify" data-icon="mdi:plus" data-inline="true"></span>
+        New Application
+    </button>
+    </div>
+</div>
+<div class="container-lg" id="appList"></div> #}
+{% endcall %}
+{% call tabPage("bots") %}
+{{ devpg("Bot") }}
+{% endcall %}
+<script src="/static/devpanel.js"></script>
+<script>
+    //$.ajax("", {ty-})
+</script>
+<div class="modal fade devpg-modal" id="editModal" tabindex="-1" aria-labelledby="editModalTitle" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editModalTitle">Edit <span class="ctx-name"></span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-outline mb-4">
+          <input type="email" id="editModalName" class="form-control">
+          <label class="form-label" for="editModalName" style="margin-left: 0px;">Name</label>
+        </div>
+        <div class="form-outline mb-4">
+          <input type="email" id="editModalAvatar" class="form-control">
+          <label class="form-label" for="editModalAvatar" style="margin-left: 0px;">Avatar URL</label>
+        </div>
+        <div class="form-outline mb-4">
+          <input type="email" id="editModalClientId" readonly class="form-control">
+          <label class="form-label" for="editModalClientId" style="margin-left: 0px;">Client ID</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" onclick="jQuery('#editModal').modal('hide')">Close</button>
+        <button type="button" class="btn btn-success ctx-submit">Update</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% macro devpg(type) %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">{{ type }}s</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+    <button class="btn btn-sm btn-outline-primary" id="new{{ type }}Button" data-bs-toggle="modal" data-bs-target="#new{{ type }}Modal">
+        <span class="iconify" data-icon="mdi:plus" data-inline="true"></span>
+        New {{ type }}
+    </button>
+    </div>
+</div>
+<div class="container-lg" id="{{ type | lower | replace('application','app') }}List"></div>
+<!-- New {{ type }} Modal -->
+<div class="modal fade devpg-modal" id="new{{ type }}Modal" tabindex="-1" aria-labelledby="new{{ type }}ModalTitle" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="new{{ type }}ModalTitle">New {{ type }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-outline mb-4">
+          <input type="email" id="new{{ type }}ModalName" class="form-control">
+          <label class="form-label" for="new{{ type }}ModalName" style="margin-left: 0px;">Name</label>
+        </div>
+        <div class="form-outline mb-4">
+          <input type="email" id="new{{ type }}ModalAvatar" class="form-control">
+          <label class="form-label" for="new{{ type }}ModalAvatar" style="margin-left: 0px;">Avatar URL</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-success" id="new{{ type }}ModalSubmit">Create</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endmacro %}

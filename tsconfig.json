@@ -7,19 +7,20 @@
     "suppressImplicitAnyIndexErrors": true,
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
-    "noUnusedLocals": true,
+    //"noUnusedLocals": true,
     "sourceMap": true,
     "declaration": true,
     "outDir": "./dist",
     "rootDir": "src",
     "baseUrl": ".",
     "esModuleInterop": true,
+    "jsx": "react",
     "types": ["node", "jest"],
     "paths": {
       "@modules/*": ["./modules/*"]
     }
   },
   "include": ["src/**/*.ts"],
-  "files": ["src/server.ts"],
+  "files": ["src/server.ts", "src/global.d.ts", "src/express.d.ts"],
   "exclude": ["node_modules"]
 }
