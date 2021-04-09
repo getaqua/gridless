@@ -10,4 +10,7 @@
     {% endfor %}
     </ul>
   {% endif %}
+  {% if backto %}<div class="row mb-4">
+    <a class="btn btn-link" href="{{ backto }}" role="button">Try Again</a>
+  </div>{% endif -%}
 {% endblock %}

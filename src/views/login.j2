@@ -2,7 +2,10 @@
 {% block title %}Login{% endblock %}
 {% block content %}
 <h5 class="card-title">Login to {{ sitename }}</h5>
-<form method="POST" action="/_gridless/login">
+{% if logout == "success" %}<div class="alert alert-success" role="alert" data-mdb-color="success">
+  You have been logged out!
+</div>
+{% endif %}<form method="POST" action="/_gridless/login">
 <!-- Username input -->
 <div class="form-outline mb-4">
   <input type="username" name="username" id="loginUsername" class="form-control">

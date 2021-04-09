@@ -1,5 +1,6 @@
 import express, { NextFunction, Response } from 'express';
 import { checkUsernameAvailability, endpoint as registrationEndpoint } from './auth/signup';
+import { endpoint as loginEndpoint, logout, logout as logoutEndpoint } from './auth/login';
 import debug from 'debug';
 import { urlencoded as bodyParser } from 'body-parser';
 import jwt from 'jsonwebtoken';
@@ -20,7 +21,8 @@ export default function routes() {
     // /_gridless/login, /_gridless/register, and other auth endpoints
     router.get("/register/password_requirements", function(req, res) {
         return res.render("passreq.j2", {...globalProps,
-            passwordRequirements: defaultPasswordRequirements //TODO: get the configurable version
+            passwordRequirements: defaultPasswordRequirements, //TODO: get the configurable version
+            redirect_url: req.params["redirect_url"]
         });
     });
     router.get("/register", checkUsernameAvailability, function(req, res) {
@@ -29,15 +31,24 @@ export default function routes() {
         });
     });
     router.post("/register", bodyParser({extended: true}), registrationEndpoint);
+    router.get("/login", function(req, res) {
+        return res.render("login.j2", {...globalProps, logout: req.query["logout"], redirect_url: req.query["redirect_url"]});
+    });
+    router.use("/logout", logoutEndpoint);
+    router.post("/login", bodyParser({extended: true}), loginEndpoint);
     router.get("/success", ensureLoggedIn(), async function(req: express.Request, res: express.Response) {
         //const token = jwt.verify(req.cookies["jwt"], globalThis.staticConfig.get("auth").get("secret"));
         return res.send({"success": true, ...req['user'], ...(await (await UserModel.findById(req['user'].userId).exec()).toJSON())});
     });
 
+    log("Registered routes for /_gridless");
+
     router.use("/static", express.static("src/views/static"));
+    log("Registered /_gridless/static")
 
     router.all('*', (req, res, next) => next(404));
     router.use(errorHandler);
 
+    log("Registered error handling. Router registration complete 😎");
     return router;
 }
