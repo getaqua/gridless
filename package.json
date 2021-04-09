@@ -8,7 +8,7 @@
     "test": "jest --runInBand ./tests",
     "clear-cache": "jest --clearCache",
     "coverage": "jest --coverage",
-    "prep-db": "docker start gridless-mongo && docker start gridless-mongo-express"
+    "prep-db": "docker start gridless-mongo && sleep 5 && docker start gridless-mongo-express"
   },
   "jest": {
     "testEnvironment": "node",
