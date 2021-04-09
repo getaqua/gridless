@@ -12,7 +12,7 @@ const log = debug("gridless:routes");
 
 export default function routes() {
     const globalProps = {
-        sitename: globalThis.staticConfig['sitename']
+        sitename: globalThis.staticConfig.get("sitename")
     };
     const router = express.Router()
     // /_gridless/graphql endpoint (moved out)
