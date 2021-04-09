@@ -10,8 +10,22 @@ const log = debug("gridless:auth:signup");
 
 export async function endpoint(req: express.Request, res: express.Response) {
     if (!req.body?.["username"] || !req.body?.["password"]) {
-        log(req.body);
-        return res.sendStatus(401);
+        return res.render("autherror.j2", {messages: ["You must supply both a username and password."]});
+    }
+    const _uvalid = await isValidUsername(req.body?.["username"]);
+    const _pvalid = await isValidPassword(req.body?.["password"]);
+    let _mess = [];
+    if (_uvalid != "SUCCESS") {
+        _mess.push(_uvalid == "USERNAME_TAKEN" ? "This username is not available."
+            : _uvalid == "INVALID_USERNAME" ? "The username is invalid."
+            : "Unknown error processing username."
+        );
+    }
+    if (_pvalid != true) {
+        _mess.push(..._pvalid.messages);
+    }
+    if (_mess.length > 0) {
+        return res.render("autherror.j2", {messages: _mess});
     }
     const pass = await bcrypt.hash(req.body?.["password"], 10);
     const user = new UserModel({
@@ -42,10 +56,8 @@ export async function checkUsernameAvailability(req: express.Request, res: expre
     if (req.query["check"]?.toString() == "username") {
         const _valid = await isValidUsername(req.query["username"].toString());
         if (_valid === "SUCCESS") {
-            log("1")
             return res.status(200).type("json").send("{}");
         } else {
-            log("2")
             return res.status(400).type("json").send(`{"error":"${_valid}"}\n`);
         }
     } else if (req.query["check"]?.toString() == "password") {

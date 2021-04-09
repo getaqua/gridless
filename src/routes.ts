@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken';
 import { ensureLoggedIn } from './auth/attachments';
 import { UserModel } from './db/models/userModel';
 import { errorHandler } from './handling/errors';
+import { defaultPasswordRequirements } from './auth/requirements';
 
 const log = debug("gridless:routes");
 
@@ -17,7 +18,9 @@ export default function routes() {
     // /_gridless/graphql endpoint (moved out)
     // /_gridless/login, /_gridless/register, and other auth endpoints
     router.get("/register", checkUsernameAvailability, function(req, res) {
-        return res.render("register.j2", {...globalProps});
+        return res.render("register.j2", {...globalProps,
+            passwordRequirements: defaultPasswordRequirements //TODO: get the configurable version
+        });
     });
     router.post("/register", bodyParser({extended: true}), registrationEndpoint);
     router.get("/success", ensureLoggedIn(), async function(req: express.Request, res: express.Response) {

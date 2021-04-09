@@ -1,5 +1,6 @@
 {% extends 'auth.j2' %}
 {% block title %}Register{% endblock %}
+{% block head %}<link rel="stylesheet" href="/_gridless/static/password/jquery.passwordRequirements.css" />{% endblock %}
 {% block content %}
 <h5 class="card-title">Sign up for an account on {{ sitename }}</h5>
 <form method="POST" action="/_gridless/register">
@@ -29,7 +30,7 @@
       This password is valid!
     </div>
     <div class="invalid-feedback" id="registrationPasswordError">
-      No error yet.
+      Invalid password.
     </div>
   <div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 64.8px;"></div><div class="form-notch-trailing"></div></div></div>
 
@@ -50,6 +51,7 @@
       </button>
     </div>
   </div>
+  <script src="/_gridless/static/password/jquery.passwordRequirements.min.js"></script>
   <script>
     document.querySelector("#registrationUsername").addEventListener("blur", () => {
       var xhttp = new XMLHttpRequest();
@@ -69,7 +71,7 @@
       xhttp.send(); 
     });
     document.querySelector("#registrationPassword").addEventListener("blur", () => {
-      var xhttp = new XMLHttpRequest();
+      /* var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 204) {
           document.getElementById("registrationPassword").className = "form-control is-valid"
@@ -83,8 +85,25 @@
         }
       };
       xhttp.open("GET", "/_gridless/register?check=password&password="+encodeURIComponent(document.getElementById("registrationPassword").value), true);
-      xhttp.send(); 
+      xhttp.send(); */
+      var _password = document.getElementById("registrationPassword").value;
+      if (_password.length < {{ passwordRequirements.minLength }}) {
+        document.getElementById("registrationPasswordError").innerHTML = 
+            `Passwords must be at least {{ passwordRequirements.minLength }} characters long.`;
+        document.getElementById("registrationPassword").className = "form-control is-invalid"
+      } {%- if passwordRequirements.maxLength > 0 %} else if (_password.length > {{ passwordRequirements.maxLength }}) {
+        document.getElementById("registrationPasswordError").innerHTML = 
+            `Passwords must be at most {{ passwordRequirements.maxLength }} characters long.`;
+        document.getElementById("registrationPassword").className = "form-control is-invalid"
+      } {%- endif %}
     });
+    {# $(".pr-password").passwordRequirements({
+      numCharacters: 8,
+      useLowercase: true,
+      useUppercase: true,
+      useNumbers: true,
+      useSpecial: true
+    }); #}
   </script>
 </form>
 {% endblock %}
