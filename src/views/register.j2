@@ -1,6 +1,5 @@
 {% extends 'auth.j2' %}
 {% block title %}Register{% endblock %}
-{% block head %}<link rel="stylesheet" href="/_gridless/static/password/jquery.passwordRequirements.css" />{% endblock %}
 {% block content %}
 <h5 class="card-title">Sign up for an account on {{ sitename }}</h5>
 <form method="POST" action="/_gridless/register">
@@ -97,13 +96,6 @@
         document.getElementById("registrationPassword").className = "form-control is-invalid"
       } {%- endif %}
     });
-    {# $(".pr-password").passwordRequirements({
-      numCharacters: 8,
-      useLowercase: true,
-      useUppercase: true,
-      useNumbers: true,
-      useSpecial: true
-    }); #}
   </script>
 </form>
 {% endblock %}
