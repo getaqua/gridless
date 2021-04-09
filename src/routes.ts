@@ -12,11 +12,17 @@ const log = debug("gridless:routes");
 
 export default function routes() {
     const globalProps = {
-        sitename: globalThis.staticConfig.get("sitename")
+        sitename: globalThis.staticConfig.get("sitename"),
+        banner: "/_gridless/static/gridlesslogo.png" // TODO: get this from the config, maybe?
     };
     const router = express.Router()
     // /_gridless/graphql endpoint (moved out)
     // /_gridless/login, /_gridless/register, and other auth endpoints
+    router.get("/register/password_requirements", function(req, res) {
+        return res.render("passreq.j2", {...globalProps,
+            passwordRequirements: defaultPasswordRequirements //TODO: get the configurable version
+        });
+    });
     router.get("/register", checkUsernameAvailability, function(req, res) {
         return res.render("register.j2", {...globalProps,
             passwordRequirements: defaultPasswordRequirements //TODO: get the configurable version

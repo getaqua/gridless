@@ -16,7 +16,7 @@
 
     <style>
       html, body {
-        height: 100%;
+        height: 100vh !important;
         width: 100%;
       }
       body {
@@ -29,10 +29,20 @@
           width: 480px;
         }
         .centerOnScreen {
-          margin: 10vh auto;
-          position: absolute;
-          left: calc( 50% - 240px );
-          top: calc( 50% - 240px )
+          margin: 2em auto;
+          /* position: absolute; */
+          height: calc(100vh - 4em);
+          overflow-y: auto;
+          /* left: calc( 50% - 240px );
+          top: calc( 50% - 240px ) */
+        }
+        html, body {
+          overflow-y: hidden;
+        }
+      }
+      @media (max-width: 799px) {
+        .centerOnScreen {
+          height: 100vh
         }
       }
     </style>
@@ -43,6 +53,7 @@
   </head>
   <body>
     <div class="card loginCard centerOnScreen">
+      {% if banner %}<img class="card-img-top" src="{{ banner }}" alt="Login screen banner">{% endif %}
       <div class="card-body">
         {% block content %}{% endblock %}
       </div>

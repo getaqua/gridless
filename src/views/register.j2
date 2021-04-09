@@ -1,7 +1,7 @@
 {% extends 'auth.j2' %}
 {% block title %}Register{% endblock %}
 {% block content %}
-<h5 class="card-title">Sign up for an account on {{ sitename }}</h5>
+<h5 class="card-title mb-4">Sign up for an account on {{ sitename }}</h5>
 <form method="POST" action="/_gridless/register">
   <!-- Username input -->
   <div class="form-floating mb-4" style="margin-bottom: 2rem !important">
@@ -37,7 +37,7 @@
   <input name="redirect_url" value="{{ redirect_url }}" type="hidden">{% endif %}
 
   <!-- Submit button -->
-  <div class="row mb-4">
+  <div class="row mt-5">
     <div class="col d-flex justify-content-center">
       <a href="/_gridless/login" class="btn btn-link  mb-4">
         Log in
@@ -50,7 +50,6 @@
       </button>
     </div>
   </div>
-  <script src="/_gridless/static/password/jquery.passwordRequirements.min.js"></script>
   <script>
     document.querySelector("#registrationUsername").addEventListener("blur", () => {
       var xhttp = new XMLHttpRequest();
@@ -94,8 +93,28 @@
         document.getElementById("registrationPasswordError").innerHTML = 
             `Passwords must be at most {{ passwordRequirements.maxLength }} characters long.`;
         document.getElementById("registrationPassword").className = "form-control is-invalid"
-      } {%- endif %}
+      } {%- endif %} else {
+        document.getElementById("registrationPasswordSuccessful").innerHTML = 
+            `Looks good! Make sure it follows the <a href="/_gridless/register/password_requirements">password requirements</a>.`;
+        document.getElementById("registrationPassword").className = "form-control is-valid border-warning"
+        document.getElementById("registrationPasswordSuccessful").className = "valid-feedback text-warning"
+      }
     });
   </script>
 </form>
+<div class="row mb-4">
+  <!-- Buttons trigger collapse -->
+  <a class="btn btn-link"
+    data-mdb-toggle="collapse"
+    href="#passwordRequirementCollapsible"
+    role="button"
+    aria-expanded="false"
+    aria-controls="passwordRequirementCollapsible"
+  >Password Requirements</a>
+  <!-- Collapsed content -->
+  <div class="collapse mt-3" id="passwordRequirementCollapsible">
+    {% include 'passreq.include.j2' %}
+  </div>
+</div>
+
 {% endblock %}

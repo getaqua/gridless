@@ -1,0 +1,12 @@
+<ul>
+    <li><strong>Minimum length:</strong> {{ passwordRequirements.minLength }}</li>
+    {%- if passwordRequirements.maxLength > 0 %}<li><strong>Maximum length:</strong> {{ passwordRequirements.maxLength }}</li>{% endif %}
+    <li><strong>Minimum # of lowercase:</strong> {{ passwordRequirements.minLowercase }}</li>
+    {%- if passwordRequirements.maxLowercase > 0 %}<li><strong>Maximum # of lowercase:</strong> {{ passwordRequirements.maxLowercase }}</li>{% endif %}
+    <li><strong>Minimum # of uppercase:</strong> {{ passwordRequirements.minCapitals }}</li>
+    {%- if passwordRequirements.maxCapitals > 0 %}<li><strong>Maximum # of uppercase:</strong> {{ passwordRequirements.maxCapitals }}</li>{% endif %}
+    <li><strong>Minimum # of digits (numbers):</strong> {{ passwordRequirements.minDigits }}</li>
+    {%- if passwordRequirements.maxDigits > 0 %}<li><strong>Maximum # of digits:</strong> {{ passwordRequirements.maxDigits }}</li>{% endif %}
+    <li><strong>Minimum # of special characters:</strong> {{ passwordRequirements.minSymbols }}</li>
+    {%- if passwordRequirements.maxSymbols > 0 %}<li><strong>Maximum # of special characters:</strong> {{ passwordRequirements.maxSymbols }}</li>{% endif %}
+</ul>
