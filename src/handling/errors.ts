@@ -6,9 +6,9 @@ const error = debug("gridless:error");
 
 export function errorHandler(err, req, res, next) {
   error(err?.message || chalk`{bold.red ERROR} {red at ${req.url || "an unknown URL"}}: ${err}`);
-  if (!req.url.includes("/_gridless")) {
-    next(err);
-  }
+  // if (!req.url.includes("/_gridless")) {
+  //   next(err);
+  // }
   if (err == "gridless:notfound" || err == ENOENT || err == 404) {
     return res.status(404).render("genericerror.j2", {
       errorCode: "404",

@@ -9,7 +9,6 @@ import cookieParser from 'cookie-parser';
 import consolidate from 'consolidate';
 import chalk from 'chalk';
 import { server as graphql } from './graphql/middleware';
-import { errorHandler } from './handling/errors';
 
 const log = debug("gridless:initserver");
 
@@ -48,8 +47,6 @@ app.set('view engine', 'j2');
 app.set('views', __dirname+ '/views');
 app.use("/_gridless", cookieParser(globalThis.staticConfig.get("auth").get("secret")), routes());
 graphql.applyMiddleware({ app, path: "/_gridless/graphql" });
-
-app.use(errorHandler);
 
 const port = process.env.PORT || staticConfig.get("server.port") || 3000;
 app.listen(port, () => {

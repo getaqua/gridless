@@ -8,22 +8,8 @@ import validator from 'password-validator';
 
 const log = debug("gridless:auth:signup");
 
-export = async function(req: express.Request, res: express.Response) {
-    if (req.body?.["check"] == "username") {
-        if (isValidUsername(req.body?.["username"])) {
-            return res.status(204);
-        } else {
-            return res.status(400);
-        }
-    } else if (req.body?.["check"] == "password") {
-        const _valid = isValidPassword(req.body?.["password"]);
-        if (_valid === true) {
-            return res.status(204);
-        } else {
-            return res.status(400).send({error: "INVALID_PASSWORD"});
-        }
-        return res.status(400);
-    } else if (!req.body?.["username"] || !req.body?.["password"]) {
+export async function endpoint(req: express.Request, res: express.Response) {
+    if (!req.body?.["username"] || !req.body?.["password"]) {
         log(req.body);
         return res.sendStatus(401);
     }
@@ -51,16 +37,37 @@ export = async function(req: express.Request, res: express.Response) {
     return res.redirect("/_gridless/success");
 }
 
-async function isValidUsername(username: string): Promise<boolean> {
-    if (!usernameRequirements.exec(username)) return false;
-    if (username.includes("//")) return false;
-    if (username.includes("/#/")) return false;
+export async function checkUsernameAvailability(req: express.Request, res: express.Response, next: express.NextFunction) {
+    //log("DEBUG: Check value is: "+req.query["check"])
+    if (req.query["check"]?.toString() == "username") {
+        const _valid = await isValidUsername(req.query["username"].toString());
+        if (_valid === "SUCCESS") {
+            log("1")
+            return res.status(200).type("json").send("{}");
+        } else {
+            log("2")
+            return res.status(400).type("json").send(`{"error":"${_valid}"}\n`);
+        }
+    } else if (req.query["check"]?.toString() == "password") {
+        const _valid = isValidPassword(req.query["password"].toString());
+        if (_valid === true) {
+            return res.status(200).type("json").send("{}");
+        } else {
+            return res.status(400).type("json").send(`{error: "INVALID_PASSWORD"}\n`);
+        }
+    } else return next()
+}
+
+async function isValidUsername(username: string): Promise<"SUCCESS" | "INVALID_USERNAME" | "USERNAME_TAKEN"> {
+    if (!usernameRequirements.exec(username)) return "INVALID_USERNAME";
+    if (username.includes("//")) return "INVALID_USERNAME";
+    if (username.includes("/#/")) return "INVALID_USERNAME";
     // save the database checks for last!
     // If a previous check fails, these don't need to be run.
-    if (await UserModel.exists({username})) return false;
-    if (await UserModel.exists({"$or": [{id: "//"+username}, {alternative_ids: "//"+username}]})) return false;
+    if (await UserModel.exists({username})) return "USERNAME_TAKEN";
+    if (await UserModel.exists({"$or": [{id: "//"+username}, {alternative_ids: "//"+username}]})) return "USERNAME_TAKEN";
     // all tests pass! it's a valid username.
-    return true;
+    return "SUCCESS";
 }
 
 const _lowercaseLetters = /[a-z]/;
