@@ -8,9 +8,14 @@ import { ensureLoggedIn } from './auth/attachments';
 import { UserModel } from './db/models/userModel';
 import { errorHandler } from './handling/errors';
 import { defaultPasswordRequirements } from './auth/requirements';
+import { getAuthConfig } from './db/models/authConfigModel';
 
 const log = debug("gridless:routes");
 
+const registrationDisabledCheck = (req, res, next) => {
+    if (getAuthConfig().registrationEnabled) next();
+    else res.status(501).render("autherror.j2", {messages: ["Registration is disabled."]});
+}
 export default function routes() {
     const globalProps = {
         sitename: globalThis.staticConfig.get("sitename"),
@@ -19,18 +24,25 @@ export default function routes() {
     const router = express.Router()
     // /_gridless/graphql endpoint (moved out)
     // /_gridless/login, /_gridless/register, and other auth endpoints
-    router.get("/register/password_requirements", function(req, res) {
-        return res.render("passreq.j2", {...globalProps,
+    router.get("/register/password_requirements", 
+        registrationDisabledCheck,
+        (req, res) => res.render("passreq.j2", {...globalProps,
             passwordRequirements: defaultPasswordRequirements, //TODO: get the configurable version
             redirect_url: req.params["redirect_url"]
-        });
-    });
-    router.get("/register", checkUsernameAvailability, function(req, res) {
+        })
+    );
+    router.get("/register",
+        registrationDisabledCheck,
+        checkUsernameAvailability, function(req, res) {
         return res.render("register.j2", {...globalProps,
             passwordRequirements: defaultPasswordRequirements //TODO: get the configurable version
         });
     });
-    router.post("/register", bodyParser({extended: true}), registrationEndpoint);
+    router.post("/register", 
+        registrationDisabledCheck,
+        bodyParser({extended: true}),
+        registrationEndpoint,
+    );
     router.get("/login", function(req, res) {
         return res.render("login.j2", {...globalProps, logout: req.query["logout"], redirect_url: req.query["redirect_url"]});
     });
@@ -41,6 +53,7 @@ export default function routes() {
         return res.send({"success": true, ...req['user'], ...(await (await UserModel.findById(req['user'].userId).exec()).toJSON())});
     });
 
+    //router.get("/authconfig", ensureLoggedIn(TokenType.COOKIE), (req, res) => res.type("json").send(getAuthConfig().toJSON()));
     log("Registered routes for /_gridless");
 
     router.use("/static", express.static("src/views/static"));

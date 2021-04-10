@@ -9,6 +9,7 @@ import cookieParser from 'cookie-parser';
 import consolidate from 'consolidate';
 import chalk from 'chalk';
 import { server as graphql } from './graphql/middleware';
+import { getAuthConfig } from './db/models/authConfigModel';
 
 const log = debug("gridless:initserver");
 
@@ -33,6 +34,8 @@ Mongoose.connect(`mongodb://${staticConfig.get("database").get("username")}:${st
   //console.log(staticConfig.toJSON());
   process.exit(8);
 }).then((mongoose) => {
+  // Cache config
+  getAuthConfig();
   log(chalk`{bold.green SUCCESS}! Database connected!`);
 });
 
