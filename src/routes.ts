@@ -1,8 +1,8 @@
-import express, { NextFunction, Response } from 'express';
+import express, { Application, NextFunction, Response } from 'express';
 import { checkUsernameAvailability, endpoint as registrationEndpoint } from './auth/signup';
 import { endpoint as loginEndpoint, logout, logout as logoutEndpoint } from './auth/login';
 import debug from 'debug';
-import { urlencoded as bodyParser } from 'body-parser';
+import { urlencoded as bodyParser, json as jsonParser } from 'body-parser';
 import jwt from 'jsonwebtoken';
 import { ensureLoggedIn } from './auth/attachments';
 import { UserModel } from './db/models/userModel';
@@ -10,6 +10,8 @@ import { errorHandler } from './handling/errors';
 import { defaultPasswordRequirements } from './auth/requirements';
 import { getAuthConfig } from './db/models/authConfigModel';
 import { extraStepsMiddleware } from './auth/extrasteps';
+import { server as devgql } from './developers/graphql';
+import { TokenType } from './auth/UserModel';
 
 const log = debug("gridless:routes");
 
@@ -20,10 +22,10 @@ const registrationDisabledCheck = (req, res, next) => {
 
 export default function routes() {
     const globalProps = {
-        sitename: globalThis.staticConfig.get("sitename"),
+        //sitename: globalThis.staticConfig.get("sitename"),
         banner: "/_gridless/static/gridlesslogo.png" // TODO: get this from the config, maybe?
     };
-    const router = express.Router()
+    const router = express.Router();
     // /_gridless/graphql endpoint (moved out)
     // /_gridless/login, /_gridless/register, and other auth endpoints
     router.get("/register/password_requirements", 
@@ -55,6 +57,10 @@ export default function routes() {
         //const token = jwt.verify(req.cookies["jwt"], globalThis.staticConfig.get("auth").get("secret"));
         return res.send({"success": true, ...req['user'], ...(await (await UserModel.findById(req['user'].userId).exec()).toJSON())});
     });
+
+    router.get("/developers", ensureLoggedIn(TokenType.COOKIE), (req, res) => res.render("devpanel/main.nj", {...globalProps}));
+    router.post("/developers", ensureLoggedIn(TokenType.COOKIE), jsonParser());
+    devgql.applyMiddleware({app: router as Application, path: "/developers", disableHealthCheck: true});
 
     //router.get("/authconfig", ensureLoggedIn(TokenType.COOKIE), (req, res) => res.type("json").send(getAuthConfig().toJSON()));
     log("Registered routes for /_gridless");

@@ -1,0 +1,27 @@
+type Query {
+    allApplications: [Application!]!
+    application(id: String): Application
+}
+type Mutation {
+    updateApplication(id: String, data: ApplicationPatch): Boolean
+    newApplication(
+        name: String,
+        type: ApplicationType
+    ): Application
+}
+
+type Application {
+    id: ID!
+    name: String!
+    type: ApplicationType!
+    avatar_url: String
+}
+input ApplicationPatch {
+    name: String
+    type: ApplicationType
+    avatar_url: String
+}
+enum ApplicationType {
+    CLIENT
+    BOT
+}

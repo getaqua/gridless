@@ -37,7 +37,7 @@ export const server = new ApolloServer({
   //validationRules: [],
   
   context: ({ req }) => {
-    const token = req.headers.authorization || req.cookies.jwt;
+    const token = req.params['access_token'] || req.signedCookies['jwt'] || req.get("Authorization")?.replace("Bearer ", "")?.replace("Bot ", "");
     if (token) {
       try {
         const jwt: {

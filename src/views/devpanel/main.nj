@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <!-- MDB -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.2.0/mdb.min.css" rel="stylesheet" />
+
+    <style>
+      html, body {
+        height: 100vh !important;
+        width: 100%;
+      }
+      body {
+        background: url(https://source.unsplash.com/daily?landscape);
+        background-position: center;
+        background-size: cover;
+        overflow-y: hidden;
+      }
+      @media (min-width: 800px) {
+        .bodycard {
+          height: calc( 100vh - 1rem );
+          width: calc( 100vw - 1rem );
+          margin: .5rem;
+        }
+        .cardpanel {
+          width: 50%;
+        }
+        .cardpanel:first-child {
+          border-right: solid gray 1px;
+          max-width: 50%;
+        }
+        .gr-panel-details:not(.is-active) {
+          display: none;
+        }
+      }
+      @media (max-width: 799px) {
+        .bodycard {
+          height: 100vh;
+          width: 100vw;
+        }
+        .cardpanel.is-active {
+          width: 100%;
+        }
+        .cardpanel:not(.is-active) {
+          display: none;
+        }
+      }
+      .cardpanel {
+        overflow-y: auto;
+        height: 100%;
+      }
+      .bodycard {
+        overflow-x: auto;
+      }
+      .gr-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 32px;
+      }
+      .gr-app-row {
+        flex-direction: row;
+        display: flex;
+      }
+      .gr-app-row h5 {
+        margin: 1em;
+      }
+      .bodycard-wrapper {
+        display: flex;
+        flex-direction: row;
+        height: 100%;
+      }
+      .bodycard-wrapper>* {
+        flex-shrink: 1;
+      }
+    </style>
+
+    <title>Developer Panel | {{ sitename }}</title>
+  </head>
+  <body>
+    <div class="card bodycard">
+      <!-- Navbar -->
+      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <!-- Container wrapper -->
+        <div class="container-fluid">
+          <!-- Navbar brand -->
+          <a class="navbar-brand" href="#">{{ sitename }} Developers</a>
+
+          <!-- Toggle button -->
+          <!-- button
+            class="navbar-toggler"
+            type="button"
+            data-mdb-toggle="collapse"
+            data-mdb-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <i class="fas fa-bars"></i>
+          </button -->
+            <!-- Search form -->
+          <button class="btn btn-outline-primary" type="button" data-mdb-ripple-color="dark" data-bs-toggle="modal" data-bs-target="#newAppModal">
+            <span class="iconify" data-icon="mdi:plus" data-inline="true"></span> New App
+          </button>
+        </div>
+      </nav>
+      <div class="bodycard-wrapper">
+        <div class="card-body cardpanel is-active" id="gr-app-list-page">
+          {% include 'devpanel/list.nj' %}
+        </div>
+        <div class="card-body cardpanel gr-panel-details" id="gr-app-details-page">
+          {% include 'devpanel/details.nj' %}
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade devpg-modal" id="newAppModal" tabindex="-1" aria-labelledby="newAppModalTitle" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="newAppModalTitle">Edit <span class="ctx-name"></span></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="form-outline mb-4">
+              <input type="email" id="newAppModalName" class="form-control">
+              <label class="form-label" for="newAppModalName" style="margin-left: 0px;">Name</label>
+            </div>
+            <div class="form-outline mb-4">
+              <input type="email" id="newAppModalAvatar" class="form-control">
+              <label class="form-label" for="newAppModalAvatar" style="margin-left: 0px;">Avatar URL</label>
+            </div>
+            <div class="form-outline mb-4">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" id="newAppModalType__Client" name="newAppModalType" checked="">
+                <label class="form-check-label" for="newAppModalType__Client">
+                  Client, login, etc.
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" id="newAppModalType__Bot" name="newAppModalType">
+                <label class="form-check-label" for="newAppModalType__Bot">
+                  Bot
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-success ctx-submit" data-bs-dismiss="modal" onclick="createApp()">Create</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert fade alert-danger alert-fixed" id="nameRequiredAlert" data-mdb-width="250px" data-mdb-autohide="true" data-mdb-position="top-right" 
+      data-mdb-delay="5000" role="alert" data-mdb-hidden="true" data-mdb-append-to-body="true" data-mdb-color="danger"
+      style="display: none; width: auto; top: 10px; right: 10px; bottom: unset; left: unset; transform: unset;">
+        Name is required
+    </div>
+    <div class="alert fade alert-danger alert-fixed" id="typeRequiredAlert" data-mdb-width="250px" data-mdb-autohide="true" data-mdb-position="top-right" 
+      data-mdb-delay="5000" role="alert" data-mdb-hidden="true" data-mdb-append-to-body="true" data-mdb-color="danger"
+      style="display: none; width: auto; top: 10px; right: 10px; bottom: unset; left: unset; transform: unset;">
+        Type is required
+    </div>
+    
+    <script src="/_gridless/static/devpanel2.js"></script>
+    <script src="https://code.iconify.design/1/1.0.7/iconify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
+    <!-- MDB -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.2.0/mdb.min.js"></script>
+  </body>
+</html>

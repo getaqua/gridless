@@ -1,5 +1,5 @@
 {% extends "auth.j2" %}
-{% block title %}Privacy Policy - {{sitename}}{% endblock %}
+{% block title %}Privacy Policy{% endblock %}
 {% block content %}
 {% if postbody.seenPrivacy %}<div class="alert alert-danger" role="alert" data-mdb-color="danger">
   You must accept the Privacy Policy to use {{sitename}}.

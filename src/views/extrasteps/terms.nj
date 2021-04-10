@@ -1,5 +1,5 @@
 {% extends "auth.j2" %}
-{% block title %}Terms of Service - {{sitename}}{% endblock %}
+{% block title %}Terms of Service{% endblock %}
 {% block content %}
 <h5 class="card-title">{{sitename}} Terms of Service</h5>
 {% if postbody.seenTerms %}<div class="alert alert-danger" role="alert" data-mdb-color="danger">
