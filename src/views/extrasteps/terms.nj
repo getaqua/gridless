@@ -1,0 +1,21 @@
+{% extends "auth.j2" %}
+{% block title %}Terms of Service - {{sitename}}{% endblock %}
+{% block content %}
+<h5 class="card-title">{{sitename}} Terms of Service</h5>
+{% if postbody.seenTerms %}<div class="alert alert-danger" role="alert" data-mdb-color="danger">
+  You must accept the Terms of Service to use {{sitename}}.
+</div>
+{% endif %}<p>Please review the <a href="{{ termsurl }}">Terms of Service for {{sitename}}</a>.</p>
+<form method="POST" action="/_gridless/register">
+    {% include "extrasteps/formbodyhelper.nj" %}
+    <div class="form-check mb-4">
+        <input class="form-check-input" type="checkbox" value="1" id="acceptedTerms" name="acceptedTerms">
+        <label class="form-check-label" for="acceptedTerms">
+            I accept the Terms of Service linked above.
+        </label>
+        <input type="hidden" value="1" name="seenTerms">
+    </div>
+    <button type="submit" class="btn btn-link btn-block mb-4">
+        Register
+    </button>
+{% endblock %}

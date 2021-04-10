@@ -46,6 +46,7 @@ const app = express();
 //   else log(chalk`{bold.red ERROR} {red in registerReact}: ${reason.message}`);
 // });
 app.engine('j2', consolidate.nunjucks);
+app.engine('nj', consolidate.nunjucks);
 app.set('view engine', 'j2');
 app.set('views', __dirname+ '/views');
 app.use("/_gridless", cookieParser(globalThis.staticConfig.get("auth").get("secret")), routes());

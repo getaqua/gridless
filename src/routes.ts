@@ -9,6 +9,7 @@ import { UserModel } from './db/models/userModel';
 import { errorHandler } from './handling/errors';
 import { defaultPasswordRequirements } from './auth/requirements';
 import { getAuthConfig } from './db/models/authConfigModel';
+import { extraStepsMiddleware } from './auth/extrasteps';
 
 const log = debug("gridless:routes");
 
@@ -16,6 +17,7 @@ const registrationDisabledCheck = (req, res, next) => {
     if (getAuthConfig().registrationEnabled) next();
     else res.status(501).render("autherror.j2", {messages: ["Registration is disabled."]});
 }
+
 export default function routes() {
     const globalProps = {
         sitename: globalThis.staticConfig.get("sitename"),
@@ -42,6 +44,7 @@ export default function routes() {
         registrationDisabledCheck,
         bodyParser({extended: true}),
         registrationEndpoint,
+        extraStepsMiddleware
     );
     router.get("/login", function(req, res) {
         return res.render("login.j2", {...globalProps, logout: req.query["logout"], redirect_url: req.query["redirect_url"]});

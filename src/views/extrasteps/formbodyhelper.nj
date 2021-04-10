@@ -1,0 +1,3 @@
+{% for key, value in postbody %}
+    <input type="hidden" name="{{key}}" value="{{value}}">
+{% endfor %}

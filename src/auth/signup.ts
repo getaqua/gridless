@@ -5,10 +5,11 @@ import { UserModel } from '../db/models/userModel';
 import debug from 'debug';
 import { defaultPasswordRequirements, IPasswordRequirements, passwordSymbols, usernameRequirements } from './requirements';
 import validator from 'password-validator';
+import { needsExtraSteps } from './extrasteps';
 
 const log = debug("gridless:auth:signup");
 
-export async function endpoint(req: express.Request, res: express.Response) {
+export async function endpoint(req: express.Request, res: express.Response, next: express.NextFunction) {
     if (!req.body?.["username"] || !req.body?.["password"]) {
         return res.render("autherror.j2", {messages: ["You must supply both a username and password."]});
     }
@@ -26,6 +27,9 @@ export async function endpoint(req: express.Request, res: express.Response) {
     }
     if (_mess.length > 0) {
         return res.render("autherror.j2", {messages: _mess});
+    }
+    if (needsExtraSteps("register", req)) {
+        return next();
     }
     const pass = await bcrypt.hash(req.body?.["password"], 10);
     const user = new UserModel({

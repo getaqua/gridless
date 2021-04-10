@@ -1,0 +1,21 @@
+{% extends "auth.j2" %}
+{% block title %}Privacy Policy - {{sitename}}{% endblock %}
+{% block content %}
+{% if postbody.seenPrivacy %}<div class="alert alert-danger" role="alert" data-mdb-color="danger">
+  You must accept the Privacy Policy to use {{sitename}}.
+</div>
+{% endif %}<h5 class="card-title">{{sitename}} Privacy Policy</h5>
+<p>Please review the <a href="{{ privacyurl }}">Privacy Policy for {{sitename}}</a>.</p>
+<form method="POST" action="/_gridless/register">
+    {% include "extrasteps/formbodyhelper.nj" %}
+    <div class="form-check mb-4">
+        <input class="form-check-input" type="checkbox" value="" id="acceptedPrivacyPolicy" name="acceptedPrivacyPolicy" checked="">
+        <label class="form-check-label" for="acceptedPrivacyPolicy">
+            I accept the Privacy Policy linked above.
+        </label>
+    <input type="hidden" value="1" name="seenPrivacy">
+    </div>
+    <button type="submit" class="btn btn-link btn-block mb-4">
+        Register
+    </button>
+{% endblock %}
