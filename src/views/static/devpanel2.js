@@ -8,32 +8,77 @@ const appThing = (data) => `<button class="list-group-item ripple rounded" data-
 </div>
 </button>`
 const appQuery = (id) => ({
-    "query": `query {
+    "query": `query appQuery {
     application(id: "${id}") {
         name
         avatar_url
         type
+        id
     }
 }`
 })
 const listQuery = {
-    "query": `query {
+    "query": `query listQuery {
     allApplications {
         name
         id
         avatar_url
     }
 }`}
+const patchQuery = (id, data) => ({
+    "query": `mutation PatchQuery($data: ApplicationPatch) {
+    updateApplication(id: "${id}", data: $data) {
+        id
+    }
+}`, "variables": {data: data}});
 
 const listElement = document.getElementById("gr-app-list");
 const listPage = document.getElementById("gr-app-list-page");
 const detailsPage = document.getElementById("gr-app-details-page");
-const inputs = {};
+var selectedApp = "";
+const inputs = {
+    name: () => document.getElementById("grDetailsName"),
+    avatar_url: () => document.getElementById("grDetailsAvatarUrl"),
+    client_id: () => document.getElementById("grDetailsClientId")
+};
+
+var _justUpdated = [];
+async function patchDetail(app, key, value, id) {
+    const appId = selectedApp;
+    let data = {};
+    data[key] = value;
+    // perform the query
+    const res = await fetch("/_gridless/developers", {
+        method: "POST",
+        body: JSON.stringify(patchQuery(app, data)),
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json;charset=UTF-8"
+        },
+        mode: 'cors',
+    });
+    if (res.ok) {
+        if (_justUpdated.includes(id)) return;
+        _justUpdated.push(id);
+        await getApps();
+        // tell the user that it was updated successfully
+        document.getElementById(id).className += " is-valid";
+        document.getElementById(id).parentElement.getElementsByClassName("invalid-feedback")[0].innerHTML = "Unknown error";
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        document.getElementById(id).className = document.getElementById(id).className.replace(" is-valid", "");
+        _justUpdated.splice(_justUpdated.indexOf(id));
+    } else {
+        console.error(res);
+        document.getElementById(id).className += " is-invalid";
+        document.getElementById(id).parentElement.getElementsByClassName("invalid-feedback")[0].innerHTML = "Error in updating: "+res.status+" "+res.statusText
+        await new Promise(resolve => setTimeout(resolve, 20000));
+        document.getElementById(id).className = document.getElementById(id).className.replace(" is-invalid", "");
+    }
+}
 
 async function appClick(ev) {
     const appId = ev.currentTarget.dataset.appId;
     const element = ev.currentTarget;
-    console.warn(ev.currentTarget);
     // perform the query
     const res = await fetch("/_gridless/developers", {
         method: "POST",
@@ -46,19 +91,23 @@ async function appClick(ev) {
     });
     // set the page
     if (res.ok) {
+        const data = (await res.json())["data"]["application"];
         //toggle buttons
-        listElement.children.forEach((element) => element.className.replace(" active", ""))
+        listElement.children.forEach((element) => element.className = element.className.replace(" active", ""))
         element.className += " active";
+        selectedApp = data["id"];
         //toggle planel
-        listPage.className.replace(" is-active", "");
+        listPage.className = listPage.className.replace(" is-active", "");
         detailsPage.className += " is-active";
-        //TODO: set up the inputs to do stuff
+        //set up the inputs to do stuff
+        inputs.name().value = data["name"];
+        inputs.avatar_url().value = data["avatar_url"];
     } else {
         console.error(res);
         //turn it off! turn it off!
-        listElement.children.forEach((element) => element.className.replace(" active", ""))
-        listPage.className.replace(" is-active", "");
-        detailsPage.className.replace(" is-active", "");
+        listElement.children.forEach((element) => element.className = element.className.replace(" active", ""))
+        listPage.className = listPage.className.replace(" is-active", "");
+        detailsPage.className = detailsPage.className.replace(" is-active", "");
     }
 }
 
@@ -83,7 +132,7 @@ function showAlert(id) {
 
 async function createApp() {
     if (!newAppInputs.type()) {alert("Type is required!"); return;}
-    if (!newAppInputs.name()) {alert("NAme is required!"); return;}
+    if (!newAppInputs.name()) {alert("Name is required!"); return;}
     const res = await fetch("/_gridless/developers", {
         method: "POST",
         headers: {
@@ -101,9 +150,15 @@ async function createApp() {
 }`}),
         credentials: "include",
     });
+    if (res.ok) {
+        await getApps();
+    }
 }
 
+var _isSyncing = false;
 async function getApps() {
+    if (_isSyncing) return;
+    _isSyncing = true;
     const res = await fetch("/_gridless/developers", {
         method: "POST",
         body: JSON.stringify(listQuery),
@@ -118,7 +173,9 @@ async function getApps() {
     for (var index in data["data"]["allApplications"]) {
         listElement.innerHTML += appThing(data["data"]["allApplications"][index]);
     }
-    document.querySelectorAll("#gr-app-list>[data-app-id]").forEach((element) => element.addEventListener("click", appClick))
+    if (selectedApp != "") listElement.querySelectorAll("[data-app-id=\""+selectedApp+"\"]").forEach((element) => element.className += " active");
+    document.querySelectorAll("#gr-app-list>[data-app-id]").forEach((element) => element.addEventListener("click", appClick));
+    _isSyncing = false;
 }
 
 getApps();

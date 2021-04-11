@@ -3,7 +3,7 @@ type Query {
     application(id: String): Application
 }
 type Mutation {
-    updateApplication(id: String, data: ApplicationPatch): Boolean
+    updateApplication(id: String, data: ApplicationPatch): Application
     newApplication(
         name: String,
         type: ApplicationType

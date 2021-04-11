@@ -1,1 +1,16 @@
-No inputs here yet!
+<div class="form-floating mb-4">
+  <input type="text" id="grDetailsName" class="form-control" onblur='patchDetail(selectedApp, "name", document.getElementById("grDetailsName").value, "grDetailsName")'>
+  <label class="form-label" for="grDetailsName" style="margin-left: 0px;">Name</label>
+  <div class="valid-feedback">Updated!</div>
+  <div class="invalid-feedback">Unknown error</div>
+<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 88.8px;"></div><div class="form-notch-trailing"></div></div></div>
+<div class="form-floating mb-4">
+  <input type="text" id="grDetailsAvatarUrl" class="form-control" onblur='patchDetail(selectedApp, "avatar_url", document.getElementById("grDetailsAvatarUrl").value, "grDetailsAvatarUrl")'>
+  <label class="form-label" for="grDetailsAvatarUrl" style="margin-left: 0px;">Avatar URL</label>
+  <div class="valid-feedback">Updated!</div>
+  <div class="invalid-feedback">Unknown error</div>
+<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 88.8px;"></div><div class="form-notch-trailing"></div></div></div>
+<div class="form-floating mb-4">
+  <input type="text" id="grDetailsClientId" class="form-control" readonly="">
+  <label class="form-label" for="grDetailsAvatarUrl" style="margin-left: 0px;">Client ID</label>
+<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 88.8px;"></div><div class="form-notch-trailing"></div></div></div>

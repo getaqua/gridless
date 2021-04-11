@@ -3,6 +3,7 @@ import express from 'express';
 import jsonwebtoken from 'jsonwebtoken';
 import { ILoggedIn, TokenType } from 'src/auth/UserModel';
 import { Application, ApplicationModel } from 'src/db/models/applicationModel';
+import { ESMap } from 'typescript';
 import devschema from './schema.gql';
 
 const resolver = {
@@ -18,10 +19,12 @@ const resolver = {
         }
     },
     Mutation: {
-        updateApplication: async (parent, {id, data}: {id: string, data: any}, context) => {
-            const found = await ApplicationModel.findById(id);
+        updateApplication: async (parent, {id, data}: {id: string, data: ESMap<any, any>}, context) => {
+            var found = await ApplicationModel.findById(id);
             if (found.owner != context.auth.userId) return null;
-            found.patch(data);
+            if (data['name']) found.set("name", data["name"]);
+            if (data['avatar_url']) found.set("avatar_url", data["avatar_url"]);
+            await found.save();
             return {...found.toJSON(), id: found.id};
         },
         newApplication: async (parent, data, context) => {
@@ -47,7 +50,7 @@ export const server = new ApolloServer({
     schema: schema,
     playground: false,
     introspection: true,
-    tracing: true,
+    tracing: false,
     engine: {
       debugPrintReports: true,
     },
