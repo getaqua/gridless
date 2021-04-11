@@ -1,3 +1,9 @@
+<div class="container-fluid d-flex">
+  <button class="btn btn-floating shadow-0 me-auto mb-4 ripple-surface" id="grDetailsDeselect" onclick="deselect()" style="font-size: 1.5em;">
+    <span class="iconify" data-icon="mdi:arrow-left"></span>
+  </button>
+  <button class="btn btn-outline-danger mb-4" id="grDetailsDelete" disabled>Delete</button>
+</div>
 <div class="form-floating mb-4">
   <input type="text" id="grDetailsName" class="form-control" onblur='patchDetail(selectedApp, "name", document.getElementById("grDetailsName").value, "grDetailsName")'>
   <label class="form-label" for="grDetailsName" style="margin-left: 0px;">Name</label>
@@ -14,3 +20,18 @@
   <input type="text" id="grDetailsClientId" class="form-control" readonly="">
   <label class="form-label" for="grDetailsAvatarUrl" style="margin-left: 0px;">Client ID</label>
 <div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 88.8px;"></div><div class="form-notch-trailing"></div></div></div>
+<div class="form-outline mb-4">
+  Type
+  <div class="form-check mx-3">
+    <input class="form-check-input" type="radio" id="grDetailsType__Client" name="grDetailsType" checked="">
+    <label class="form-check-label" for="grDetailsType__Client">
+      Client, login, etc.
+    </label>
+  </div>
+  <div class="form-check mx-3">
+    <input class="form-check-input" type="radio" id="grDetailsType__Bot" name="grDetailsType">
+    <label class="form-check-label" for="grDetailsType__Bot">
+      Bot
+    </label>
+  </div>
+</div>

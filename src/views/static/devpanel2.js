@@ -105,9 +105,7 @@ async function appClick(ev) {
     } else {
         console.error(res);
         //turn it off! turn it off!
-        listElement.children.forEach((element) => element.className = element.className.replace(" active", ""))
-        listPage.className = listPage.className.replace(" is-active", "");
-        detailsPage.className = detailsPage.className.replace(" is-active", "");
+        deselect()
     }
 }
 
@@ -153,6 +151,12 @@ async function createApp() {
     if (res.ok) {
         await getApps();
     }
+}
+
+function deselect() {
+    listElement.children.forEach((element) => element.className = element.className.replace(" active", ""))
+    listPage.className = listPage.className.replace(" is-active", "");
+    detailsPage.className = detailsPage.className.replace(" is-active", "");
 }
 
 var _isSyncing = false;
