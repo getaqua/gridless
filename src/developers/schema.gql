@@ -20,7 +20,7 @@ type Application {
 }
 input ApplicationPatch {
     name: String
-    type: ApplicationType
+    #type: ApplicationType
     avatar_url: String
 }
 enum ApplicationType {

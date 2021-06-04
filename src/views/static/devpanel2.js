@@ -44,7 +44,9 @@ var selectedApp = "";
 const inputs = {
     name: () => document.getElementById("grDetailsName"),
     avatar_url: () => document.getElementById("grDetailsAvatarUrl"),
-    client_id: () => document.getElementById("grDetailsClientId")
+    client_id: () => document.getElementById("grDetailsClientId"),
+    selected_type: () => document.querySelector("[name=grDetailsType]:checked"),
+    select_type: (type) => document.querySelector("#grDetailsType__"+type).checked = true
 };
 
 var _justUpdated = [];
@@ -131,6 +133,7 @@ async function appClick(ev) {
         inputs.name().value = data["name"];
         inputs.avatar_url().value = data["avatar_url"];
         inputs.client_id().value = json["data"]["applicationClientId"];
+        inputs.select_type(data["type"] ?? "CLIENT");
     } else {
         console.error(res);
         //turn it off! turn it off!
