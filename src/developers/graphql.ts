@@ -1,6 +1,6 @@
 import { ApolloServer, makeExecutableSchema } from 'apollo-server-express';
-import express from 'express';
 import jsonwebtoken from 'jsonwebtoken';
+import { randomBytes } from 'crypto';
 import { ILoggedIn, TokenType } from 'src/auth/UserModel';
 import { Application, ApplicationModel } from 'src/db/models/applicationModel';
 import { ESMap } from 'typescript';
@@ -16,6 +16,17 @@ const resolver = {
             const found = await ApplicationModel.findById(id);
             if (found.owner != context.auth.userId) return null;
             else return {...found.toJSON(), id: found.id};
+        },
+        applicationClientId: async (parent, {id}: {id: string}, context) => {
+            const found = await ApplicationModel.findById(id);
+            if (found.owner != context.auth.userId) return null;
+            else if (found.client_id != "") return found.client_id;
+            else {
+                let x = "AQUA-"+randomBytes(36).toString("hex");
+                found.client_id = x;
+                await found.save();
+                return x;
+            }
         }
     },
     Mutation: {

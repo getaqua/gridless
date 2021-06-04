@@ -15,6 +15,7 @@ const appQuery = (id) => ({
         type
         id
     }
+    applicationClientId(id: "${id}")
 }`
 })
 const listQuery = {
@@ -117,7 +118,8 @@ async function appClick(ev) {
     });
     // set the page
     if (res.ok) {
-        const data = (await res.json())["data"]["application"];
+        const json = await res.json();
+        const data = json["data"]["application"];
         //toggle buttons
         listElement.children.forEach((element) => element.className = element.className.replace(" active", ""))
         element.className += " active";
@@ -128,10 +130,11 @@ async function appClick(ev) {
         //set up the inputs to do stuff
         inputs.name().value = data["name"];
         inputs.avatar_url().value = data["avatar_url"];
+        inputs.client_id().value = json["data"]["applicationClientId"];
     } else {
         console.error(res);
         //turn it off! turn it off!
-        deselect()
+        deselect();
     }
 }
 

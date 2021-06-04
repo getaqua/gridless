@@ -1,6 +1,7 @@
 type Query {
     allApplications: [Application!]!
     application(id: String): Application
+    applicationClientId(id: String): String
 }
 type Mutation {
     updateApplication(id: String, data: ApplicationPatch): Application

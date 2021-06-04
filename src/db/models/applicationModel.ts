@@ -8,6 +8,7 @@ export interface Application extends mongoose.Document {
   owner: string;
   avatar_url?: string;
   type: "CLIENT" | "BOT" | string;
+  client_id: string;
   patch: (data: Application) => void
 }
 
@@ -31,6 +32,11 @@ const ApplicationSchema = new mongoose.Schema({
     type: String,
     required: true,
     default: "CLIENT"
+  },
+  client_id: {
+    type: String,
+    required: false,
+    default: ""
   }
 });
 
