@@ -1,0 +1,19 @@
+{
+    "user.read": {
+        "name": "Use your email address and phone number",
+        "icon": "mdi:account-lock"
+    },
+    "flow.new": {
+        "name": "Create Flows on your behalf",
+        "icon": "mdi:water-plus"
+    },
+    "flow.list": {
+        "name": "Discover private Flows you have access to",
+        "icon": "mdi:lock"
+    },
+    "user.post": {
+        "name": "Post to your profile",
+        "icon": "mdi:comment-alert",
+        "danger": true
+    }
+}

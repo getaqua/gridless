@@ -1,0 +1,53 @@
+{% extends 'auth.j2' %}
+{% block title %}Authorize {{ app.name }}{% endblock %}
+{% block content %}
+<h5 class="card-title{% if "client" in scopes %} text-danger{% endif %}">{% if "client" in scopes %}Login With {% else %}Authorize{% endif %} {{ app.name }}</h5>
+<form method="POST" action="/_gridless/authorize">
+
+{%- if "client" in scopes -%}
+<p>{{ app.name }} wants to act as a full client application. Are you sure you want to allow this app full permission to:</p>
+<ul>
+  <li>post as you</li>
+  <li>join, follow, and subscribe to Flows for you</li>
+  <li>change account settings</li>
+  <li>access all of your private Flows</li>
+  <li>create private and public Flows owned by your account</li>
+  <li>and several other dangerous things</li>
+</ul>
+<p>Remember the following actions <strong>cannot</strong> be taken by client applications for your security and safety:</p>
+<ul>
+  <li>Change your password</li>
+  <li>Change your email address</li>
+  <li>Change your two-factor authentication settings</li>
+  <li>Create bots or client applications</li>
+</ul>
+{%- else -%}
+<ul class="list-group list-group-flush">
+  <li class="list-group-item">
+    <span class="iconify" data-icon="mdi:account-outline"></span>
+    Identify you
+  </li>
+  {% for scope in scopes -%}
+  <li class="list-group-item {% if scopedata[scope].danger %}list-group-item-warning{% endif %}">
+    {%- if scopedata[scope].icon %}<span class="iconify" data-icon="{{ scopedata[scope].icon }}"></span>{%- endif -%}
+    {%- if scopedata[scope].name %}{{ scopedata[scope].name }}{% else %}{{ scope }}{%- endif -%}
+  </li>
+  {%- endfor %}
+</ul>
+{%- endif -%}
+
+<div class="row my-4">
+  <div class="col d-flex justify-content-center">
+    <a href="/_gridless/authorize?client_id={{ app.client_id }}&denied=true" class="btn btn-link mb-4">
+      Deny
+    </a>
+  </div>
+  <div class="col">
+    <button type="submit" class="btn {% if "client" in scopes %}btn-danger{% else %}btn-outline-primary{% endif %} btn-block mb-4">
+      Allow
+    </button>
+  </div>
+</div>
+
+</form>
+{% endblock %}

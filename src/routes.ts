@@ -1,6 +1,7 @@
 import express, { Application, NextFunction, Response } from 'express';
 import { checkUsernameAvailability, endpoint as registrationEndpoint } from './auth/signup';
 import { endpoint as loginEndpoint, logout, logout as logoutEndpoint } from './auth/login';
+import { endpoint as authorizeEndpoint } from './auth/authorize';
 import debug from 'debug';
 import { urlencoded as bodyParser, json as jsonParser } from 'body-parser';
 import jwt from 'jsonwebtoken';
@@ -60,6 +61,7 @@ export default function routes() {
 
     router.get("/developers", ensureLoggedIn(TokenType.COOKIE), (req, res) => res.render("devpanel/main.nj", {...globalProps}));
     router.post("/developers", ensureLoggedIn(TokenType.COOKIE), jsonParser());
+    router.get("/authorize", ensureLoggedIn(TokenType.COOKIE), authorizeEndpoint);
     devgql.applyMiddleware({app: router as Application, path: "/developers", disableHealthCheck: true});
 
     //router.get("/authconfig", ensureLoggedIn(TokenType.COOKIE), (req, res) => res.type("json").send(getAuthConfig().toJSON()));
