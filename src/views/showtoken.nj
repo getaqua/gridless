@@ -1,0 +1,14 @@
+{% extends 'auth.j2' %}
+{% block title %}Token for {{ app.name }}{% endblock %}
+{% block content %}
+<h5 class="card-title">Token for {{ app.name }}</h5>
+<div class="form-floating mb-4">
+    <input class="form-control" id="grAuthorizeToken" readonly="" type="text" value="{{ token }}">
+    <label class="form-label" for="grAuthorizeToken" style="margin-left: 0px;">Token</label>
+    <div class="form-notch">
+        <div class="form-notch-leading" style="width: 9px;"></div>
+        <div class="form-notch-middle" style="width: 88.8px;"></div>
+        <div class="form-notch-trailing"></div>
+    </div>
+</div>
+{% endblock %}

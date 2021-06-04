@@ -62,6 +62,7 @@ export default function routes() {
     router.get("/developers", ensureLoggedIn(TokenType.COOKIE), (req, res) => res.render("devpanel/main.nj", {...globalProps}));
     router.post("/developers", ensureLoggedIn(TokenType.COOKIE), jsonParser());
     router.get("/authorize", ensureLoggedIn(TokenType.COOKIE), authorizeEndpoint);
+    router.post("/authorize", bodyParser({extended: true}), ensureLoggedIn(TokenType.COOKIE), authorizeEndpoint);
     devgql.applyMiddleware({app: router as Application, path: "/developers", disableHealthCheck: true});
 
     //router.get("/authconfig", ensureLoggedIn(TokenType.COOKIE), (req, res) => res.type("json").send(getAuthConfig().toJSON()));

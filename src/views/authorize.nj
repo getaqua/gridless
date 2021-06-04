@@ -3,6 +3,9 @@
 {% block content %}
 <h5 class="card-title{% if "client" in scopes %} text-danger{% endif %}">{% if "client" in scopes %}Login With {% else %}Authorize{% endif %} {{ app.name }}</h5>
 <form method="POST" action="/_gridless/authorize">
+<input type="hidden" name="client_id" value="{{ app.client_id }}">
+<input type="hidden" name="method" value="{{ authmethod }}">
+<input type="hidden" name="redirect_url" value="{{ redirect_url }}">
 
 {%- if "client" in scopes -%}
 <p>{{ app.name }} wants to act as a full client application. Are you sure you want to allow this app full permission to:</p>
