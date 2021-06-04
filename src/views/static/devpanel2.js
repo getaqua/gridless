@@ -31,6 +31,10 @@ const patchQuery = (id, data) => ({
         id
     }
 }`, "variables": {data: data}});
+const deleteQuery = (id) => ({
+    "query": `mutation DeleteQuery {
+    deleteApplication(id: "${id}")
+}`});
 
 const listElement = document.getElementById("gr-app-list");
 const listPage = document.getElementById("gr-app-list-page");
@@ -73,6 +77,28 @@ async function patchDetail(app, key, value, id) {
         document.getElementById(id).parentElement.getElementsByClassName("invalid-feedback")[0].innerHTML = "Error in updating: "+res.status+" "+res.statusText
         await new Promise(resolve => setTimeout(resolve, 20000));
         document.getElementById(id).className = document.getElementById(id).className.replace(" is-invalid", "");
+    }
+}
+
+async function deleteApplication() {
+    const appId = selectedApp;
+    // perform the query
+    const res = await fetch("/_gridless/developers", {
+        method: "POST",
+        body: JSON.stringify(deleteQuery(appId)),
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json;charset=UTF-8"
+        },
+        mode: 'cors',
+    });
+    if (res.ok && (await res.json())["data"]["deleteApplication"]) {
+        //showAlert("deleteSuccessAlert");
+        await getApps();
+        deselect();
+    } else {
+        window.alert("Deletion failed");
+        console.log(res.json());
     }
 }
 
@@ -124,6 +150,7 @@ function sanitizeInput(input) {
 }
 
 function showAlert(id) {
+    return null;
     let instance = mdb.Alert.getInstance(document.getElementById(id));
     instance.show();
 }

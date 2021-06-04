@@ -2,7 +2,7 @@
   <button class="btn btn-floating shadow-0 me-auto mb-4 ripple-surface" id="grDetailsDeselect" onclick="deselect()" style="font-size: 1.5em;">
     <span class="iconify" data-icon="mdi:arrow-left"></span>
   </button>
-  <button class="btn btn-outline-danger mb-4" id="grDetailsDelete" disabled>Delete</button>
+  <button class="btn btn-outline-danger mb-4" id="grDetailsDelete" data-bs-toggle="modal" data-bs-target="#deleteAppModal">Delete</button>
 </div>
 <div class="form-floating mb-4">
   <input type="text" id="grDetailsName" class="form-control" onblur='patchDetail(selectedApp, "name", document.getElementById("grDetailsName").value, "grDetailsName")'>
@@ -18,7 +18,7 @@
 <div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 88.8px;"></div><div class="form-notch-trailing"></div></div></div>
 <div class="form-floating mb-4">
   <input type="text" id="grDetailsClientId" class="form-control" readonly="">
-  <label class="form-label" for="grDetailsAvatarUrl" style="margin-left: 0px;">Client ID</label>
+  <label class="form-label" for="grDetailsClientId" style="margin-left: 0px;">Client ID</label>
 <div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 88.8px;"></div><div class="form-notch-trailing"></div></div></div>
 <div class="form-outline mb-4">
   Type

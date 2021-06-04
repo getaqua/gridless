@@ -34,6 +34,12 @@ const resolver = {
             } as Application);
             app.save();
             return {...app.toJSON(), id: app.id};
+        },
+        deleteApplication: async (parent, {id}, context) => {
+            var found = await ApplicationModel.findById(id);
+            if (found.owner != context.auth.userId) return false;
+            await found.delete();
+            return true;
         }
     }
 }

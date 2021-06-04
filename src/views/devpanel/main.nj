@@ -160,17 +160,44 @@
         </div>
       </div>
     </div>
+    
+    <div class="modal fade devpg-modal" id="deleteAppModal" tabindex="-1" aria-labelledby="deleteAppModalTitle" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteAppModalTitle">Delete <span class="ctx-name"></span>?</h5>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to delete this app? This action <strong>CANNOT</strong> be reversed!
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">No</button>
+            <button type="button" class="btn btn-outline-danger ctx-submit" data-bs-dismiss="modal" onclick="deleteApplication()">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <div class="alert fade alert-danger alert-fixed" id="nameRequiredAlert" data-mdb-width="250px" data-mdb-autohide="true" data-mdb-position="top-right" 
+    <!-- <div class="alert fade alert-danger alert-fixed" id="nameRequiredAlert" data-mdb-width="250px" data-mdb-autohide="true" data-mdb-position="top-right" 
       data-mdb-delay="5000" role="alert" data-mdb-hidden="true" data-mdb-append-to-body="true" data-mdb-color="danger"
       style="display: none; width: auto; top: 10px; right: 10px; bottom: unset; left: unset; transform: unset;">
         Name is required
+    </div>
+    <div class="alert fade alert-success alert-fixed" id="deleteSuccessAlert" data-mdb-width="250px" data-mdb-autohide="true" data-mdb-position="top-right" 
+      data-mdb-delay="5000" role="alert" data-mdb-hidden="true" data-mdb-append-to-body="true" data-mdb-color="danger"
+      style="display: none; width: auto; top: 10px; right: 10px; bottom: unset; left: unset; transform: unset;">
+        App successfully deleted
+    </div>
+    <div class="alert fade alert-danger alert-fixed" id="deleteFailedAlert" data-mdb-width="250px" data-mdb-autohide="true" data-mdb-position="top-right" 
+      data-mdb-delay="5000" role="alert" data-mdb-hidden="true" data-mdb-append-to-body="true" data-mdb-color="danger"
+      style="display: none; width: auto; top: 10px; right: 10px; bottom: unset; left: unset; transform: unset;">
+        App was not deleted
     </div>
     <div class="alert fade alert-danger alert-fixed" id="typeRequiredAlert" data-mdb-width="250px" data-mdb-autohide="true" data-mdb-position="top-right" 
       data-mdb-delay="5000" role="alert" data-mdb-hidden="true" data-mdb-append-to-body="true" data-mdb-color="danger"
       style="display: none; width: auto; top: 10px; right: 10px; bottom: unset; left: unset; transform: unset;">
         Type is required
-    </div>
+    </div> -->
     
     <script src="/_gridless/static/devpanel2.js"></script>
     <script src="https://code.iconify.design/1/1.0.7/iconify.min.js"></script>
