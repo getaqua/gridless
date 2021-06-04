@@ -15,6 +15,7 @@ export async function endpoint(req: express.Request & {user?: ILoggedIn}, res: e
     const appdata = await app.exec();
     const method: AuthMethods = req.query["method"]?.toString() ?? req.body?.method ?? "redirect_url";
     const redirect_url = req.query["redirect_url"]?.toString() ?? req.body?.redirect_url;
+    const scopes: Array<String> = (req.query["scopes"]?.toString() ?? req.body?.scopes)?.split(",") ?? [];
 
     if (!appdata) {
         return res.status(404).render("autherror.j2", {messages: [
@@ -30,7 +31,7 @@ export async function endpoint(req: express.Request & {user?: ILoggedIn}, res: e
         return res.render("authorize.nj", {
             scopedata: JSON.parse(await (await fs.readFile(__dirname+"/scopeStrings.json")).toString()),
             app: appdata,
-            scopes: req.query["scopes"].toString()?.split(",") ?? [],
+            scopes,
             authmethod: method,
             redirect_url,
         })
@@ -43,19 +44,23 @@ export async function endpoint(req: express.Request & {user?: ILoggedIn}, res: e
 
     // == GENERATE TOKEN ==
     var newToken = jsonwebtoken.sign(
-        { uid: req.user?.userId, aid: appdata.id},
+        { uid: req.user?.userId, aid: appdata.id, scopes: scopes},
         globalThis.staticConfig.get("auth").get("secret"),
         { expiresIn: '1y' }
     );
 
     /*else*/ if (method == "show") {
-        return res.render("showtoken.nj", {
+        if (scopes.includes("client")) {
+            return res.status(400).render("autherror.j2", {messages: [
+                "`show` authorization method not allowed for applications that request the `client` special scope."
+            ]});
+        } else return res.render("showtoken.nj", {
             app: appdata,
             token: newToken
         });
     } else {
         return res.status(400).render("autherror.j2", {messages: [
-            "<code>method</code> query parameter required.",
+            "`method` query parameter required.",
             newToken
         ]});
     }

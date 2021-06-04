@@ -6,6 +6,7 @@
 <input type="hidden" name="client_id" value="{{ app.client_id }}">
 <input type="hidden" name="method" value="{{ authmethod }}">
 <input type="hidden" name="redirect_url" value="{{ redirect_url }}">
+<input type="hidden" name="scopes" value="{{ scopes | join(',') }}">
 
 {%- if "client" in scopes -%}
 <p>{{ app.name }} wants to act as a full client application. Are you sure you want to allow this app full permission to:</p>
@@ -25,14 +26,16 @@
   <li>Create bots or client applications</li>
 </ul>
 {%- else -%}
+<p>Do you want to allow {{ app.name }} to:</p>
 <ul class="list-group list-group-flush">
   <li class="list-group-item">
     <span class="iconify" data-icon="mdi:account-outline"></span>
-    Identify you
+    Identify you<br />
+    <small><em>(This permission is given to every app you authorize.)</em></small>
   </li>
   {% for scope in scopes -%}
   <li class="list-group-item {% if scopedata[scope].danger %}list-group-item-warning{% endif %}">
-    {%- if scopedata[scope].icon %}<span class="iconify" data-icon="{{ scopedata[scope].icon }}"></span>{%- endif -%}
+    {%- if scopedata[scope].icon %}<span class="iconify" data-icon="{{ scopedata[scope].icon }}"></span> {% endif -%}
     {%- if scopedata[scope].name %}{{ scopedata[scope].name }}{% else %}{{ scope }}{%- endif -%}
   </li>
   {%- endfor %}
@@ -53,4 +56,5 @@
 </div>
 
 </form>
+<script src="https://code.iconify.design/1/1.0.7/iconify.min.js"></script>
 {% endblock %}
