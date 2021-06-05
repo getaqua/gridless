@@ -5,7 +5,7 @@
 <form method="POST" action="/_gridless/authorize">
 <input type="hidden" name="client_id" value="{{ app.client_id }}">
 <input type="hidden" name="method" value="{{ authmethod }}">
-<input type="hidden" name="redirect_url" value="{{ redirect_url }}">
+<input type="hidden" name="redirect_uri" value="{{ redirect_url }}">
 <input type="hidden" name="scopes" value="{{ scopes | join(',') }}">
 
 {%- if "client" in scopes -%}

@@ -1,37 +1,63 @@
 <div class="container-fluid d-flex">
-  <button class="btn btn-floating shadow-0 me-auto mb-4 ripple-surface" id="grDetailsDeselect" onclick="deselect()" style="font-size: 1.5em;">
+    <button class="btn btn-floating shadow-0 me-auto mb-4 ripple-surface" id="grDetailsDeselect" onclick="deselect()" style="font-size: 1.5em;">
     <span class="iconify" data-icon="mdi:arrow-left"></span>
   </button>
-  <button class="btn btn-outline-danger mb-4" id="grDetailsDelete" data-bs-toggle="modal" data-bs-target="#deleteAppModal">Delete</button>
+    <button class="btn btn-outline-danger mb-4" id="grDetailsDelete" data-bs-toggle="modal" data-bs-target="#deleteAppModal">Delete</button>
 </div>
 <div class="form-floating mb-4">
-  <input type="text" id="grDetailsName" class="form-control" onblur='patchDetail(selectedApp, "name", document.getElementById("grDetailsName").value, "grDetailsName")'>
-  <label class="form-label" for="grDetailsName" style="margin-left: 0px;">Name</label>
+    <input type="text" id="grDetailsName" class="form-control" onblur='patchDetail(selectedApp, "name", document.getElementById("grDetailsName").value, "grDetailsName")'>
+    <label class="form-label" for="grDetailsName" style="margin-left: 0px;">Name</label>
+    <div class="valid-feedback">Updated!</div>
+    <div class="invalid-feedback">Unknown error</div>
+    <div class="form-notch">
+        <div class="form-notch-leading" style="width: 9px;"></div>
+        <div class="form-notch-middle" style="width: 88.8px;"></div>
+        <div class="form-notch-trailing"></div>
+    </div>
+</div>
+<div class="form-floating mb-4">
+    <input type="text" id="grDetailsAvatarUrl" class="form-control" onblur='patchDetail(selectedApp, "avatar_url", document.getElementById("grDetailsAvatarUrl").value, "grDetailsAvatarUrl")'>
+    <label class="form-label" for="grDetailsAvatarUrl" style="margin-left: 0px;">Avatar URL</label>
+    <div class="valid-feedback">Updated!</div>
+    <div class="invalid-feedback">Unknown error</div>
+    <div class="form-notch">
+        <div class="form-notch-leading" style="width: 9px;"></div>
+        <div class="form-notch-middle" style="width: 88.8px;"></div>
+        <div class="form-notch-trailing"></div>
+    </div>
+</div>
+<div class="form-floating mb-4">
+  <input type="text" id="grDetailsRedirectUris" class="form-control" onblur='patchDetail(selectedApp, "redirect_uris", document.getElementById("grDetailsRedirectUris").value, "grDetailsRedirectUris")'>
+  <label class="form-label" for="grDetailsRedirectUris" style="margin-left: 0px;">Avatar URL</label>
   <div class="valid-feedback">Updated!</div>
   <div class="invalid-feedback">Unknown error</div>
-<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 88.8px;"></div><div class="form-notch-trailing"></div></div></div>
+  <div class="form-notch">
+      <div class="form-notch-leading" style="width: 9px;"></div>
+      <div class="form-notch-middle" style="width: 88.8px;"></div>
+      <div class="form-notch-trailing"></div>
+  </div>
+</div>
 <div class="form-floating mb-4">
-  <input type="text" id="grDetailsAvatarUrl" class="form-control" onblur='patchDetail(selectedApp, "avatar_url", document.getElementById("grDetailsAvatarUrl").value, "grDetailsAvatarUrl")'>
-  <label class="form-label" for="grDetailsAvatarUrl" style="margin-left: 0px;">Avatar URL</label>
-  <div class="valid-feedback">Updated!</div>
-  <div class="invalid-feedback">Unknown error</div>
-<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 88.8px;"></div><div class="form-notch-trailing"></div></div></div>
-<div class="form-floating mb-4">
-  <input type="text" id="grDetailsClientId" class="form-control" readonly="">
-  <label class="form-label" for="grDetailsClientId" style="margin-left: 0px;">Client ID</label>
-<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 88.8px;"></div><div class="form-notch-trailing"></div></div></div>
+    <input type="text" id="grDetailsClientId" class="form-control" readonly="">
+    <label class="form-label" for="grDetailsClientId" style="margin-left: 0px;">Client ID</label>
+    <div class="form-notch">
+        <div class="form-notch-leading" style="width: 9px;"></div>
+        <div class="form-notch-middle" style="width: 88.8px;"></div>
+        <div class="form-notch-trailing"></div>
+    </div>
+</div>
 <div class="form-outline mb-4">
-  Type
-  <div class="form-check mx-3">
-    <input class="form-check-input" type="radio" id="grDetailsType__CLIENT" name="grDetailsType" readonly="" checked="">
-    <label class="form-check-label" for="grDetailsType__CLIENT">
+    Type
+    <div class="form-check mx-3">
+        <input class="form-check-input" type="radio" id="grDetailsType__CLIENT" name="grDetailsType" readonly="" checked="">
+        <label class="form-check-label" for="grDetailsType__CLIENT">
       Client, login, etc.
     </label>
-  </div>
-  <div class="form-check mx-3">
-    <input class="form-check-input" type="radio" id="grDetailsType__BOT" name="grDetailsType" readonly="">
-    <label class="form-check-label" for="grDetailsType__BOT">
+    </div>
+    <div class="form-check mx-3">
+        <input class="form-check-input" type="radio" id="grDetailsType__BOT" name="grDetailsType" readonly="">
+        <label class="form-check-label" for="grDetailsType__BOT">
       Bot
     </label>
-  </div>
+    </div>
 </div>
