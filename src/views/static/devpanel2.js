@@ -53,7 +53,9 @@ var _justUpdated = [];
 async function patchDetail(app, key, value, id) {
     const appId = selectedApp;
     let data = {};
-    data[key] = value;
+    if (key == "redirect_uris") {
+        data[key] = value.split(/[\n\r]+|,[ ]?/);
+    } else data[key] = value;
     // perform the query
     const res = await fetch("/_gridless/developers", {
         method: "POST",

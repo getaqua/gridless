@@ -10,6 +10,7 @@ type Mutation {
         type: ApplicationType
     ): Application
     deleteApplication(id: String): Boolean!
+    resetApplicationClientId(id: String): String
 }
 
 type Application {
@@ -17,11 +18,13 @@ type Application {
     name: String!
     type: ApplicationType!
     avatar_url: String
+    redirect_uris: [String!]!
 }
 input ApplicationPatch {
     name: String
     #type: ApplicationType
     avatar_url: String
+    redirect_uris: [String!]
 }
 enum ApplicationType {
     CLIENT

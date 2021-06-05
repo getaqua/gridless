@@ -27,8 +27,8 @@
     </div>
 </div>
 <div class="form-floating mb-4">
-  <input type="text" id="grDetailsRedirectUris" class="form-control" onblur='patchDetail(selectedApp, "redirect_uris", document.getElementById("grDetailsRedirectUris").value, "grDetailsRedirectUris")'>
-  <label class="form-label" for="grDetailsRedirectUris" style="margin-left: 0px;">Avatar URL</label>
+  <textarea type="text" id="grDetailsRedirectUris" class="form-control" onblur='patchDetail(selectedApp, "redirect_uris", document.getElementById("grDetailsRedirectUris").value, "grDetailsRedirectUris")'></textarea>
+  <label class="form-label" for="grDetailsRedirectUris" style="margin-left: 0px;">Redirect URIs (one per line)</label>
   <div class="valid-feedback">Updated!</div>
   <div class="invalid-feedback">Unknown error</div>
   <div class="form-notch">
@@ -43,7 +43,11 @@
     <div class="form-notch">
         <div class="form-notch-leading" style="width: 9px;"></div>
         <div class="form-notch-middle" style="width: 88.8px;"></div>
-        <div class="form-notch-trailing"></div>
+        <div class="form-notch-trailing">
+          <button class="btn btn-link text-primary" onclick="resetClientId()">
+            <span class="iconify" data-icon="mdi:refresh"></span>
+          </button>
+        </div>
     </div>
 </div>
 <div class="form-outline mb-4">

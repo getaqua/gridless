@@ -35,6 +35,7 @@ const resolver = {
             if (found.owner != context.auth.userId) return null;
             if (data['name']) found.set("name", data["name"]);
             if (data['avatar_url']) found.set("avatar_url", data["avatar_url"]);
+            if (data['redirect_uris']) found.set("redirect_uris", data["redirect_uris"]);
             await found.save();
             return {...found.toJSON(), id: found.id};
         },
@@ -46,11 +47,21 @@ const resolver = {
             app.save();
             return {...app.toJSON(), id: app.id};
         },
-        deleteApplication: async (parent, {id}, context) => {
+        deleteApplication: async (parent, {id}: {id: string}, context) => {
             var found = await ApplicationModel.findById(id);
             if (found.owner != context.auth.userId) return false;
             await found.delete();
             return true;
+        },
+        resetApplicationClientId: async (parent, {id}: {id: string}, context) => {
+            const found = await ApplicationModel.findById(id);
+            if (found.owner != context.auth.userId) return null;
+            else {
+                let x = "AQUA-"+randomBytes(36).toString("hex");
+                found.client_id = x;
+                await found.save();
+                return x;
+            }
         }
     }
 }

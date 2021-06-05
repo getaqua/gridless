@@ -38,7 +38,7 @@ export async function endpoint(req: express.Request & {user?: ILoggedIn}, res: e
             scopedata: JSON.parse(await (await fs.readFile(__dirname+"/scopeStrings.json")).toString()),
             app: appdata,
             scopes,
-            authmethod: method,
+            authmethod: method, grant,
             redirect_url,
         })
     } else if (req.method == "POST" && method == "code") {
