@@ -1,6 +1,7 @@
 {
   "name": "gridless",
   "private": true,
+  "license": "GPL-3.0-or-later",
   "scripts": {
     "dist": "node -r ts-node/register ./src/server.ts",
     "start:watch": "nodemon",
@@ -25,7 +26,6 @@
   "resolutions": {
     "graphql": "^15.3.0"
   },
-  "license": "MIT",
   "dependencies": {
     "@graphql-tools/merge": "^6.2.10",
     "@iconify/react-with-api": "^1.0.0-rc.7",

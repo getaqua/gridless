@@ -1,4 +1,5 @@
 # Gridless
+![Gridless logo](https://github.com/getaqua/gridless/raw/main/src/views/static/gridlesslogo.png)
 
 ## How To Run
 1. Run `yarn` to install dependencies. You will have to install Yarn if you haven't already, using `npm i -g yarn`, for this to work.
