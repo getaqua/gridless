@@ -9,6 +9,8 @@ export interface User extends mongoose.Document {
   username: string;
   //email: string;
   password: string;
+  currentlyAuthorizingToken?: string;
+  currentlyAuthorizingScopes?: string[];
 }
 
 /**
@@ -38,6 +40,20 @@ const UserSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
+  },
+  currentlyAuthorizingToken: {
+    type: String,
+    required: false,
+    index: {
+      expires: "2m"
+    }
+  },
+  currentlyAuthorizingScopes: {
+    type: [String],
+    required: false,
+    index: {
+      expires: "2m"
+    }
   }
 });
 

@@ -1,0 +1,6 @@
+{% extends 'auth.j2' %}
+{% block title %}Authorizing...{% endblock %}
+{% block content %}
+<h5 class="card-title">Authorizing...</h5>
+<p>Return to your app to complete login.</p>
+{% endblock %}

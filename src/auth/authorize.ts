@@ -6,6 +6,7 @@ import fs from 'fs/promises';
 import { Application, ApplicationModel } from 'src/db/models/applicationModel';
 import jsonwebtoken from 'jsonwebtoken';
 import { ILoggedIn } from './UserModel';
+import { UserModel } from 'src/db/models/userModel';
 
 const log = debug("gridless:auth:client");
 
@@ -16,7 +17,7 @@ export async function endpoint(req: express.Request & {user?: ILoggedIn}, res: e
     const grant: "code" = req.query["grant_type"]?.toString() ?? req.body?.grant_type;
     const code: string = req.query["code"]?.toString() ?? req.body?.code;
     const redirect_url = req.query["redirect_uri"]?.toString() ?? req.body?.redirect_uri;
-    const scopes: Array<String> = (req.query["scopes"]?.toString() ?? req.body?.scopes)?.split(",") ?? [];
+    const scopes: string[] = (req.query["scopes"]?.toString() ?? req.body?.scopes)?.split(",") ?? [];
 
     if (!appdata) {
         return res.status(404).render("autherror.j2", {messages: [
@@ -60,7 +61,7 @@ export async function endpoint(req: express.Request & {user?: ILoggedIn}, res: e
 
     // == GENERATE TOKEN ==
     var newToken = jsonwebtoken.sign(
-        { uid: req.user?.userId, aid: appdata.id, client_id: appdata.client_id, scopes: scopes},
+        { aid: appdata.id, client_id: appdata.client_id, scopes: scopes},
         globalThis.staticConfig.get("auth").get("secret"),
         { expiresIn: '1y' }
     );
@@ -70,7 +71,7 @@ export async function endpoint(req: express.Request & {user?: ILoggedIn}, res: e
             // The redirect_uri is valid and associated with this app.
             // Give the authorization code to the app.
             if (code && jsonwebtoken.verify(code, globalThis.staticConfig.get("auth").get("secret"))) {
-                return res.redirect(redirect_url+"?code="+newToken);
+                return res.redirect(redirect_url+"?token="+newToken);
             } else {
                 return res.status(400).render("autherror.j2", {messages: [
                     code ? "Authorization code invalid." : "Authorization code required.",
@@ -79,9 +80,20 @@ export async function endpoint(req: express.Request & {user?: ILoggedIn}, res: e
         } else if (!redirect_url) {
             // The redirect_uri does not exist.
             // For now, give an error until I decide how to better handle this.
-            return res.status(400).render("autherror.j2", {messages: [
-                "`redirect_uri` query parameter required.",
-            ]});
+            // return res.status(400).render("autherror.j2", {messages: [
+            //     "`redirect_uri` query parameter required.",
+            // ]});
+            //
+            // Handle it better by allowing the client to call 
+            // /_gridless/claimtoken?code=<whatevertheauthcodeis>
+            // to get their token, AFTER a user authorizes it.
+            // See claimTokenEndpoint() below.
+            //req.user?.userId
+            var um = await UserModel.findById(req.user?.userId);
+            um.currentlyAuthorizingToken = code;
+            um.currentlyAuthorizingScopes = scopes;
+            await um.save();
+            return res.render("returntoapp.nj");
         } else {
             return res.status(400).render("autherror.j2", {messages: [
                 "`redirect_uri` invalid.",
@@ -127,4 +139,41 @@ export function isValidRedirectUri(url: string): boolean {
     && !(url.startsWith("aquaAppIntent") && url.includes("://authorize/"))
     ) return false;
     else return true;
+}
+
+export async function claimTokenEndpoint(req: express.Request, res: express.Response, next: express.NextFunction) {
+    const app = ApplicationModel.findOne({client_id: req.query.client_id?.toString() ?? req.body?.client_id});
+    const appdata = await app.exec();
+    const code: string = req.query["code"]?.toString() ?? req.body?.code;
+    const scopes: Array<String> = (req.query["scopes"]?.toString() ?? req.body?.scopes)?.split(",") ?? [];
+
+    if (!appdata) {
+        return res.status(404).send({
+            error: "Client ID does not exist."
+        });
+    } else if (appdata.type == "BOT") {
+        return res.status(501).send({
+            error: appdata.name + " is a bot. Bot authorization is not supported yet."
+        });
+    } else if (!code || code == "null" || code == "undefined" || code == "0") {
+        return res.status(400).send({
+            error: "No authorization code given."
+        });
+    }
+
+    // == GENERATE TOKEN ==
+    var newToken = jsonwebtoken.sign(
+        { uid: req.user?.userId, aid: appdata.id, client_id: appdata.client_id, scopes: scopes},
+        globalThis.staticConfig.get("auth").get("secret"),
+        { expiresIn: '1y' }
+    );
+
+    if ((await UserModel.count({currentlyAuthorizingToken: code})) == 1) {
+        (await UserModel.findOne({currentlyAuthorizingToken: code})).set("currentlyAuthorizingToken", null);
+        return res.send({token: newToken});
+    } else {
+        return res.status(401).send({
+            error: "A user is not currently authorizing"
+        })
+    }
 }
