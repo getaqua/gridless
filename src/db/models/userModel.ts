@@ -11,6 +11,8 @@ export interface User extends mongoose.Document {
   password: string;
   currentlyAuthorizingToken?: string;
   currentlyAuthorizingScopes?: string[];
+  /** Client IDs that the user has authorized. */
+  authorizedAppCIDs: string[];
 }
 
 /**
@@ -54,6 +56,11 @@ const UserSchema = new mongoose.Schema({
     index: {
       expires: "2m"
     }
+  },
+  authorizedAppCIDs: {
+    type: [String],
+    required: false,
+    default: []
   }
 });
 

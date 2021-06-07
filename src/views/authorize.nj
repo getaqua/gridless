@@ -6,6 +6,7 @@
 <input type="hidden" name="client_id" value="{{ app.client_id }}">
 <input type="hidden" name="response_type" value="{{ authmethod }}">
 <input type="hidden" name="grant_type" value="{{ grant }}">
+<input type="hidden" name="code" value="{{ authcode }}">
 <input type="hidden" name="redirect_uri" value="{{ redirect_url }}">
 <input type="hidden" name="scopes" value="{{ scopes | join(',') }}">
 
