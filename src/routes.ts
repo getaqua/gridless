@@ -12,6 +12,7 @@ import { defaultPasswordRequirements } from './auth/requirements';
 import { getAuthConfig } from './db/models/authConfigModel';
 import { extraStepsMiddleware } from './auth/extrasteps';
 import { server as devgql } from './developers/graphql';
+import { server as gql } from './graphql/middleware';
 import { TokenType } from './auth/UserModel';
 
 const log = debug("gridless:routes");
@@ -82,6 +83,8 @@ export default function routes() {
         authorizeEndpoints.claimTokenEndpoint
     );
     devgql.applyMiddleware({app: router as Application, path: "/developers", disableHealthCheck: true});
+    
+    gql.applyMiddleware({app: router as Application, path: "/graphql"});
 
     //router.get("/authconfig", ensureLoggedIn(TokenType.COOKIE), (req, res) => res.type("json").send(getAuthConfig().toJSON()));
     log("Registered routes for /_gridless");

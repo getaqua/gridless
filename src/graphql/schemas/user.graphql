@@ -39,33 +39,5 @@ type ThisUser {
     """
     The permissions that this token has.
     """
-    tokenPermissions: TokenPermissions
-}
-type TokenPermissions {
-    """
-    Whether the token can be used to
-    read the current user's "secure" data,
-    such as email, phone number, and AUID
-    (App-Unique ID).
-    """
-    readUser: Boolean!
-    """
-    Whether the token can be used to
-    create new Flows under the current User.
-    """
-    createFlow: Boolean!
-    """
-    Whether the token can be used to
-    list private Flows, such as Friends.
-    """
-    listPrivateFlows: Boolean!
-    """
-    The Flows that the token is authorized to post to.
-    """
-    postToFlows: [ID!]!
-    """
-    Whether the token can be used to
-    post to a user's personal Flow (their profile).
-    """
-    postToProfile: Boolean!
+    tokenPermissions: [String!]
 }

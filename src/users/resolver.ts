@@ -1,12 +1,16 @@
 import { ILoggedIn } from "src/auth/UserModel";
-import { User } from "src/db/models/userModel";
+import { UserModel } from "src/db/models/userModel";
 
 const userResolver = {
     Query: {
-        getUser(_, args, { auth } : { auth: ILoggedIn }) {
-            //user data is always public
-            //TODO: deprecate this, since all that matters
-            //for public users are their profile Flows
+        async getMe(parent, args, context) {
+            const user = await UserModel.findById(context.auth.userId);
+            return {
+                user,
+                verifiedEmail: false, //TODO: verify emails
+                username: user.username,
+                tokenPermissions: context.auth.scopes
+            }
         }
     }
 }

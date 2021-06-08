@@ -32,6 +32,10 @@ export function errorHandler(err, req, res, next) {
     return res.status(403).render("autherror.j2", {
       messages: ["Your token is invalid."]
     });
+  } else if (err == "gridless:expiredtoken") {
+    return res.status(401).render("autherror.j2", {
+      messages: ["Your token has expired or has been revoked."]
+    });
   } else if (err == "gridless:wrongtokentype") {
     return res.status(403).render("autherror.j2", {
       messages: ["You cannot access this resource with the type of token specified."]

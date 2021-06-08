@@ -31,7 +31,7 @@ export async function variableConfigMiddleware(req: express.Request & {user?: IL
     const code: string = req.query["code"]?.toString() ?? req.body?.code;
     const redirect_url = req.query["redirect_uri"]?.toString() ?? req.body?.redirect_uri;
     const scopes: string[] = (req.query["scopes"]?.toString() ?? req.body?.scopes)?.split(",") ?? [];
-    const [token, tokenerror] = code ? await verifyToken(code) : null; //jsonwebtoken.verify(code, globalThis.staticConfig.get("auth").get("secret"));
+    const [token, tokenerror] = code ? await verifyToken(code) : [null, null]; //jsonwebtoken.verify(code, globalThis.staticConfig.get("auth").get("secret"));
 
     req.aevs = {app, appdata, method, grant, code, redirect_url, scopes, token, tokenerror};
     return next();
@@ -67,7 +67,7 @@ export async function postEndpoint(req: express.Request & {user?: ILoggedIn, aev
 
     // == GENERATE TOKEN ==
     var newToken = jsonwebtoken.sign(
-        { aid: appdata.id, client_id: appdata.client_id, scopes: scopes},
+        { uid: req.user?.userId, aid: appdata.id, client_id: appdata.client_id, scopes: scopes},
         globalThis.staticConfig.get("auth").get("secret"),
         { expiresIn: '1y' }
     );
@@ -151,7 +151,7 @@ export async function nonBrowserMiddleware(req: express.Request & {user?: ILogge
 
     if (req.method == "POST" && method == "code") {
         var authcode = jsonwebtoken.sign(
-            { uid: req.user?.userId, aid: appdata.id, type: "code", scopes},
+            { aid: appdata.id, type: "code", scopes},
             globalThis.staticConfig.get("auth").get("secret"),
             { expiresIn: '10m' }
         );
@@ -205,12 +205,7 @@ export async function claimTokenEndpoint(req: express.Request & {user?: ILoggedI
         });
     }
 
-    // == GENERATE TOKEN ==
-    var newToken = jsonwebtoken.sign(
-        { uid: req.user?.userId, aid: appdata.id, client_id: appdata.client_id, scopes: token?.["scopes"]},
-        globalThis.staticConfig.get("auth").get("secret"),
-        { expiresIn: '1y' }
-    );
+    
 
     if ((await UserModel.countDocuments({currentlyAuthorizingToken: code})) == 1) {
         var user = await UserModel.findOne({currentlyAuthorizingToken: code})
@@ -220,6 +215,12 @@ export async function claimTokenEndpoint(req: express.Request & {user?: ILoggedI
         user.depopulate("currentlyAuthorizingScopes");
         user.authorizedAppCIDs.push(appdata.client_id);
         await user.save();
+        // == GENERATE TOKEN ==
+        var newToken = jsonwebtoken.sign(
+            { uid: user._id.toString(), aid: appdata.id, client_id: appdata.client_id, scopes: token?.["scopes"]},
+            globalThis.staticConfig.get("auth").get("secret"),
+            { expiresIn: '1y' }
+        );
         return res.send({token: newToken});
     } else {
         return res.status(401).send({

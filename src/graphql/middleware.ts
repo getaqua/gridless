@@ -6,7 +6,6 @@ import user from './schemas/user.graphql';
 import rootSchema from './schemas/root.graphql';
 import contentSchema from './schemas/content.graphql';
 import errorSchema from './schemas/errors.graphql';
-//import userResolver from './resolvers/userResolver';
 import userResolver from '../users/resolver';
 import debug from 'debug';
 import { ILoggedIn, TokenType } from '../auth/UserModel';
@@ -37,14 +36,14 @@ export const server = new ApolloServer({
   //validationRules: [],
   
   context: ({ req }) => {
-    const token = req.params['access_token'] || req.signedCookies['jwt'] || req.get("Authorization")?.replace("Bearer ", "")?.replace("Bot ", "");
+    const token = req.query['access_token'] || req.signedCookies['jwt'] || req.get("Authorization")?.replace("Bearer ", "")?.replace("Bot ", "");
     if (token) {
       try {
         const jwt: {
           uid: string
           aid: string | null
           bot: boolean
-        } = jsonwebtoken.verify(token, globalThis.staticConfig.get("auth.secret")) as any;
+        } = jsonwebtoken.verify(token, globalThis.staticConfig.get("auth").get("secret")) as any;
         return {
           auth: {
             userId: jwt.uid,
@@ -66,6 +65,12 @@ export const server = new ApolloServer({
           } as ILoggedIn
         }
       }
+    } else return {
+      auth: {
+        tokenType: TokenType.INVALID,
+        userId: "",
+        appId: ""
+      } as ILoggedIn
     }
   },
 });
