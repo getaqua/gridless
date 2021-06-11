@@ -1,19 +1,21 @@
 import { ApolloServer } from 'apollo-server-express';
 import { makeExecutableSchema } from 'apollo-server';
 import { mergeTypeDefs, mergeResolvers } from '@graphql-tools/merge';
-import jsonwebtoken from 'jsonwebtoken';
-import user from './schemas/user.graphql';
+import jsonwebtoken, { JsonWebTokenError } from 'jsonwebtoken';
+import userSchema from './schemas/user.graphql';
 import rootSchema from './schemas/root.graphql';
 import contentSchema from './schemas/content.graphql';
 import errorSchema from './schemas/errors.graphql';
+import flowSchema from './schemas/flow.graphql';
 import userResolver from '../users/resolver';
 import debug from 'debug';
 import { ILoggedIn, TokenType } from '../auth/UserModel';
+import flowResolver from 'src/flows/resolver';
 
 const log = debug("gridless:graphql");
 
-const types = mergeTypeDefs([user, rootSchema, contentSchema, errorSchema]);
-const resolvers = mergeResolvers([userResolver]);
+const types = mergeTypeDefs([userSchema, flowSchema, rootSchema, contentSchema, errorSchema]);
+const resolvers = mergeResolvers([userResolver, flowResolver]);
 
 const schema = makeExecutableSchema({
   typeDefs: types,
@@ -42,7 +44,8 @@ export const server = new ApolloServer({
         const jwt: {
           uid: string
           aid: string | null
-          bot: boolean
+          bot: boolean,
+          scopes: string[]
         } = jsonwebtoken.verify(token, globalThis.staticConfig.get("auth").get("secret")) as any;
         return {
           auth: {
@@ -52,7 +55,8 @@ export const server = new ApolloServer({
               jwt.bot === true ? TokenType.BOTTOKEN
               : TokenType.APPTOKEN
             : req.cookies.jwt ? TokenType.COOKIE
-            : TokenType.INVALID
+            : TokenType.INVALID,
+            scopes: jwt.scopes
           } as ILoggedIn,
         };
       } catch(e) {
@@ -61,7 +65,8 @@ export const server = new ApolloServer({
           auth: {
             tokenType: TokenType.INVALID,
             userId: "",
-            appId: ""
+            appId: "",
+            scopes: []
           } as ILoggedIn
         }
       }

@@ -1,0 +1,106 @@
+"""
+A Flow is a collection of Members, Content, and Rooms,
+along with access controls, badges, and posting as the Flow.
+"""
+type Flow implements FlowEntity {
+    name: String!
+    description: String
+    id: ID!
+    alternative_ids: [String!]!
+    # Coming soon, maybe: permissions, display settings, and such
+    public_permissions: FlowPermissions!
+    joined_permissions: FlowPermissions!
+    member_permissions: Dict
+    badges: Badge
+}
+"""Used in the creation of new Flows."""
+input NewFlow {
+    """The name of the Flow to create."""
+    name: String!
+    """
+    The **user-configurable** part of the ID.
+    It's equivalent to a username.
+    Does not include `//`.
+    """
+    id: String!
+    """
+    Presets that are used to generate default settings for the Flow.
+    """
+    preset: FlowPreset!
+    """
+    The description, topic, or biography of the Flow.
+    """
+    description: String
+}
+"""
+A preset with which to configure a Flow's initial settings.
+"""
+enum FlowPreset {
+    """Anyone can read, post, and join. Can optionally require approval. Comparable to a subreddit."""
+    community
+    """An invite-only group."""
+    private_group
+    """Similar to "stories" on other platforms."""
+    story
+    """
+    All users post anonymously (under the group's name) by default.
+    Viewing is public. Joining and posting are invite-only.
+    """
+    channel
+    """An invite-only group where members post anonymously by default."""
+    anonymous_group
+    """
+    Blog Flows have a blog- or news-like home page. 
+    Viewing is public. Joining and posting are invite-only.
+    """
+    blog
+    """A private collection, group, or list."""
+    collection
+}
+"""
+A Badge, as seen in Flows. Badges can have permission overrides in Flows,
+and have a name, and optional description, color, and importance.
+"""
+type Badge {
+    id: ID!
+    name: String!
+    description: String
+    color: String
+    important: Boolean
+}
+enum AllowDeny {
+    allow
+    deny
+}
+"""Used by the Join permission."""
+enum AllowDenyRequest {
+    allow
+    deny
+    request
+}
+type FlowPermissions {
+    """
+    Whether a user can join the Flow. 
+    Only applicable for public_permissions.
+    """
+    join: AllowDenyRequest
+    """Whether the user can post Content to this Flow."""
+    post: AllowDeny
+    """Whether the user can read Content posted to this Flow."""
+    read: AllowDeny
+    """Whether the user can see the profile information of this Flow,
+    such as:
+    * Name
+    * Profile picture
+    * Bio/about me
+    * Banner
+    """
+    view: AllowDeny
+    """
+    Whether the user can delete Content posted to this Flow.
+    The owner inherently has this permission set to `allow`.
+    """
+    delete: AllowDeny
+    """Whether the user can pin Content in this Flow."""
+    pin: AllowDeny
+}

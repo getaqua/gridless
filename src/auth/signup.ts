@@ -6,6 +6,7 @@ import debug from 'debug';
 import { defaultPasswordRequirements, IPasswordRequirements, passwordSymbols, usernameRequirements } from './requirements';
 import validator from 'password-validator';
 import { needsExtraSteps } from './extrasteps';
+import { FlowModel } from 'src/db/models/flowModel';
 
 const log = debug("gridless:auth:signup");
 
@@ -74,14 +75,18 @@ export async function checkUsernameAvailability(req: express.Request, res: expre
     } else return next()
 }
 
-async function isValidUsername(username: string): Promise<"SUCCESS" | "INVALID_USERNAME" | "USERNAME_TAKEN"> {
+export async function isValidUsername(username: string): Promise<"SUCCESS" | "INVALID_USERNAME" | "USERNAME_TAKEN"> {
     if (!usernameRequirements.exec(username)) return "INVALID_USERNAME";
     if (username.includes("//")) return "INVALID_USERNAME";
     if (username.includes("/#/")) return "INVALID_USERNAME";
     // save the database checks for last!
     // If a previous check fails, these don't need to be run.
     if (await UserModel.exists({username})) return "USERNAME_TAKEN";
-    if (await UserModel.exists({"$or": [{id: "//"+username}, {alternative_ids: "//"+username}]})) return "USERNAME_TAKEN";
+    if (await UserModel.exists({"$or": [
+        {id: "//"+username}, {alternative_ids: "//"+username}
+    ]}) || await FlowModel.exists({"$or": [
+        {id: "//"+username}, {alternative_ids: "//"+username}
+    ]})) return "USERNAME_TAKEN";
     // all tests pass! it's a valid username.
     return "SUCCESS";
 }
