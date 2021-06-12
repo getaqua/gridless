@@ -38,6 +38,18 @@ input NewFlow {
     """
     description: String
 }
+input PatchedFlow {
+    """The Flow's name."""
+    name: String
+    """The Flow's description."""
+    description: String
+    """Permissions for users who have not joined the Flow.
+    Permissions given will be patched on top of the existing permissions."""
+    public_permissions: FlowPermissions
+    """Default permissions for users who _have_ joined the Flow.
+    Permissions given will be patched on top of the existing permissions."""
+    joined_permissions: FlowPermissions
+}
 """
 A preset with which to configure a Flow's initial settings.
 """

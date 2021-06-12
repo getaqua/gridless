@@ -1,3 +1,6 @@
+import { Flow } from "src/db/models/flowModel";
+import { User } from "src/db/models/userModel";
+
 type AllowDeny = "allow" | "deny" | null
 export interface FlowPermissions {
   /** Whether a user can join the Flow. 
@@ -37,3 +40,16 @@ export const fallbackJoinedFlowPermissions: Omit<FlowPermissions, "join"> = {
   pin: "allow",
   delete: "deny"
 };
+
+export async function getEffectivePermissions(user: User, flow: Flow) : Promise<FlowPermissions> {
+  const userflow = await user.flow;
+  var is_joined = flow.members.includes(userflow._id);
+  var member_permissions = is_joined ? flow.member_permissions[userflow._id.toHexString()] : null;
+  var defaults = is_joined ? flow.joined_permissions : flow.member_permissions;
+  var fallback: FlowPermissions = is_joined ? (fallbackJoinedFlowPermissions && {join: "allow"} as FlowPermissions) : fallbackPublicFlowPermissions;
+  return {
+    ...fallback,
+    ...defaults,
+    ...member_permissions
+  }
+}

@@ -6,7 +6,7 @@ export interface ILoggedIn {
     /** appId is NOT used when the `tokenType` is `TokenType.COOKIE`. */
     appId: string | undefined,
     /** The scopes the user is allowed to use. */
-    scopes: Array<Scopes>
+    scopes: Array<Scopes | CustomScope>
 }
 
 export enum TokenType {
@@ -35,6 +35,9 @@ export enum Scopes {
     /** The user is allowed all permissions inherently. */
     Client = "client"
 }
+
+export type CustomScope = string;
+export const CustomScope = (scope: string) => scope as CustomScope;
 
 /*
 {

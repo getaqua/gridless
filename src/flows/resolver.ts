@@ -1,44 +1,45 @@
 import debug from "debug";
-import mongoose, { isValidObjectId, Mongoose, Types } from 'mongoose';
+import { Types } from "mongoose";
+import { checkScope } from "src/auth/permissions";
 import { isValidUsername } from "src/auth/signup";
-import { ILoggedIn, Scopes, TokenType } from "src/auth/UserModel"
+import { CustomScope, ILoggedIn, Scopes, TokenType } from "src/auth/UserModel"
 import { Flow, FlowModel } from "src/db/models/flowModel"
-import { User, UserModel } from "src/db/models/userModel";
+import { UserModel } from "src/db/models/userModel";
 import { flowPresets } from "./presets";
 
 const log = debug("gridless:flow:resolver");
 
 const flowResolver = {
     Query: {
-        getFlow: async function (_, {id}: { id: string }, {auth}: { auth: ILoggedIn }) {
+        getFlow: async function (_, {id}: { id: string }, {auth}: { auth: ILoggedIn },) {
             // TODO: check if the client is authorized to perform this action, returning null if they are not
             var flow = await FlowModel.findOne({"$or": [{id}, {alternative_ids: id}]});
+            if (!(checkScope(auth, CustomScope(`flow.${flow._id.toHexString()}.view`)) || flow.public_permissions.view == "allow")) return null;
+            if (!flow) return null;
+            if (!flow.members.includes((await (await UserModel.findById(auth.userId)).flow)._id.toString()) 
+            && flow.member_permissions.view == "allow") return null;
             flow = await flow.populate("owner").execPopulate();
             return {...flow.toObject(), id: flow.id};
         }
     },
     Flow: {
-        members: async function ({id}: Partial<Flow>, {limit}: { limit?: number }, {auth}: { auth: ILoggedIn }) {
-            var flow = await FlowModel.findOne({"$or": [{id}, {alternative_ids: id}]}).populate("members");
-            return flow.members;
-        }
+        members: async function ({_id}: {_id: Types.ObjectId}, {limit}: { limit?: number }, {auth}: { auth: ILoggedIn }) {
+            var flow = await FlowModel.findById(_id).populate("members");
+            if (Math.abs(limit) != limit) limit = 0;
+            return flow.members.slice(limit > 0 ? -(limit) : 0);
+        },
+        // TODO: put the Content field here
     },
     Mutation: {
-        createFlow: async function (_, {flow, parentId}: { flow: Partial<Flow> & { preset: string }, parentId?: string }, {auth}: { auth: ILoggedIn }) {
+        createFlow: async function (_, {flow, ownerId}: { flow: Partial<Flow> & { preset: string }, ownerId?: string }, {auth}: { auth: ILoggedIn }) {
             // TODO: use the permission/scope checker function
-            if (!(
-                auth.tokenType == TokenType.APPTOKEN
-                && (
-                    auth.scopes.includes(Scopes.FlowNew)
-                    || auth.scopes.includes(Scopes.Client)
-                )
-            )) return null;
+            if (!checkScope(auth, Scopes.FlowNew)) return null;
             if (!await isValidUsername(flow.id)) return null;
             // if all checks pass...
             log("Creating new Flow.");
             var parent: Flow;
-            if (parentId) {
-                parent = await FlowModel.findOne({$or: [{id: parentId}, {alternative_ids: parentId}]});
+            if (ownerId) {
+                parent = await FlowModel.findOne({$or: [{id: ownerId}, {alternative_ids: ownerId}]});
             } else {
                 var _user = await UserModel.findById(auth.userId);
                 parent = await _user.flow;
