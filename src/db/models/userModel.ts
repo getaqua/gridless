@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { Flow, FlowModel } from './flowModel';
 
 /**
  * provides the User interface for typescript
@@ -13,6 +14,7 @@ export interface User extends mongoose.Document {
   currentlyAuthorizingScopes?: string[];
   /** Client IDs that the user has authorized. */
   authorizedAppCIDs: string[];
+  flow: Promise<Flow>;
 }
 
 /**
@@ -63,5 +65,6 @@ const UserSchema = new mongoose.Schema({
     default: []
   }
 });
+UserSchema.virtual("flow").get(function() {return FlowModel.findOne({id: this.id});});
 
 export const UserModel = mongoose.model<User>('users', UserSchema);

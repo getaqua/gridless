@@ -19,7 +19,7 @@ export async function endpoint(req: express.Request, res: express.Response, next
     } else return res.status(403).render("autherror.j2", {messages: ["Password is incorrect."], backto: "/_gridless/login"});
     
     var newToken = jsonwebtoken.sign(
-        { uid: user._id.toString() },
+        { uid: user._id.toHexString() },
         globalThis.staticConfig.get("auth").get("secret"),
         { expiresIn: '1y' }
     );

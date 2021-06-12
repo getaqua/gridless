@@ -6,7 +6,7 @@ import debug from 'debug';
 import { defaultPasswordRequirements, IPasswordRequirements, passwordSymbols, usernameRequirements } from './requirements';
 import validator from 'password-validator';
 import { needsExtraSteps } from './extrasteps';
-import { FlowModel } from 'src/db/models/flowModel';
+import { Flow, FlowModel } from 'src/db/models/flowModel';
 
 const log = debug("gridless:auth:signup");
 
@@ -40,9 +40,15 @@ export async function endpoint(req: express.Request, res: express.Response, next
         password: pass,
     });
     await user.save();
+    const flow = new FlowModel({
+        name: req.body?.["username"],
+        // email: email,
+        id: "//"+req.body?.["username"],
+    } as Flow);
+    await flow.save();
 
     var newToken = jsonwebtoken.sign(
-        { uid: user._id.toString(), regi: "new" },
+        { uid: user._id.toHexString(), regi: "new" },
         globalThis.staticConfig.get("auth").get("secret"),
         { expiresIn: '1y' }
     );

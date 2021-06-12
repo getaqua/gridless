@@ -7,11 +7,17 @@ type Flow implements FlowEntity {
     description: String
     id: ID!
     alternative_ids: [String!]!
-    # Coming soon, maybe: permissions, display settings, and such
+    # Coming soon, maybe: display settings, and such
     public_permissions: FlowPermissions!
     joined_permissions: FlowPermissions!
     member_permissions: Dict
     badges: Badge
+    owner: PartialFlow!
+    members(limit: Int): [PartialFlow!]
+}
+type PartialFlow {
+    id: String!
+    name: String!
 }
 """Used in the creation of new Flows."""
 input NewFlow {
@@ -103,4 +109,44 @@ type FlowPermissions {
     delete: AllowDeny
     """Whether the user can pin Content in this Flow."""
     pin: AllowDeny
+}
+
+"""Flags regarding a Flow."""
+enum FlowFlag {
+    """
+    The Flow is owned by a user sharing its ID, 
+    so it is marked as owning itself.
+    """
+    IS_PROFILE
+    """
+    The Flow is the profile of a system administrator.
+    Show the blue and red Aqua Admin badge on the client.
+    """
+    IS_SYSADMIN
+    """
+    The Flow is the Special Story Flow for its owner.
+    This flag is used in lookups for Special flows
+    or the owner's Story flow.
+    This Flow's owner must have the IS_PROFILE flag.
+    """
+    IS_USER_STORY
+}
+"""All Features available for Flows."""
+enum FlowFeature {
+    """The Flow contains Content."""
+    Content
+    """The Flow uses Likes and Dislikes.
+    Mutually exclusive with Like and Rating."""
+    LikeDislike
+    """The Flow uses Likes.
+    Mutually exclusive with LikeDislike and Rating."""
+    Like
+    """The Flow uses a five-star rating system for Content.
+    Mutually exclusive with LikeDislike and Like."""
+    Rating
+    """
+    Users with effective Read permission
+    can react to posts with emoji.
+    """
+    Reactions
 }

@@ -1,6 +1,7 @@
-import mongoose, { ObjectId } from 'mongoose';
+import mongoose, { Mongoose, ObjectId, Schema } from 'mongoose';
 import { FlowBadge, FlowBadgeSchema } from 'src/flows/badges';
 import { FlowPermissions } from 'src/flows/permissions';
+import { User } from './userModel';
 
 /**
  * provides the Flow interface for typescript
@@ -21,6 +22,15 @@ export interface Flow extends mongoose.Document {
    * Permission overrides for specific members. */
   member_permissions: Record<string, Partial<FlowPermissions>>
   badges: FlowBadge[]
+  /** The owner of the Flow. 
+   * 
+   * Add `.populate("owner")` to the query
+   * before use. */
+  owner: Flow | mongoose.Types.ObjectId | string
+  /** The members of the Flow.
+   * Add `.populate("members.$*")` to the query
+   * before use. */
+  members: (Flow | mongoose.Types.ObjectId | string)[]
 }
 
 const AllowDeny = {
@@ -80,7 +90,20 @@ const FlowSchema = new mongoose.Schema({
     required: false,
     default: {}
   },
-  badges: [FlowBadgeSchema]
+  badges: [FlowBadgeSchema],
+  owner: {
+    type: Schema.Types.ObjectId,
+    ref: "flows",
+    required: true
+  },
+  members: {
+    type: Array,
+    of: {
+      type: Schema.Types.ObjectId,
+      ref: "flows",
+    },
+    required: true
+  }
 });
 
 export const FlowModel = mongoose.model<Flow>('flows', FlowSchema);

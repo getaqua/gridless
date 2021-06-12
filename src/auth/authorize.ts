@@ -217,7 +217,7 @@ export async function claimTokenEndpoint(req: express.Request & {user?: ILoggedI
         await user.save();
         // == GENERATE TOKEN ==
         var newToken = jsonwebtoken.sign(
-            { uid: user._id.toString(), aid: appdata.id, client_id: appdata.client_id, scopes: token?.["scopes"]},
+            { uid: user._id.toHexString(), aid: appdata.id, client_id: appdata.client_id, scopes: token?.["scopes"]},
             globalThis.staticConfig.get("auth").get("secret"),
             { expiresIn: '1y' }
         );

@@ -22,7 +22,7 @@ type Query {
     getSystemInfo: SystemInfo!
 }
 type Mutation {
-    createFlow(flow: NewFlow): Flow
+    createFlow(flow: NewFlow, parentId: String): Flow
 }
 
 # ================
