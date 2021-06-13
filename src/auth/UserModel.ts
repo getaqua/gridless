@@ -32,6 +32,9 @@ export enum Scopes {
     UserPost = "user.post",
     UserAddBot = "user.addbot",
     UserImpersonate = "user.impersonate",
+    FlowUpdate = "flow.update",
+    FlowContentPost = "flow.content.post",
+    FlowContentManage = "flow.content.manage",
     /** The user is allowed all permissions inherently. */
     Client = "client"
 }

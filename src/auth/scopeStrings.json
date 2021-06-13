@@ -20,16 +20,25 @@
         "name": "Link bots to your account",
         "icon": "mdi:robot"
     },
-    "flow.%s.post": {
-        "name": "Post to %s",
+    "flow.content.post": {
+        "name": "Post Content to your Flows",
         "icon": "mdi:text-box"
     },
-    "flow.%s.manage": {
-        "name": "Change settings and delete %s",
+    "flow.content.manage": {
+        "name": "Pin, edit, and delete Content in your Flows",
+        "icon": "mdi:pin",
+        "danger": true
+    },
+    "flow.update": {
+        "name": "Change settings in your Flows",
+        "icon": "mdi:pencil"
+    },
+    "flow.delete": {
+        "name": "Delete your Flows",
         "icon": "mdi:delete",
         "danger": true
     },
-    "flow.%s.addbot": {
+    "flow.addbot": {
         "name": "Link bots to %s",
         "icon": "mdi:robot"
     },

@@ -23,6 +23,7 @@ type Query {
 }
 type Mutation {
     createFlow(flow: NewFlow, parentId: String): Flow
+    updateFlow(flowId: String!, data: PatchedFlow!): Flow
 }
 
 # ================

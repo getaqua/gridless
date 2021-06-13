@@ -22,11 +22,16 @@ export interface Flow extends mongoose.Document {
    * Permission overrides for specific members. */
   member_permissions: Record<string, Partial<FlowPermissions>>
   badges: FlowBadge[]
-  /** The owner of the Flow. 
+  /** The parent of the Flow. 
+   * 
+   * Add `.populate("parent")` to the query
+   * before use. */
+  parent: Flow | mongoose.Types.ObjectId | string
+  /** The owner of the Flow. This is a user, not a Flow.
    * 
    * Add `.populate("owner")` to the query
    * before use. */
-  owner: Flow | mongoose.Types.ObjectId | string
+  owner: User | mongoose.Types.ObjectId | string
   /** The members of the Flow.
    * Add `.populate("members.$*")` to the query
    * before use. */
@@ -91,9 +96,14 @@ const FlowSchema = new mongoose.Schema({
     default: {}
   },
   badges: [FlowBadgeSchema],
-  owner: {
+  parent: {
     type: Schema.Types.ObjectId,
     ref: "flows",
+    required: true
+  },
+  owner: {
+    type: Schema.Types.ObjectId,
+    ref: "users",
     required: true
   },
   members: {
@@ -107,3 +117,4 @@ const FlowSchema = new mongoose.Schema({
 });
 
 export const FlowModel = mongoose.model<Flow>('flows', FlowSchema);
+export const getFlow = async (id: string) => await FlowModel.findOne({$or: [{id}, {alternative_ids: id}]});

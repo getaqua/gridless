@@ -2,6 +2,7 @@
   "name": "gridless",
   "private": true,
   "license": "GPL-3.0-or-later",
+  "version": "0.1.0-dev",
   "scripts": {
     "dist": "node -r ts-node/register ./src/server.ts",
     "start:watch": "nodemon",
@@ -56,6 +57,7 @@
     "nodemon": "^2.0.7",
     "nunjucks": "^3.2.3",
     "password-validator": "^5.1.1",
+    "read-package-json": "^3.0.1",
     "src": "link:./src",
     "ts-jest": "^26.5.4",
     "ts-node": "^9.1.1",
