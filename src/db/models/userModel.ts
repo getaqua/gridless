@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { ObjectId } from 'mongoose';
 import { Flow, FlowModel } from './flowModel';
 
 /**
@@ -68,3 +68,8 @@ const UserSchema = new mongoose.Schema({
 UserSchema.virtual("flow").get(function() {return FlowModel.findOne({id: this.id});});
 
 export const UserModel = mongoose.model<User>('users', UserSchema);
+export const getUserFlow = async (userId: string) => await (await UserModel.findById(userId)).flow;
+export const getUserFlowId = async function (userId: string) : Promise<ObjectId> {
+  const user = await UserModel.findById(userId);
+  return (await FlowModel.findOne({id: user.id}, {_id: 1}))._id;
+};

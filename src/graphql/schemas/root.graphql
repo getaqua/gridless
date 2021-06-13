@@ -22,8 +22,15 @@ type Query {
     getSystemInfo: SystemInfo!
 }
 type Mutation {
+    """Creates a Flow, returning null if it fails
+    and the new Flow if it succeeds."""
     createFlow(flow: NewFlow, parentId: String): Flow
-    updateFlow(flowId: String!, data: PatchedFlow!): Flow
+    """Updates a Flow, returning null if it fails
+    and the updated Flow if it succeeds."""
+    updateFlow(id: String!, data: PatchedFlow!): Flow
+    """Joins a Flow, returning null if it fails 
+    and the joined Flow if it succeeds."""
+    joinFlow(id: String!, inviteCode: String): Flow
 }
 
 # ================

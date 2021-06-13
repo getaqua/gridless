@@ -56,7 +56,7 @@ export async function getEffectivePermissions(user: User, flow: Flow) : Promise<
   var is_joined = flow.members.includes(user._id);
   var is_owner = (flow.owner as any)._id.toHexString() == user._id.toHexString();
   var member_permissions = is_joined ? flow.member_permissions[userflow._id.toHexString()] : null;
-  var defaults = is_joined ? flow.joined_permissions : flow.member_permissions;
+  var defaults = (is_joined ? flow.joined_permissions : flow.public_permissions as any).toJSON();
   var fallback: FlowPermissions = is_joined ? (fallbackJoinedFlowPermissions && {join: "allow"} as FlowPermissions) : fallbackPublicFlowPermissions;
   return {
     ...fallback,

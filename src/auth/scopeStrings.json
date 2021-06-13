@@ -11,6 +11,10 @@
         "name": "Discover your public and private Flows",
         "icon": "mdi:format-list-bulleted"
     },
+    "flow.join": {
+        "name": "Join Flows for you",
+        "icon": "mdi:account-plus"
+    },
     "flow.view.private": {
         "name": "View your private Flows it already knows about",
         "icon": "mdi:eye"

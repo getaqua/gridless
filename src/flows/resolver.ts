@@ -4,7 +4,7 @@ import { checkScope } from "src/auth/permissions";
 import { isValidUsername } from "src/auth/signup";
 import { CustomScope, ILoggedIn, Scopes, TokenType } from "src/auth/UserModel"
 import { Flow, FlowModel, getFlow } from "src/db/models/flowModel"
-import { User, UserModel } from "src/db/models/userModel";
+import { getUserFlowId, User, UserModel } from "src/db/models/userModel";
 import { getEffectivePermissions } from "./permissions";
 import { flowPresets } from "./presets";
 
@@ -56,13 +56,29 @@ const flowResolver = {
             newFlow = await newFlow.populate("owner").execPopulate();
             return {...newFlow.toJSON(), id: doc.id};
         },
-        updateFlow: async function (_, {flowId, data}: { flowId: string, data: Partial<Flow> }, {auth}: { auth: ILoggedIn }) {
+        updateFlow: async function (_, {id, data}: { id: string, data: Partial<Flow> }, {auth}: { auth: ILoggedIn }) {
             if (!checkScope(auth, Scopes.FlowUpdate)) return null;
-            const flow = await getFlow(flowId);
+            const flow = await getFlow(id);
             const effectivePermissions = await getEffectivePermissions(await UserModel.findById(auth.userId), flow);
             if (effectivePermissions.update == "deny") return null;
             await flow.updateOne({$set: data});
-            return await (await getFlow(flowId)).populate("owner").execPopulate();
+            return await (await getFlow(id)).populate("owner").execPopulate();
+        },
+        joinFlow: async function (_, {id, inviteCode}: { id: string, inviteCode: string }, {auth}: { auth: ILoggedIn }) {
+            if (!checkScope(auth, Scopes.FlowJoin)) return null;
+            var [flow, ufid, user] = await Promise.all([
+                getFlow(id),
+                getUserFlowId(auth.userId),
+                UserModel.findById(auth.userId)
+            ]);
+            if (flow.members.includes(ufid as any)) return null;
+            var effectivePermissions = await getEffectivePermissions(user, flow);
+            if (effectivePermissions.join != "allow") return null;
+            //TODO: add support for join requests
+            // if all checks pass...
+            flow.members.push(ufid as any);
+            await flow.save();
+            return flow;
         }
     }
 }
