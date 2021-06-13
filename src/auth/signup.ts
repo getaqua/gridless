@@ -7,6 +7,7 @@ import { defaultPasswordRequirements, IPasswordRequirements, passwordSymbols, us
 import validator from 'password-validator';
 import { needsExtraSteps } from './extrasteps';
 import { Flow, FlowModel } from 'src/db/models/flowModel';
+import { flowPresets } from 'src/flows/presets';
 
 const log = debug("gridless:auth:signup");
 
@@ -44,6 +45,8 @@ export async function endpoint(req: express.Request, res: express.Response, next
         name: req.body?.["username"],
         // email: email,
         id: "//"+req.body?.["username"],
+        owner: user._id,
+        ...flowPresets["channel"],
     } as Flow);
     await flow.save();
 

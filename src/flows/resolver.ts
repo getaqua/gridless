@@ -13,13 +13,11 @@ const log = debug("gridless:flow:resolver");
 const flowResolver = {
     Query: {
         getFlow: async function (_, {id}: { id: string }, {auth}: { auth: ILoggedIn },) {
-            // TODO: check if the client is authorized to perform this action, returning null if they are not
-            var flow = await getFlow(id);
-            if (!(checkScope(auth, CustomScope(`flow.${flow._id.toHexString()}.view`)) || flow.public_permissions.view == "allow")) return null;
+            var flow = await (await getFlow(id)).populate("owner, parent").execPopulate();
+            if (!(checkScope(auth, Scopes.FlowViewPrivate) || flow.public_permissions.view == "allow")) return null;
             if (!flow) return null;
-            if (!flow.members.includes((await (await UserModel.findById(auth.userId)).flow)._id.toString()) 
-            && flow.member_permissions.view == "allow") return null;
-            flow = await flow.populate("owner").execPopulate();
+            if (!(flow.members.includes((await (await UserModel.findById(auth.userId)).flow)._id) || flow.public_permissions.view == "allow") 
+            && (await getEffectivePermissions(await UserModel.findById(auth.userId), flow)).view == "allow") return null;
             return {...flow.toObject(), id: flow.id};
         }
     },
@@ -63,8 +61,8 @@ const flowResolver = {
             const flow = await getFlow(flowId);
             const effectivePermissions = await getEffectivePermissions(await UserModel.findById(auth.userId), flow);
             if (effectivePermissions.update == "deny") return null;
-            await flow.update({$set: data});
-            return await getFlow(flowId);
+            await flow.updateOne({$set: data});
+            return await (await getFlow(flowId)).populate("owner").execPopulate();
         }
     }
 }

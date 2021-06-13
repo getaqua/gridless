@@ -13,11 +13,11 @@ type Flow implements FlowEntity {
     member_permissions: Dict
     badges: Badge
     owner: PartialFlow!
-    members(limit: Int): [PartialFlow!]
+    parent: Flow
+    members(limit: Int): [Flow!]
 }
 type PartialFlow {
     id: String!
-    name: String!
 }
 """Used in the creation of new Flows."""
 input NewFlow {

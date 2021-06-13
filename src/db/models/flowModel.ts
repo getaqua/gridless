@@ -26,7 +26,7 @@ export interface Flow extends mongoose.Document {
    * 
    * Add `.populate("parent")` to the query
    * before use. */
-  parent: Flow | mongoose.Types.ObjectId | string
+  parent?: Flow | mongoose.Types.ObjectId | string
   /** The owner of the Flow. This is a user, not a Flow.
    * 
    * Add `.populate("owner")` to the query
@@ -99,7 +99,7 @@ const FlowSchema = new mongoose.Schema({
   parent: {
     type: Schema.Types.ObjectId,
     ref: "flows",
-    required: true
+    required: false
   },
   owner: {
     type: Schema.Types.ObjectId,

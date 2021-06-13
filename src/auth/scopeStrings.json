@@ -8,8 +8,25 @@
         "icon": "mdi:water-plus"
     },
     "flow.list": {
-        "name": "Discover private Flows you have access to",
-        "icon": "mdi:lock"
+        "name": "Discover your public and private Flows",
+        "icon": "mdi:format-list-bulleted"
+    },
+    "flow.view.private": {
+        "name": "View your private Flows it already knows about",
+        "icon": "mdi:eye"
+    },
+    "flow.read.public": {
+        "name": "Read and respond to Content in public Flows as you",
+        "icon": "mdi:emoticon"
+    },
+    "flow.read.private": {
+        "name": "Read and respond to Content in private Flows as you",
+        "icon": "mdi:emoticon-angry"
+    },
+    "flow.post": {
+        "name": "Post in Flows as you",
+        "icon": "mdi:text-box",
+        "danger": true
     },
     "user.post": {
         "name": "Post to your profile",
