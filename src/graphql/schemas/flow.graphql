@@ -15,6 +15,7 @@ type Flow implements FlowEntity {
     owner: PartialFlow!
     parent: Flow
     members(limit: Int): [Flow!]
+    content(limit: Int): [Content!]
 }
 type PartialFlow {
     id: String!

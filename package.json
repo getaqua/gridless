@@ -45,6 +45,7 @@
     "eslint-plugin-import": "^2.22.1",
     "express": "^4.17.1",
     "express-jwt": "^6.0.0",
+    "extended-snowflake": "^2.1.0",
     "faker": "^5.4.0",
     "graphql": "^15.3.0",
     "graphql-import-node": "^0.0.4",

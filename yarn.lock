@@ -6724,6 +6724,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"extended-snowflake@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "extended-snowflake@npm:2.1.0"
+  checksum: 601a2f7036e0d0f117d29fdf357856a32b66e621f25ac4b8412920d0a4257f6b268310c2f581bd63cd2313658db196414bd0399144e692dad6c2ced72912542a
+  languageName: node
+  linkType: hard
+
 "extglob@npm:^2.0.4":
   version: 2.0.4
   resolution: "extglob@npm:2.0.4"
@@ -7543,6 +7550,7 @@ fsevents@^1.2.7:
     eslint-plugin-import: ^2.22.1
     express: ^4.17.1
     express-jwt: ^6.0.0
+    extended-snowflake: ^2.1.0
     faker: ^5.4.0
     graphql: ^15.3.0
     graphql-import-node: ^0.0.4

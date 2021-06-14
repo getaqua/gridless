@@ -2,11 +2,6 @@
 # Procedures
 # ==========
 type Query {
-    # """
-    # Get a user's profile data. Returns null/None if it doesn't exist,
-    # or if you don't have permission to access it.
-    # """
-    # @deprecated getUser(userid: String!): User
     """
     Get the logged-in user.f"{info.context.host}//{flow.get('id','')}"
     """
@@ -20,6 +15,12 @@ type Query {
     System information about the gridless server.
     """
     getSystemInfo: SystemInfo!
+    # """
+    # Get Content. Returns null if it doesn't exist,
+    # or if you don't have read permission in the Flow
+    # this Content was posted in.
+    # """
+    # getContent(id: String!): Content
 }
 type Mutation {
     """Creates a Flow, returning null if it fails
@@ -31,6 +32,9 @@ type Mutation {
     """Joins a Flow, returning null if it fails 
     and the joined Flow if it succeeds."""
     joinFlow(id: String!, inviteCode: String): Flow
+    """Posts Content to a Flow, returning null if it fails
+    and the new Content if it succeeds."""
+    postContent(to: String!, data: NewContent): Content
 }
 
 # ================

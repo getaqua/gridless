@@ -1,107 +1,37 @@
+type Content {
+    # Body
+    "The text of this Content."
+    text: String
+    "The original post of this Content, if it Forwards other Content."
+    origin: Content
 
-# =============
-# Content types
-# =============
-interface Content {
-    """
-    This is the **displayed** sender.
-    The real sender is kept in the database,
-    using an anonymized ID.
-    """
-    sender: FlowEntity!
-    """
-    This is the date **and time** (in ISO-8601 format, according to the server)
-    when this Content was sent.
-    """
+    # Metadata
+    "Whether or not the Content is pinned in its Flow."
+    pinned: Boolean!
+    "The author of this Content."
+    author: Flow!
+    "The ID of the Flow this Content was posted in, if you need to look it up."
+    inFlowId: String!
+    "The ISO-8601 timestamp of this Content's original posting."
     timestamp: Date!
+    "Whether or not the Content has been edited."
+    edited: Boolean!
+    "If the Content was edited, the time that it was last edited."
+    editedTimestamp: Date
 }
-"""
-Short text is comparable to a Tweet on Twitter.
-"""
-type ShortTextContent implements Content {
-    sender: FlowEntity!
-    timestamp: Date!
-    """
-    The string body of the post.
-    """
-    body: String!
-    """
-    URLs to image files attached to this Content.
-    Expect up to 5.
-    """
-    images: [String!]!
+
+input NewContent {
+    # Body
+    "The text of this Content."
+    text: String
+    #"The original post of this Content, if it Forwards other Content."
+    #origin: Content
 }
-"""
-Long text is comparable to a post on Facebook.
-"""
-type LongTextContent implements Content {
-    sender: FlowEntity!
-    timestamp: Date!
-    """
-    The Markdown body of the post. Headers should be limited 
-    (# and ##, which are about the sizes of ### and ####).
-    """
-    body: String!
-}
-"""
-Image content is comparable to an Instagram post or a Facebook album.
-"""
-type ImageContent implements Content {
-    sender: FlowEntity!
-    timestamp: Date!
-    """
-    Album entries in this Content.
-    """
-    images: [AlbumEntry!]!
-    """
-    A string block of text shown above the album preview.
-    """
-    caption: String
-}
-"""
-Blog Content is similar to a Medium post.
-The official app's viewer for Blog Content
-utilizes the Flow's "shortcut bar" on the post
-at all times, instead of just when you're on a
-particular post or page under the Flow.
-Also, Blog Content should automatically link to
-related posts on the client side.
-"""
-type BlogContent implements Content {
-    sender: FlowEntity!
-    timestamp: Date!
-    """
-    The Markdown body of the post.
-    """
-    body: String!
-    """
-    The title of the blog post.
-    """
-    title: String!
-    """
-    A string summary of the post.
-    Displayed before the user clicks or
-    taps on the post to view its full
-    contents.
-    """
-    summary: String!
-    """
-    A URL to the feature image.
-    This is shown alongside the summary,
-    and near the title in the viewer.
-    """
-    featureImageUrl: String
-}
-type LinkContent implements Content {
-    sender: FlowEntity!
-    timestamp: Date!
-    type: LinkType!
-    """
-    What the LinkContent refers to.
-    """
-    destination: String!
-    """
-    A string comment associated with this Link.
-    """
-    comment: String
+
+input PatchedContent {
+    # Body
+    "The text of this Content."
+    text: String
+    #"The original post of this Content, if it Forwards other Content."
+    #origin: Content
 }

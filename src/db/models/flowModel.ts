@@ -1,4 +1,4 @@
-import mongoose, { Mongoose, ObjectId, Schema } from 'mongoose';
+import mongoose, { Mongoose, Schema } from 'mongoose';
 import { FlowBadge, FlowBadgeSchema } from 'src/flows/badges';
 import { FlowPermissions } from 'src/flows/permissions';
 import { User } from './userModel';
@@ -26,12 +26,12 @@ export interface Flow extends mongoose.Document {
    * 
    * Add `.populate("parent")` to the query
    * before use. */
-  parent?: Flow | mongoose.Types.ObjectId | string
+  parent?: MaybePopulated<Flow>
   /** The owner of the Flow. This is a user, not a Flow.
    * 
    * Add `.populate("owner")` to the query
    * before use. */
-  owner: User | mongoose.Types.ObjectId | string
+  owner: MaybePopulated<User>
   /** The members of the Flow.
    * Add `.populate("members.$*")` to the query
    * before use. */
@@ -115,6 +115,18 @@ const FlowSchema = new mongoose.Schema({
     required: true
   }
 });
+
+/** 
+ * This field *may* be populated, but it may not be. Provides a `.id` interface to check it.
+ * 
+ * To check if this value is populated, call `.populated("PATHHERE")`
+ * on the document. To ensure this value is populated, call `.populate("PATHHERE")`
+ * when finding the document.
+ * 
+ * *(MaybePopulated entries are NEVER strings, but if I don't make it a string, it explodes.
+ * No idea why, don't ask, and don't touch it.)*
+ */
+export type MaybePopulated<T extends mongoose.Document> = T | mongoose.Types.ObjectId | string;
 
 export const FlowModel = mongoose.model<Flow>('flows', FlowSchema);
 export const getFlow = async (id: string) => await FlowModel.findOne({$or: [{id}, {alternative_ids: id}]});

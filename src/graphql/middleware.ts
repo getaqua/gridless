@@ -12,11 +12,12 @@ import debug from 'debug';
 import { ILoggedIn, TokenType } from '../auth/UserModel';
 import flowResolver from 'src/flows/resolver';
 import systemResolver from './system';
+import contentResolver from 'src/content/resolver';
 
 const log = debug("gridless:graphql");
 
 const types = mergeTypeDefs([userSchema, flowSchema, rootSchema, contentSchema, errorSchema]);
-const resolvers = mergeResolvers([userResolver, flowResolver, systemResolver]);
+const resolvers = mergeResolvers([userResolver, flowResolver, systemResolver, contentResolver]);
 
 const schema = makeExecutableSchema({
   typeDefs: types,

@@ -3,6 +3,7 @@ import { Types } from "mongoose";
 import { checkScope } from "src/auth/permissions";
 import { isValidUsername } from "src/auth/signup";
 import { CustomScope, ILoggedIn, Scopes, TokenType } from "src/auth/UserModel"
+import { Content, ContentModel } from "src/db/models/contentModel";
 import { Flow, FlowModel, getFlow } from "src/db/models/flowModel"
 import { getUserFlowId, User, UserModel } from "src/db/models/userModel";
 import { getEffectivePermissions } from "./permissions";
@@ -27,6 +28,24 @@ const flowResolver = {
             if (Math.abs(limit) != limit) limit = 0;
             return flow.members.slice(limit > 0 ? -(limit) : 0);
         },
+        content: async function (flow: Partial<Flow>, {limit}: { limit?: number }, {auth}: { auth: ILoggedIn }) {
+            if (!(checkScope(auth, Scopes.FlowViewPrivate) || flow.public_permissions.view == "allow")) return null;
+            if (!(checkScope(auth, Scopes.FlowReadPrivate) || 
+                (flow.public_permissions.read == "allow" && checkScope(auth, Scopes.FlowReadPublic)))) return null;
+            if (!flow) return null;
+            if (!(flow.members.includes((await (await UserModel.findById(auth.userId)).flow)._id) || flow.public_permissions.read == "allow") 
+            && (await getEffectivePermissions(await UserModel.findById(auth.userId), flow as any)).read == "allow") return null;
+            return (await ContentModel.find({inFlow: Types.ObjectId(flow._id)}).sort({timestamp: -1}).limit(limit))
+            .map<any>(async (content) => {
+                await content.populate("author").execPopulate();
+                return {
+                    ...content.toJSON(),
+                    inFlowId: flow.id,
+                    timestamp: content.timestamp.toISOString(),
+                    editedTimestamp: content.editedTimestamp?.toISOString()
+                }
+            });
+        }
         // TODO: put the Content field here
     },
     Mutation: {
