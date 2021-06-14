@@ -109,6 +109,19 @@ const flowResolver = {
             if ((flow.owner as any)._id != ufid) return false;
             await flow.deleteOne();
             return true;
+        },
+        leaveFlow: async function (_, {id}: { id: string }, {auth}: { auth: ILoggedIn }) {
+            if (!checkScope(auth, Scopes.FlowUpdate)) return false;
+            var [flow, ufid] = await Promise.all([
+                getFlow(id),
+                getUserFlowId(auth.userId)
+            ]);
+            if (!flow) return false;
+            if ((flow.owner as any)._id == ufid) return false;
+            if (!flow.members.includes(ufid)) return false;
+            flow.members.splice(flow.members.indexOf(ufid), 1);
+            await flow.save();
+            return true;
         }
     }
 }

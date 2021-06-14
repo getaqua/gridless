@@ -32,6 +32,12 @@ type Mutation {
     """Joins a Flow, returning null if it fails 
     and the joined Flow if it succeeds."""
     joinFlow(id: String!, inviteCode: String): Flow
+    """Deletes a Flow, returning false if it fails
+    and true if it succeeds."""
+    deleteFlow(id: String!): Boolean!
+    """Leaves a Flow, returning false if it fails
+    and true if it succeeds."""
+    leaveFlow(id: String!): Boolean!
     """Posts Content to a Flow, returning null if it fails
     and the new Content if it succeeds."""
     postContent(to: String!, data: NewContent): Content
