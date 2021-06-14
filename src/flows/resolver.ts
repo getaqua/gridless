@@ -98,6 +98,17 @@ const flowResolver = {
             flow.members.push(ufid as any);
             await flow.save();
             return flow;
+        },
+        deleteFlow: async function (_, {id}: { id: string }, {auth}: { auth: ILoggedIn }) {
+            if (!checkScope(auth, Scopes.FlowUpdate)) return false;
+            var [flow, ufid] = await Promise.all([
+                getFlow(id),
+                getUserFlowId(auth.userId)
+            ]);
+            if (!flow) return false;
+            if ((flow.owner as any)._id != ufid) return false;
+            await flow.deleteOne();
+            return true;
         }
     }
 }
