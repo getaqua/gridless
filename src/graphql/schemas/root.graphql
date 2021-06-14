@@ -35,6 +35,9 @@ type Mutation {
     """Posts Content to a Flow, returning null if it fails
     and the new Content if it succeeds."""
     postContent(to: String!, data: NewContent): Content
+    """Deletes Content, returning false if it fails
+    and true if it succeeds."""
+    deleteContent(snowflake: String!): Boolean!
 }
 
 # ================

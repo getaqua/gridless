@@ -28,7 +28,7 @@ const flowResolver = {
             if (Math.abs(limit) != limit) limit = 0;
             return flow.members.slice(limit > 0 ? -(limit) : 0);
         },
-        content: async function (flow: Partial<Flow>, {limit}: { limit?: number }, {auth}: { auth: ILoggedIn }) {
+        content: async function (flow: Partial<Flow>, {limit = 100}: { limit?: number }, {auth}: { auth: ILoggedIn }) {
             if (!(checkScope(auth, Scopes.FlowViewPrivate) || flow.public_permissions.view == "allow")) return null;
             if (!(checkScope(auth, Scopes.FlowReadPrivate) || 
                 (flow.public_permissions.read == "allow" && checkScope(auth, Scopes.FlowReadPublic)))) return null;

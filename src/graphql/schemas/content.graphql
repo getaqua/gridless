@@ -18,6 +18,8 @@ type Content {
     edited: Boolean!
     "If the Content was edited, the time that it was last edited."
     editedTimestamp: Date
+    "A unique ID for this Content. Useful for looking it up again."
+    snowflake: String!
 }
 
 input NewContent {

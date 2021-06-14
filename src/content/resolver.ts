@@ -2,8 +2,8 @@ import debug from "debug";
 import { checkScope } from "src/auth/permissions";
 import { ILoggedIn, Scopes } from "src/auth/UserModel";
 import { Content, ContentModel } from "src/db/models/contentModel";
-import { getFlow } from "src/db/models/flowModel";
-import { UserModel } from "src/db/models/userModel";
+import { Flow, FlowModel, getFlow } from "src/db/models/flowModel";
+import { getUserFlowId, UserModel } from "src/db/models/userModel";
 import { getEffectivePermissions } from "src/flows/permissions";
 import { ExtSnowflakeGenerator } from "extended-snowflake";
 
@@ -37,6 +37,20 @@ const contentResolver = {
                 timestamp: newContent.timestamp.toISOString(),
                 editedTimestamp: newContent.editedTimestamp?.toISOString()
             };
+        },
+        deleteContent: async function (_, {snowflake}: {snowflake: string}, {auth}: {auth: ILoggedIn}) {
+            if (!checkScope(auth, Scopes.FlowContentManage)) return false;
+            const content = await ContentModel.findOne({snowflake}).populate("inFlow");
+            if (!content) return false;
+            const flow = content.inFlow as Flow;
+            const user = await UserModel.findById(auth.userId);
+            const ufid = await getUserFlowId(auth.userId);
+            if (content.author != ufid) {
+                const effectivePermissions = await getEffectivePermissions(user, flow);
+                if (effectivePermissions.delete == "deny") return false;
+            }
+            await content.deleteOne();
+            return true;
         }
     }
 }
