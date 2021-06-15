@@ -1,7 +1,7 @@
 markdown: kramdown
 
-#site_url: https://getaqua.github.io/gridless
-site_url: http://127.0.0.1:4000
+site_url: https://getaqua.github.io/gridless
+#site_url: http://127.0.0.1:4000
 title: Gridless
 navlogo: /assets/img/logo-nav.png
 icon: /assets/img/favicon.png
