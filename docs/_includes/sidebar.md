@@ -2,4 +2,7 @@
 
 Getting Started
 * [Starting Gridless](/docs/starting-gridless/)
-* [Authenticating Clients](/docs/authentication/)
+* [Authorizing Clients](/docs/authorization/)
+
+Reference
+* [Scopes](/docs/scopes/)
