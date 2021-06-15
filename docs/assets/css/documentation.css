@@ -1,0 +1,95 @@
+---
+---
+h2 {
+    font-weight: lighter;
+}
+
+.demo-main {
+    margin-top: 10vh;
+    -webkit-flex-shrink: 0;
+    -ms-flex-negative: 0;
+    flex-shrink: 0;
+}
+
+.demo-header .mdl-layout__header-row {
+    padding-left: 40px;
+}
+
+.demo-container {
+    max-width: 1600px;
+    width: calc(100% - 16px);
+    margin: 0 auto;
+}
+
+.demo-content {
+    border-radius: 20px;
+    padding: 80px 56px;
+    margin-bottom: 80px;
+}
+
+.demo-layout.is-small-screen .demo-content {
+    padding: 40px 28px;
+}
+
+.demo-content h3 {
+    margin-top: 48px;
+}
+
+.demo-footer {
+    padding-left: 40px;
+}
+
+.demo-footer .mdl-mini-footer--link-list a {
+    font-size: 13px;
+}
+
+.dahliaOS-docs-sidebar ul {
+    list-style: none;
+}
+
+.dahliaOS-docs-sidebar>ul ul {
+    padding-left: 1em
+}
+
+.dahliaOS-docs-sidebar {color: black;}
+.mdl-layout__drawer.dahliaOS-docs-sidebar {color: white;}
+.dahliaOS-docs-sidebar p {
+    font-weight: 600;
+    font-family: '{{ site.brand_font }}';
+    font-size: 1.25em;
+    margin-top: 1em;
+}
+
+.dahliaOS-docs-sidebar>ul a:not(:hover) {
+    text-decoration: none
+}
+
+@media screen and (min-width: 840px) {
+    body[data-dahliaos-site="docs"] .mdl-layout__drawer-button {
+        display: none !important;
+    }
+    body[data-dahliaos-site="docs"] .mdl-layout__drawer-button+.mdl-layout__header-row {
+        padding-left: 24px;
+    }
+}
+
+#sidebar-hider {
+    display: none;
+    appearance: none;
+}
+
+.dahliaOS-docs-sidebar[data-docs-visible=false] {
+    display: none;
+}
+.dahliaOS-docs-sidebar[data-docs-visible=false]+.replacement-cell {
+    display: initial;
+}
+@media screen and (min-width: 840px) {
+    .dahliaOS-docs-sidebar[data-docs-visible=true]+.replacement-cell {
+        display: none;
+    }
+}
+
+.mdl-layout__obfuscator.is-visible, .mdl-layout__drawer.is-visible {
+    position: fixed;
+}
