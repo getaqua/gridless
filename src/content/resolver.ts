@@ -3,15 +3,36 @@ import { checkScope } from "src/auth/permissions";
 import { ILoggedIn, Scopes } from "src/auth/UserModel";
 import { Content, ContentModel } from "src/db/models/contentModel";
 import { Flow, FlowModel, getFlow } from "src/db/models/flowModel";
-import { getUserFlowId, UserModel } from "src/db/models/userModel";
+import { getUserFlow, getUserFlowId, UserModel } from "src/db/models/userModel";
 import { getEffectivePermissions } from "src/flows/permissions";
 import { ExtSnowflakeGenerator } from "extended-snowflake";
+import { Types } from "mongoose";
 
 const log = debug("gridless:content:resolver");
 
 const esg = new ExtSnowflakeGenerator(0);
 
 const contentResolver = {
+    Query: {
+        getFollowedContent: async function (_, {limit = 100}: { limit?: number }, {auth}: { auth: ILoggedIn }) {
+            const flow = await getUserFlow(auth.userId);
+            if (!(checkScope(auth, Scopes.FlowViewPrivate))) return null;
+            if (!(checkScope(auth, Scopes.FlowReadPrivate))) return null;
+            //if (!flow) return null;
+            if (flow.following.length == 0) return [];
+            return (await ContentModel.find({inFlow: {$in: flow.following as Types.ObjectId[]}}).sort({timestamp: -1}).limit(limit))
+            .map<any>(async (content) => {
+                await content.populate("author").execPopulate();
+                await content.populate("inFlow").execPopulate();
+                return {
+                    ...content.toJSON(),
+                    inFlowId: (content.inFlow as Flow).id,
+                    timestamp: content.timestamp.toISOString(),
+                    editedTimestamp: content.editedTimestamp?.toISOString()
+                }
+            });
+        }
+    },
     Mutation: {
         postContent: async function (_, {to, data}: { to: string, data: Partial<Content>}, {auth}: {auth: ILoggedIn}) {
             if (!checkScope(auth, Scopes.FlowContentPost)) return null;

@@ -86,11 +86,14 @@ export default function routes() {
     
     gql.applyMiddleware({app: router as Application, path: "/graphql"});
 
+    router.get("/healthcheck", (req, res, next) => res.type("txt").send("OK"));
+    
     //router.get("/authconfig", ensureLoggedIn(TokenType.COOKIE), (req, res) => res.type("json").send(getAuthConfig().toJSON()));
     log("Registered routes for /_gridless");
 
     router.use("/static", express.static("src/views/static"));
     log("Registered /_gridless/static")
+
 
     router.all('*', (req, res, next) => next(404));
     router.use(errorHandler);

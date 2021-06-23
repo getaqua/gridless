@@ -35,7 +35,9 @@ export interface Flow extends mongoose.Document {
   /** The members of the Flow.
    * Add `.populate("members.$*")` to the query
    * before use. */
-  members: (Flow | mongoose.Types.ObjectId | string)[]
+  members: MaybePopulated<Flow>[]
+  /** The Flows this Flow follows. */
+  following: MaybePopulated<Flow>[]
 }
 
 const AllowDeny = {
@@ -113,6 +115,14 @@ const FlowSchema = new mongoose.Schema({
       ref: "flows",
     },
     required: true
+  },
+  following: {
+    type: Array,
+    of: {
+      type: Schema.Types.ObjectId,
+      ref: "flows",
+    },
+    required: false
   }
 });
 

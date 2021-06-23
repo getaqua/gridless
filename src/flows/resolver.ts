@@ -5,7 +5,7 @@ import { isValidUsername } from "src/auth/signup";
 import { CustomScope, ILoggedIn, Scopes, TokenType } from "src/auth/UserModel"
 import { Content, ContentModel } from "src/db/models/contentModel";
 import { Flow, FlowModel, getFlow } from "src/db/models/flowModel"
-import { getUserFlowId, User, UserModel } from "src/db/models/userModel";
+import { getUserFlow, getUserFlowId, User, UserModel } from "src/db/models/userModel";
 import { getEffectivePermissions } from "./permissions";
 import { flowPresets } from "./presets";
 
@@ -20,6 +20,11 @@ const flowResolver = {
             if (!(flow.members.includes((await (await UserModel.findById(auth.userId)).flow)._id) || flow.public_permissions.view == "allow") 
             && (await getEffectivePermissions(await UserModel.findById(auth.userId), flow)).view == "allow") return null;
             return {...flow.toObject(), id: flow.id};
+        },
+        getFollowedFlows: async function (_, data, {auth}: { auth: ILoggedIn }) {
+            const flow = await getUserFlow(auth.userId);
+            await flow.populate("following").execPopulate();
+            return flow.following.map((v: Flow, i,a) => ({...v.toObject(), id: v.id}));
         }
     },
     Flow: {

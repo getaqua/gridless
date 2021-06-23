@@ -21,6 +21,11 @@ type Query {
     # this Content was posted in.
     # """
     # getContent(id: String!): Content
+    """Get a list of the most recent Content published by
+    Flows you follow or subscribe to."""
+    getFollowedContent(limit: Int): [Content!]
+    """Get a list of the Flows you follow or subscribe to."""
+    getFollowedFlows: [Flow!]
 }
 type Mutation {
     """Creates a Flow, returning null if it fails
