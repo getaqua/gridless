@@ -51,7 +51,6 @@ const flowResolver = {
                 }
             });
         }
-        // TODO: put the Content field here
     },
     Mutation: {
         createFlow: async function (_, {flow, ownerId}: { flow: Partial<Flow> & { preset: string }, ownerId?: string }, {auth}: { auth: ILoggedIn }) {
@@ -126,6 +125,24 @@ const flowResolver = {
             if (!flow.members.includes(ufid)) return false;
             flow.members.splice(flow.members.indexOf(ufid), 1);
             await flow.save();
+            return true;
+        },
+        followFlow: async function (_, {id}: { id: string }, {auth}: { auth: ILoggedIn }) {
+            if (!checkScope(auth, Scopes.FlowFollow)) return false;
+            var user = await getUserFlow(auth.userId);
+            var flow = await getFlow(id);
+            if (!flow) return false;
+            if (user.following.includes(flow._id)) return false;
+            await user.updateOne({$push: {following: flow._id}});
+            return true;
+        },
+        unfollowFlow: async function (_, {id}: { id: string }, {auth}: { auth: ILoggedIn }) {
+            if (!checkScope(auth, Scopes.FlowFollow)) return false;
+            var user = await getUserFlow(auth.userId);
+            var flow = await getFlow(id);
+            if (!flow) return false;
+            if (!user.following.includes(flow._id)) return false;
+            await user.updateOne({$pull: {following: flow._id}});
             return true;
         }
     }

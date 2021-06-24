@@ -15,6 +15,10 @@
         "name": "Join Flows for you",
         "icon": "mdi:account-plus"
     },
+    "flow.follow": {
+        "name": "Follow and unfollow Flows for you",
+        "icon": "mdi:arrow-right"
+    },
     "flow.view.private": {
         "name": "View your private Flows it already knows about",
         "icon": "mdi:eye"

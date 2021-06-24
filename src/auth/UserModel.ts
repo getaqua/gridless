@@ -30,6 +30,7 @@ export enum Scopes {
     FlowNew = "flow.new",
     FlowList = "flow.list",
     FlowJoin = "flow.join",
+    FlowFollow = "flow.follow",
     UserPost = "user.post",
     UserAddBot = "user.addbot",
     UserImpersonate = "user.impersonate",

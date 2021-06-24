@@ -43,6 +43,12 @@ type Mutation {
     """Leaves a Flow, returning false if it fails
     and true if it succeeds."""
     leaveFlow(id: String!): Boolean!
+    """Follow or subscribe to a Flow, returning false if it fails
+    and true if it succeeds."""
+    followFlow(id: String!): Boolean!
+    """Unfollow or unsubscribe to a Flow, returning false if it fails
+    and true if it succeeds."""
+    unfollowFlow(id: String!): Boolean!
     """Posts Content to a Flow, returning null if it fails
     and the new Content if it succeeds."""
     postContent(to: String!, data: NewContent): Content
