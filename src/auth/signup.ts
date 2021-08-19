@@ -8,6 +8,7 @@ import validator from 'password-validator';
 import { needsExtraSteps } from './extrasteps';
 import { Flow, FlowModel } from 'src/db/models/flowModel';
 import { flowPresets } from 'src/flows/presets';
+import { Types } from 'mongoose';
 
 const log = debug("gridless:auth:signup");
 
@@ -41,11 +42,15 @@ export async function endpoint(req: express.Request, res: express.Response, next
         password: pass,
     });
     await user.save();
+    const _newFlowId = Types.ObjectId.generate();
     const flow = new FlowModel({
+        _id: _newFlowId,
         name: req.body?.["username"],
         // email: email,
         id: "//"+req.body?.["username"],
         owner: user._id,
+        members: [_newFlowId],
+        following: [_newFlowId],
         ...flowPresets["channel"],
     } as Flow);
     await flow.save();

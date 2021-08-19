@@ -22,15 +22,15 @@
                 ".yarn/**"
             ],
             "runtimeExecutable": "yarn",
-            "runtimeArgs": ["nodemon", "--exec", "ts-node"],
+            "runtimeArgs": ["dev"],
             "env": {
-                "DEBUG": "gridless:*,express:*"
+                "DEBUG": "gridless:*"
             },
             "program": "${workspaceFolder}/src/server.ts",
             "cwd": "${workspaceFolder}",
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
-            ]
+            ],
         }
     ]
 }
