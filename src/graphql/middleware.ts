@@ -56,7 +56,7 @@ export const server = new ApolloServer({
             tokenType: jwt.aid ? 
               jwt.bot === true ? TokenType.BOTTOKEN
               : TokenType.APPTOKEN
-            : req.cookies.jwt ? TokenType.COOKIE
+            : req.signedCookies['jwt'] == token ? TokenType.COOKIE
             : TokenType.INVALID,
             scopes: jwt.scopes
           } as ILoggedIn,
