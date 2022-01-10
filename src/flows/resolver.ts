@@ -14,7 +14,7 @@ const log = debug("gridless:flow:resolver");
 const flowResolver = {
     Query: {
         getFlow: async function (_, {id}: { id: string }, {auth}: { auth: ILoggedIn },) {
-            var flow = await (await getFlow(id)).populate("owner, parent").execPopulate();
+            var flow = await (await getFlow(id)).populate("owner, parent");
             if (!(checkScope(auth, Scopes.FlowViewPrivate) || flow.public_permissions.view == "allow")) return null;
             if (!flow) return null;
             if (!(flow.members.includes((await (await UserModel.findById(auth.userId)).flow)._id) || flow.public_permissions.view == "allow") 
@@ -23,7 +23,7 @@ const flowResolver = {
         },
         getFollowedFlows: async function (_, data, {auth}: { auth: ILoggedIn }) {
             const flow = await getUserFlow(auth.userId);
-            await flow.populate("following").execPopulate();
+            await flow.populate("following");
             return flow.following.map((v: Flow, i,a) => ({...v.toObject(), id: v.id}));
         }
     },
@@ -40,9 +40,9 @@ const flowResolver = {
             if (!flow) return null;
             if (!(flow.members.includes((await (await UserModel.findById(auth.userId)).flow)._id) || flow.public_permissions.read == "allow") 
             && (await getEffectivePermissions(await UserModel.findById(auth.userId), flow as any)).read == "allow") return null;
-            return (await ContentModel.find({inFlow: Types.ObjectId(flow._id)}).sort({timestamp: -1}).limit(limit))
+            return (await ContentModel.find({inFlow: new Types.ObjectId(flow._id)}).sort({timestamp: -1}).limit(limit))
             .map<any>(async (content) => {
-                await content.populate("author").execPopulate();
+                await content.populate("author");
                 return {
                     ...content.toJSON(),
                     inFlowId: flow.id,
@@ -76,7 +76,7 @@ const flowResolver = {
             };
             //return {...await (await FlowModel.create(doc)).toJSON(), id: doc.id};
             var newFlow = await FlowModel.create(doc);
-            newFlow = await newFlow.populate("owner").execPopulate();
+            newFlow = await newFlow.populate("owner");
             return {...newFlow.toJSON(), id: doc.id};
         },
         updateFlow: async function (_, {id, data}: { id: string, data: Partial<Flow> }, {auth}: { auth: ILoggedIn }) {
@@ -85,7 +85,7 @@ const flowResolver = {
             const effectivePermissions = await getEffectivePermissions(await UserModel.findById(auth.userId), flow);
             if (effectivePermissions.update == "deny") return null;
             await flow.updateOne({$set: data});
-            return await (await getFlow(id)).populate("owner").execPopulate();
+            return await (await getFlow(id)).populate("owner");
         },
         joinFlow: async function (_, {id, inviteCode}: { id: string, inviteCode: string }, {auth}: { auth: ILoggedIn }) {
             if (!checkScope(auth, Scopes.FlowJoin)) return null;

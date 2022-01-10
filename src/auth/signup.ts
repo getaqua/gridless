@@ -42,7 +42,7 @@ export async function endpoint(req: express.Request, res: express.Response, next
         password: pass,
     });
     await user.save();
-    const _newFlowId = Types.ObjectId.generate();
+    const _newFlowId = new Types.ObjectId();
     const flow = new FlowModel({
         _id: _newFlowId,
         name: req.body?.["username"],

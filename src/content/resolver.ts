@@ -22,8 +22,8 @@ const contentResolver = {
             if (flow.following.length == 0) return [];
             return (await ContentModel.find({inFlow: {$in: flow.following as Types.ObjectId[]}}).sort({timestamp: -1}).limit(limit))
             .map<any>(async (content) => {
-                await content.populate("author").execPopulate();
-                await content.populate("inFlow").execPopulate();
+                await content.populate("author");
+                await content.populate("inFlow");
                 return {
                     ...content.toJSON(),
                     inFlowId: (content.inFlow as Flow).id,

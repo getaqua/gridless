@@ -22,5 +22,5 @@
   },
   "include": ["src/**/*.ts"],
   "files": ["src/server.ts", "src/global.d.ts", "src/express.d.ts"],
-  //"exclude": ["node_modules"]
+  //"exclude": [".yarn/cache/**/*.ts"]
 }

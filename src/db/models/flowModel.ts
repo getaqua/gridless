@@ -143,4 +143,4 @@ const FlowSchema = new mongoose.Schema({
 export type MaybePopulated<T extends mongoose.Document> = T | mongoose.Types.ObjectId | string;
 
 export const FlowModel = mongoose.model<Flow>('flows', FlowSchema);
-export const getFlow = async (id: string) => await FlowModel.findOne({$or: [{_id: id}, {snowflake: id}, {id}, {alternative_ids: id}]});
+export const getFlow = async (id: string) => await FlowModel.findOne({$or: [{snowflake: id}, {id}, {alternative_ids: id}]});

@@ -1,5 +1,5 @@
 import 'graphql-import-node';
-import Mongoose from 'mongoose';
+import Mongoose, { ConnectOptions } from 'mongoose';
 import express from 'express';
 import * as yaml from 'yaml';
 import * as fs from 'fs';
@@ -20,14 +20,8 @@ globalThis.staticConfig = staticConfig;
 Mongoose.connect(`mongodb://${staticConfig.get("database").get("username")}:${staticConfig.get("database").get("password")}@`+
 `${staticConfig.get("database").get("host") || "127.0.0.1"}:${staticConfig.get("database").get("port") || "27017"}`, {
   autoIndex: true,
-  poolSize: 50,
-  bufferMaxEntries: 0,
   bufferCommands: false,
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useFindAndModify: false,
-  useCreateIndex: true,
-  appname: "Gridless by Aqua",
+  appName: "Gridless by Aqua",
   dbName: staticConfig.get("database").get("name") || "gridless"
 }).catch((rejection) => {
   log(chalk`{bold.red ERROR}: Database failed to connect: ${rejection.message}`);
