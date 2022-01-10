@@ -22,7 +22,8 @@ export interface Flow extends mongoose.Document {
    * Permission overrides for specific members. */
   member_permissions: Record<string, Partial<FlowPermissions>>
   badges: FlowBadge[]
-  /** The parent of the Flow. 
+  /** The parent of the Flow. `null` if this is a User Flow,
+   * which is considered a root/origin Flow.
    * 
    * Add `.populate("parent")` to the query
    * before use. */
@@ -36,6 +37,9 @@ export interface Flow extends mongoose.Document {
    * Add `.populate("members.$*")` to the query
    * before use. */
   members: MaybePopulated<Flow>[]
+  /** A unique, public ID to identify this Flow
+   * in clients. */
+  snowflake: String
   /** The Flows this Flow follows. */
   following: MaybePopulated<Flow>[]
 }
@@ -139,4 +143,4 @@ const FlowSchema = new mongoose.Schema({
 export type MaybePopulated<T extends mongoose.Document> = T | mongoose.Types.ObjectId | string;
 
 export const FlowModel = mongoose.model<Flow>('flows', FlowSchema);
-export const getFlow = async (id: string) => await FlowModel.findOne({$or: [{id}, {alternative_ids: id}]});
+export const getFlow = async (id: string) => await FlowModel.findOne({$or: [{_id: id}, {snowflake: id}, {id}, {alternative_ids: id}]});

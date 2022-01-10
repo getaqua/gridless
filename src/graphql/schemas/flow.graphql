@@ -7,6 +7,7 @@ type Flow implements FlowEntity {
     description: String
     id: ID!
     alternative_ids: [String!]!
+    snowflake: String!
     # Coming soon, maybe: display settings, and such
     public_permissions: FlowPermissions!
     joined_permissions: FlowPermissions!
