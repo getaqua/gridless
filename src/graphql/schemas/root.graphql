@@ -77,7 +77,7 @@ interface FlowEntity {
 """
 A Room is a collection of Members (usually identical to its parent Flow)
 and Messages, along with access controls. Rooms are primarily used for
-instant messaging.
+instant messaging (such as chat).
 """
 interface Room {
     id: ID!
@@ -102,7 +102,7 @@ input UpdatedSettings {
     Domains that are allowed here and do this will bear that domain
     to users who sign up there.
     """
-    allowHostname: [String!]!
+    allowHostnames: [String!]!
 }
 
 # =============
