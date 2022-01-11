@@ -30,7 +30,7 @@ input NewContent {
     #origin: Content
 }
 
-input PatchedContent {
+input EditedContent {
     # Body
     "The text of this Content."
     text: String

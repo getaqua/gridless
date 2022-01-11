@@ -140,7 +140,7 @@ const FlowSchema = new mongoose.Schema({
  * *(MaybePopulated entries are NEVER strings, but if I don't make it a string, it explodes.
  * No idea why, don't ask, and don't touch it.)*
  */
-export type MaybePopulated<T extends mongoose.Document> = T | mongoose.Types.ObjectId | string;
+export type MaybePopulated<T extends mongoose.Document> = (T | mongoose.Types.ObjectId | string);
 
 export const FlowModel = mongoose.model<Flow>('flows', FlowSchema);
 export const getFlow = async (id: string) => await FlowModel.findOne({$or: [{snowflake: id}, {id}, {alternative_ids: id}]});

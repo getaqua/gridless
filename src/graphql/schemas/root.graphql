@@ -26,6 +26,8 @@ type Query {
     getFollowedContent(limit: Int): [Content!]
     """Get a list of the Flows you follow or subscribe to."""
     getFollowedFlows: [Flow!]
+    """Get a list of the Flows you are a member of."""
+    getJoinedFlows: [Flow!]
 }
 type Mutation {
     """Creates a Flow, returning null if it fails
@@ -52,6 +54,9 @@ type Mutation {
     """Posts Content to a Flow, returning null if it fails
     and the new Content if it succeeds."""
     postContent(to: String!, data: NewContent): Content
+    """Edits given Content by its snowflake, returning null if it fails
+    and the updated Content if it succeeds."""
+    updateContent(id: String!, data: EditedContent): Content
     """Deletes Content, returning false if it fails
     and true if it succeeds."""
     deleteContent(snowflake: String!): Boolean!

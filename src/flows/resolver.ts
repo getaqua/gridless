@@ -25,6 +25,11 @@ const flowResolver = {
             const flow = await getUserFlow(auth.userId);
             await flow.populate("following");
             return flow.following.map((v: Flow, i,a) => ({...v.toObject(), id: v.id}));
+        },
+        getJoinedFlows: async function (_, data, {auth}: { auth: ILoggedIn }) {
+            const flow = await getUserFlow(auth.userId);
+            var flows = await FlowModel.find({"members": flow._id});
+            return flows.map((v: Flow, i,a) => ({...v.toObject(), id: v.id}));
         }
     },
     Flow: {
