@@ -40,5 +40,12 @@ export function errorHandler(err, req, res, next) {
     return res.status(403).render("autherror.j2", {
       messages: ["You cannot access this resource with the type of token specified."]
     });
+  } else if (err == "gridless:mediastoreblocked") {
+    return res.status(500).render("genericerror.j2", {
+      errorCode: "500",
+      errorName: "Server Error",
+      errorReason: "The server does not have permission to access the resource you requested.\n\n"+
+      "* Contact the server administrator to alert them to the issue."
+    });
   } else next(err);
 }

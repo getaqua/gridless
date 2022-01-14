@@ -109,10 +109,15 @@ export async function postEndpoint(req: express.Request & {user?: ILoggedIn, aev
             return res.status(400).render("autherror.j2", {messages: [
                 "`show` authorization response type not allowed for applications that request the `client` special scope."
             ]});
-        } else return res.render("showtoken.nj", {
-            app: appdata,
-            token: newToken
-        });
+        } else {
+            const user = await UserModel.findById(req.user?.userId);
+            user.authorizedAppCIDs.push(appdata.client_id);
+            user.save();
+            return res.render("showtoken.nj", {
+                app: appdata,
+                token: newToken
+            });
+        }
     } else {
         return res.status(400).render("autherror.j2", {messages: [
             "`response_type` query parameter required.",

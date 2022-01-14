@@ -41,6 +41,10 @@
         "icon": "mdi:text-box",
         "danger": true
     },
+    "content.attachments.upload": {
+        "name": "Upload files as attachments to new Content on your behalf",
+        "icon": "mdi:image"
+    },
     "user.addbot": {
         "name": "Link bots to your account",
         "icon": "mdi:robot"

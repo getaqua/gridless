@@ -23,6 +23,7 @@ export function ensureLoggedIn(using: TokenType | null = null) {
             const user = {
                 userId: token['uid'],
                 appId: token['aid'],
+                scopes: token['scopes'],
                 tokenType: token['aid'] ? 
                 token['bot'] === true ? TokenType.BOTTOKEN
                 : TokenType.APPTOKEN

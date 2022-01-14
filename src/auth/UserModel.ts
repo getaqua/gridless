@@ -25,7 +25,7 @@ export enum TokenType {
 }
 
 export enum Scopes {
-    /** The user is allowed to read user data. */
+    /** The client is allowed to read user data. */
     UserRead = "user.read",
     FlowNew = "flow.new",
     FlowList = "flow.list",
@@ -33,7 +33,10 @@ export enum Scopes {
     FlowFollow = "flow.follow",
     UserPost = "user.post",
     UserAddBot = "user.addbot",
+    /** @deprecated */
     UserImpersonate = "user.impersonate",
+    /** The client is allowed to upload files as attachments. */
+    ContentAttachmentsUpload = "content.attachments.upload",
     FlowUpdate = "flow.update",
     FlowViewPrivate = "flow.view.private",
     FlowReadPublic = "flow.read.public",
@@ -46,47 +49,3 @@ export enum Scopes {
 
 export type CustomScope = string;
 export const CustomScope = (scope: string) => scope as CustomScope;
-
-/*
-{
-    "user.read": {
-        "name": "Use your email address and phone number",
-        "icon": "mdi:account-lock"
-    },
-    "flow.new": {
-        "name": "Create Flows on your behalf",
-        "icon": "mdi:water-plus"
-    },
-    "flow.list": {
-        "name": "Discover private Flows you have access to",
-        "icon": "mdi:lock"
-    },
-    "user.post": {
-        "name": "Post to your profile",
-        "icon": "mdi:text-box",
-        "danger": true
-    },
-    "user.addbot": {
-        "name": "Link bots to your account",
-        "icon": "mdi:robot"
-    },
-    "flow.%s.post": {
-        "name": "Post to %s",
-        "icon": "mdi:text-box"
-    },
-    "flow.%s.manage": {
-        "name": "Change settings and delete %s",
-        "icon": "mdi:delete",
-        "danger": true
-    },
-    "flow.%s.addbot": {
-        "name": "Link bots to %s",
-        "icon": "mdi:robot"
-    },
-    "user.impersonate": {
-        "name": "Post as you to your Profile and Flows",
-        "icon": "mdi:comment-alert",
-        "danger": true
-    }
-}
-*/

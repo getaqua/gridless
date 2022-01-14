@@ -1,4 +1,4 @@
-import express, { Application, NextFunction, Response } from 'express';
+import express, { Application, NextFunction, RequestHandler, Response } from 'express';
 import { checkUsernameAvailability, endpoint as registrationEndpoint } from './auth/signup';
 import { endpoint as loginEndpoint, logout, logout as logoutEndpoint } from './auth/login';
 import * as authorizeEndpoints from './auth/authorize';
@@ -14,6 +14,8 @@ import { extraStepsMiddleware } from './auth/extrasteps';
 import { server as devgql } from './developers/graphql';
 import { server as gql } from './graphql/middleware';
 import { TokenType } from './auth/UserModel';
+import { uploadFileEndpoint } from './uploads/upload';
+import { viewFileEndpoint } from './uploads/download';
 
 const log = debug("gridless:routes");
 
@@ -28,7 +30,7 @@ export default function routes() {
         banner: "/_gridless/static/gridlesslogo.png" // TODO: get this from the config, maybe?
     };
     const router = express.Router();
-    // /_gridless/graphql endpoint (moved out)
+
     // /_gridless/login, /_gridless/register, and other auth endpoints
     router.get("/register/password_requirements", 
         registrationDisabledCheck,
@@ -46,7 +48,7 @@ export default function routes() {
     });
     router.post("/register", 
         registrationDisabledCheck,
-        bodyParser({extended: true}),
+        bodyParser({extended: true}) as RequestHandler,
         registrationEndpoint,
         extraStepsMiddleware
     );
@@ -54,23 +56,25 @@ export default function routes() {
         return res.render("login.j2", {...globalProps, logout: req.query["logout"], redirect_url: req.query["redirect_url"]});
     });
     router.use("/logout", logoutEndpoint);
-    router.post("/login", bodyParser({extended: true}), loginEndpoint);
+    router.post("/login", bodyParser({extended: true}) as RequestHandler, loginEndpoint);
     router.get("/success", ensureLoggedIn(), async function(req: express.Request, res: express.Response) {
         //const token = jwt.verify(req.cookies["jwt"], globalThis.staticConfig.get("auth").get("secret"));
         return res.send({"success": true, ...req['user'], ...(await (await UserModel.findById(req['user'].userId).exec()).toJSON())});
     });
 
     router.get("/developers", ensureLoggedIn(TokenType.COOKIE), (req, res) => res.render("devpanel/main.nj", {...globalProps}));
-    router.post("/developers", ensureLoggedIn(TokenType.COOKIE), jsonParser());
+    router.post("/developers", ensureLoggedIn(TokenType.COOKIE), jsonParser() as RequestHandler);
+
+    // /_graphql/authorize and /_graphql/claimtoken
     router.get("/authorize", 
-        bodyParser({extended: true}),
+        bodyParser({extended: true}) as RequestHandler,
         authorizeEndpoints.variableConfigMiddleware,
         authorizeEndpoints.preflightMiddleware,
         ensureLoggedIn(TokenType.COOKIE), 
         authorizeEndpoints.getEndpoint
     );
     router.post("/authorize", 
-        bodyParser({extended: true}),
+        bodyParser({extended: true}) as RequestHandler,
         authorizeEndpoints.variableConfigMiddleware,
         authorizeEndpoints.preflightMiddleware,
         authorizeEndpoints.nonBrowserMiddleware, 
@@ -78,14 +82,24 @@ export default function routes() {
         authorizeEndpoints.postEndpoint
     );
     router.post("/claimtoken", 
-        bodyParser({extended: true}),
+        bodyParser({extended: true}) as RequestHandler,
         authorizeEndpoints.variableConfigMiddleware,
         authorizeEndpoints.claimTokenEndpoint
     );
-    devgql.applyMiddleware({app: router as Application, path: "/developers", disableHealthCheck: true});
-    
+
+    // /_gridless/media endpoints
+    router.post("/media",
+        ensureLoggedIn(),
+        uploadFileEndpoint
+        //uploadMultipartFileEndpoint
+    );
+    router.get("/media/view/:index/:filename", viewFileEndpoint);
+
+    // GraphQL middlewares
+    devgql.applyMiddleware({app: router as Application, path: "/developers", disableHealthCheck: true});    
     gql.applyMiddleware({app: router as Application, path: "/graphql"});
 
+    // Healthcheck
     router.get("/healthcheck", (req, res, next) => res.type("txt").send("OK"));
     
     //router.get("/authconfig", ensureLoggedIn(TokenType.COOKIE), (req, res) => res.type("json").send(getAuthConfig().toJSON()));

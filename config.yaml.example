@@ -5,3 +5,11 @@ database:
 auth:
   secret: #some unique, obscure, super-secure string
 sitename: Aqua Development #you can put whatever you want here
+storage:
+  - id: your_id_here
+    type: local
+    path: /tmp/aqua # has to be a path that exists
+# - type: s3
+#   # Amazon s3 storage is not yet supported
+# - type: ipfs
+#   # IPFS storage is not yet supported

@@ -16,6 +16,7 @@
         {
             "name": "Attach by Process ID",
             "processId": "${command:PickProcess}",
+            "port": 9339,
             "request": "attach",
             "skipFiles": [
                 "<node_internals>/**"

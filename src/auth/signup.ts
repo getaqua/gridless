@@ -77,14 +77,14 @@ export async function checkUsernameAvailability(req: express.Request, res: expre
         if (_valid === "SUCCESS") {
             return res.status(200).type("json").send("{}");
         } else {
-            return res.status(400).type("json").send(`{"error":"${_valid}"}\n`);
+            return res.status(400).type("json").send({"error":"${_valid}"});
         }
     } else if (req.query["check"]?.toString() == "password") {
         const _valid = isValidPassword(req.query["password"].toString());
         if (_valid === true) {
             return res.status(200).type("json").send("{}");
         } else {
-            return res.status(400).type("json").send(`{error: "INVALID_PASSWORD"}\n`);
+            return res.status(400).type("json").send({"error": "INVALID_PASSWORD"});
         }
     } else return next()
 }
@@ -93,6 +93,7 @@ export async function isValidUsername(username: string): Promise<"SUCCESS" | "IN
     if (!usernameRequirements.exec(username)) return "INVALID_USERNAME";
     if (username.includes("//")) return "INVALID_USERNAME";
     if (username.includes("/#/")) return "INVALID_USERNAME";
+    if (username.includes("/+/")) return "INVALID_USERNAME";
     // save the database checks for last!
     // If a previous check fails, these don't need to be run.
     if (await UserModel.exists({username})) return "USERNAME_TAKEN";

@@ -13,44 +13,47 @@ import { getAuthConfig } from './db/models/authConfigModel';
 
 const log = debug("gridless:initserver");
 
-log("Starting database...");
-const staticConfig = yaml.parseDocument(fs.readFileSync("./config.yaml").toString());
+log("Reading config...");
+export const staticConfig = yaml.parseDocument(fs.readFileSync("./config.yaml").toString());
 globalThis.staticConfig = staticConfig;
 
-Mongoose.connect(`mongodb://${staticConfig.get("database").get("username")}:${staticConfig.get("database").get("password")}@`+
-`${staticConfig.get("database").get("host") || "127.0.0.1"}:${staticConfig.get("database").get("port") || "27017"}`, {
-  autoIndex: true,
-  bufferCommands: false,
-  appName: "Gridless by Aqua",
-  dbName: staticConfig.get("database").get("name") || "gridless"
-}).catch((rejection) => {
-  log(chalk`{bold.red ERROR}: Database failed to connect: ${rejection.message}`);
-  //console.log(staticConfig.toJSON());
-  process.exit(8);
-}).then((mongoose) => {
-  // Cache config
-  getAuthConfig();
-  log(chalk`{bold.green SUCCESS}! Database connected!`);
-});
+(async () => {  
+  log("Starting database...");
+  await Mongoose.connect(`mongodb://${staticConfig.get("database").get("username")}:${staticConfig.get("database").get("password")}@`+
+  `${staticConfig.get("database").get("host") || "127.0.0.1"}:${staticConfig.get("database").get("port") || "27017"}`, {
+    autoIndex: true,
+    bufferCommands: false,
+    appName: "Gridless by Aqua",
+    dbName: staticConfig.get("database").get("name") || "gridless"
+  }).catch((rejection) => {
+    log(chalk`{bold.red ERROR}: Database failed to connect: ${rejection.message}`);
+    //console.log(staticConfig.toJSON());
+    process.exit(8);
+  }).then((mongoose) => {
+    // Cache config
+    getAuthConfig();
+    log(chalk`{bold.green SUCCESS}! Database connected!`);
+  });
 
-const app = express();
-// registerReact(app).catch((reason) => {
-//   if (reason.message.match("babel")) 
-//   log(chalk`{bold.yellow WARNING} {yellow in registerReact}: probably plugin related, nothing to worry about`);
-//   else log(chalk`{bold.red ERROR} {red in registerReact}: ${reason.message}`);
-// });
-app.engine('j2', consolidate.nunjucks);
-app.engine('nj', consolidate.nunjucks);
-app.set('view engine', 'j2');
-app.set('views', __dirname+ '/views');
-app.use("/_gridless", cookieParser(globalThis.staticConfig.get("auth").get("secret")), routes());
-app.locals.sitename = globalThis.staticConfig.get("sitename") || "Aqua",
-graphql.applyMiddleware({ app, path: "/_gridless/graphql" });
+  const app = express();
+  // registerReact(app).catch((reason) => {
+  //   if (reason.message.match("babel")) 
+  //   log(chalk`{bold.yellow WARNING} {yellow in registerReact}: probably plugin related, nothing to worry about`);
+  //   else log(chalk`{bold.red ERROR} {red in registerReact}: ${reason.message}`);
+  // });
+  app.engine('j2', consolidate.nunjucks);
+  app.engine('nj', consolidate.nunjucks);
+  app.set('view engine', 'j2');
+  app.set('views', __dirname+ '/views');
+  app.use("/_gridless", cookieParser(globalThis.staticConfig.get("auth").get("secret")), routes());
+  app.locals.sitename = globalThis.staticConfig.get("sitename") || "Aqua",
+  graphql.applyMiddleware({ app, path: "/_gridless/graphql" });
 
-const port = process.env.PORT || staticConfig.get("server.port") || 3000;
-app.listen(port, () => {
-  // if (err) {
-  //   console.log(err);
-  // }
-  log(chalk`Gridless {bold.green UP}! Running on port: ${port}`);
-});
+  const port = process.env.PORT || staticConfig.get("server.port") || 3000;
+  app.listen(port, () => {
+    // if (err) {
+    //   console.log(err);
+    // }
+    log(chalk`Gridless {bold.green UP}! Running on port: ${port}`);
+  });
+})().then(() => log("Server shutting down!"));
