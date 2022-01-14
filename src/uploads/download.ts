@@ -32,8 +32,9 @@ export async function viewFileEndpoint(req: express.Request, res: express.Respon
     const attachment: Partial<Attachment> = await AttachmentModel.findOne({$or: [{optimized_file: req.params["filename"]}, {original_file: req.params["filename"]}]}, {original_mime_type: 1, filename: 1});
     res.setHeader("Cache-Control", "public, max-age=2629800, immutable");
     const file = createReadStream(store.path+"/"+req.params["filename"]);
-    res.type(attachment.original_mime_type ?? express.static.mime.lookup(attachment.filename)[0]);
-    if (req.path.includes("media/view")) res.setHeader("Content-Disposition", "inline");
+    const type = attachment.original_mime_type ?? express.static.mime.lookup(attachment.filename)[0];
+    res.type(type);
+    if (req.path.includes("media/view") && type != "text/html") res.setHeader("Content-Disposition", "inline");
     else res.setHeader("Content-Disposition", "attachment; filename=\""+attachment.filename+"\"");
     file.pipe(res);
     //file.once("end", () => res.end());

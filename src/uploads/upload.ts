@@ -22,11 +22,12 @@ export async function uploadFileEndpoint(req: express.Request & {user?: ILoggedI
         // )).post) return null;
         // Only local storage is supported at this time.
         // A random working storage, fitting any given criteria,
-    // will be chosen as the upload target at a later point.
+        // will be chosen as the upload target at a later point.
     const target = globalThis.staticConfig.get("storage").toJSON().find((v,i,a) => v.type == "local") as LocalStorageConfigEntry ?? {type: "local", id: "local", path: "/tmp/aqua"};
     var type = req.header("Content-Type");
     const tempname = esg.next();
     const uploadpath = target.path+"/UPLOADING__"+tempname;
+    var ogfilename = /(?:;[ ]?|^)filename="(.*)"/.exec(req.header("Content-Disposition") ?? "")?.[1];
 
     // Multipart formdata responses are not yet supported, as they have to be parsed.
     // When they do become supported, it will first check for a field named "file",
@@ -47,7 +48,10 @@ export async function uploadFileEndpoint(req: express.Request & {user?: ILoggedI
             }
         });
 
-        form.on("file", (name, file) => type = file.mimetype);
+        form.on("file", (name, file) => {
+            type = file.mimetype;
+            ogfilename = file.originalFilename
+        });
         await new Promise<void>((resolve, reject) => {
             form.once("end", resolve);
             form.once("error", reject);
@@ -68,7 +72,6 @@ export async function uploadFileEndpoint(req: express.Request & {user?: ILoggedI
     if (req.header("Content-Length") == "0") return res.status(400).type("json").send({error: "Empty files cannot be uploaded."});
 
     
-    var ogfilename = /(?:;[ ]?|^)filename="(.*)"/.exec(req.header("Content-Disposition") ?? "")?.[1];
     if (ogfilename == null) {
         ogfilename = "file." + express.static.mime.extension(type);
     }

@@ -94,6 +94,7 @@ export default function routes() {
         //uploadMultipartFileEndpoint
     );
     router.get("/media/view/:index/:filename", viewFileEndpoint);
+    router.get("/media/download/:index/:filename", viewFileEndpoint);
 
     // GraphQL middlewares
     devgql.applyMiddleware({app: router as Application, path: "/developers", disableHealthCheck: true});    
