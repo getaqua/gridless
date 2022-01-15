@@ -3,7 +3,8 @@
 import { NextFunction, Request, Response } from "express";
 import jsonwebtoken from 'jsonwebtoken';
 import { UserModel } from "src/db/models/userModel";
-import { ILoggedIn, TokenType } from "./UserModel";
+import { checkScope } from "./permissions";
+import { ILoggedIn, Scopes, TokenType } from "./UserModel";
 
 /// Determine if the user is logged in with the given method.
 /// The user ID is available at `req.user`.
@@ -37,6 +38,17 @@ export function ensureLoggedIn(using: TokenType | null = null) {
             if (using != null && using != user.tokenType) return next("gridless:wrongtokentype");
             req['user'] = user;
             return next();
+        }
+    }
+}
+
+export function scopeCheck(scope: Scopes) {
+    return function (target: any, propertyName: string, descriptor: TypedPropertyDescriptor<Function>) {
+        let field = descriptor.value!;
+
+        descriptor.value = function (parent, data, context) {
+            if (!checkScope(context.auth, Scopes.FlowUpdate)) return null;
+            else field.apply(this, [parent, data, context]);
         }
     }
 }

@@ -1,4 +1,5 @@
 import { Schema, model, Types, Document, Mongoose } from 'mongoose';
+import { Attachment, AttachmentModel } from './attachmentModel';
 import { Flow, MaybePopulated } from './flowModel';
 
 export interface Content extends Document {
@@ -20,7 +21,8 @@ export interface Content extends Document {
     /** The time of the last edit to this Content. */
     editedTimestamp?: Date
     /** A unique identifier for this Content. */
-    snowflake: string
+    snowflake: string,
+    attachments: (Attachment | string)[]
 }
 
 const ContentSchema = new Schema({
@@ -58,6 +60,13 @@ const ContentSchema = new Schema({
         type: String,
         required: true,
         unique: true
+    },
+    attachments: {
+        type: [
+            {type: AttachmentModel}
+        ],
+        required: false,
+        default: []
     }
 });
 

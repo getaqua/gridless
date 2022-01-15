@@ -20,6 +20,9 @@ type Content {
     editedTimestamp: Date
     "A unique ID for this Content. Useful for looking it up again."
     snowflake: String!
+    """Any attachments on this post.
+    Attachments are stored by the server and not on admin-uncontrolled sites such as Imgur."""
+    attachments: [Attachment!]!
 }
 
 input NewContent {
@@ -28,6 +31,7 @@ input NewContent {
     text: String
     #"The original post of this Content, if it Forwards other Content."
     #origin: Content
+    attachments: [String!]
 }
 
 input EditedContent {

@@ -4,6 +4,11 @@ along with access controls, badges, and posting as the Flow.
 """
 type Flow implements FlowEntity {
     name: String!
+    avatar_url: String
+    "Banners display above or behind the name and/or avatar of the Flow."
+    banner_url: String
+    "Taglines are 64 characters or less, and are often displayed above the description."
+    tagline: String
     description: String
     id: ID!
     alternative_ids: [String!]!
@@ -39,12 +44,22 @@ input NewFlow {
     The description, topic, or biography of the Flow.
     """
     description: String
+    """
+    The avatar or profile picture for the Flow.
+    """
+    avatar_url: String
 }
 input PatchedFlow {
     """The Flow's name."""
     name: String
     """The Flow's description."""
     description: String
+    """The avatar or profile picture for the Flow."""
+    avatar_url: String
+    "Banners display above or behind the name and/or avatar of the Flow."
+    banner_url: String
+    "Taglines are 64 characters or less, and are often displayed above the description."
+    tagline: String
     """Permissions for users who have not joined the Flow.
     Permissions given will be patched on top of the existing permissions."""
     public_permissions: Dict

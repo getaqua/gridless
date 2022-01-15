@@ -9,6 +9,9 @@ import { User } from './userModel';
 export interface Flow extends mongoose.Document {
   name: string
   description?: string
+  tagline?: string
+  avatar_url?: string
+  banner_url?: string
   /** The Flow's ID. */
   id: string
   alternative_ids: string[]
@@ -87,6 +90,19 @@ const FlowSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
+  tagline: {
+    type: String,
+    maxlength: 64,
+    required: false,
+  },
+  avatar_url: {
+    type: String,
+    required: false,
+  },
+  banner_url: {
+    type: String,
+    required: false,
+  },
   public_permissions: {
     type: FlowPermissionSchema,
     required: true
@@ -112,7 +128,7 @@ const FlowSchema = new mongoose.Schema({
     ref: "users",
     required: true
   },
-  members: {
+  members: { // to be deprecated
     type: Array,
     of: {
       type: Schema.Types.ObjectId,

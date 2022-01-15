@@ -1,11 +1,13 @@
 import debug from "debug";
 import { Types } from "mongoose";
+import { scopeCheck } from "src/auth/attachments";
 import { checkScope } from "src/auth/permissions";
 import { isValidUsername } from "src/auth/signup";
 import { CustomScope, ILoggedIn, Scopes, TokenType } from "src/auth/UserModel"
 import { Content, ContentModel } from "src/db/models/contentModel";
 import { Flow, FlowModel, getFlow } from "src/db/models/flowModel"
 import { getUserFlow, getUserFlowId, User, UserModel } from "src/db/models/userModel";
+import { OutOfScopeError } from "src/handling/graphql";
 import { getEffectivePermissions } from "./permissions";
 import { flowPresets } from "./presets";
 
@@ -15,7 +17,7 @@ const flowResolver = {
     Query: {
         getFlow: async function (_, {id}: { id: string }, {auth}: { auth: ILoggedIn },) {
             var flow = await (await getFlow(id)).populate("owner, parent");
-            if (!(checkScope(auth, Scopes.FlowViewPrivate) || flow.public_permissions.view == "allow")) return null;
+            if (!(checkScope(auth, Scopes.FlowViewPrivate) || flow.public_permissions.view == "allow")) throw new OutOfScopeError("getFlow", Scopes.FlowViewPrivate);
             if (!flow) return null;
             if (!(flow.members.includes((await (await UserModel.findById(auth.userId)).flow)._id) || flow.public_permissions.view == "allow") 
             && (await getEffectivePermissions(await UserModel.findById(auth.userId), flow)).view == "allow") return null;
@@ -59,7 +61,7 @@ const flowResolver = {
     },
     Mutation: {
         createFlow: async function (_, {flow, ownerId}: { flow: Partial<Flow> & { preset: string }, ownerId?: string }, {auth}: { auth: ILoggedIn }) {
-            if (!checkScope(auth, Scopes.FlowNew)) return null;
+            if (!checkScope(auth, Scopes.FlowNew)) throw new OutOfScopeError("createFlow", Scopes.FlowNew);
             if (!await isValidUsername(flow.id)) return null;
             // if all checks pass...
             log("Creating new Flow.");
@@ -85,7 +87,7 @@ const flowResolver = {
             return {...newFlow.toJSON(), id: doc.id};
         },
         updateFlow: async function (_, {id, data}: { id: string, data: Partial<Flow> }, {auth}: { auth: ILoggedIn }) {
-            if (!checkScope(auth, Scopes.FlowUpdate)) return null;
+            if (!checkScope(auth, Scopes.FlowUpdate)) throw new OutOfScopeError("updateFlow", Scopes.FlowUpdate);
             const flow = await getFlow(id);
             const effectivePermissions = await getEffectivePermissions(await UserModel.findById(auth.userId), flow);
             if (effectivePermissions.update == "deny") return null;

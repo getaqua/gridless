@@ -33,7 +33,9 @@ export interface Attachment extends mongoose.Document {
   /** If applicable, the Application that uploaded this file
    * on the user's behalf. This is used for moderation purposes only.
    */
-  app?: ObjectId
+  app?: ObjectId,
+  /** The public ID of the exact attachment. */
+  snowflake: string,
 }
 
 /**
@@ -69,6 +71,10 @@ const AttachmentSchema = new mongoose.Schema({
     required: false,
   },
   index: {
+    type: String,
+    required: true,
+  },
+  snowflake: {
     type: String,
     required: true,
   },

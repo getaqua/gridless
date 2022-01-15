@@ -23,4 +23,9 @@ defaults:
       type: docs
     values:
       layout: doc
+  - scope:
+      path: ""
+      type: development
+    values:
+      layout: doc
 permalink: /:categories/:slug/

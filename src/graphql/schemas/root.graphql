@@ -89,6 +89,17 @@ type ChatRoom implements Room {
     # messages(limit: Int): [Message]!
 }
 
+"""An attachment on a post."""
+type Attachment {
+    url: String!
+    downloadUrl: String
+    mimeType: String!
+    downloadMimeType: String
+    filename: String!
+    yours: Boolean!
+    snowflake: String!
+}
+
 # ===========
 # Input Types
 # ===========
