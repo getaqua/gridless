@@ -1,5 +1,5 @@
 import { Schema, model, Types, Document, Mongoose } from 'mongoose';
-import { Attachment, AttachmentModel } from './attachmentModel';
+import { Attachment } from './attachmentModel';
 import { Flow, MaybePopulated } from './flowModel';
 
 export interface Content extends Document {
@@ -63,7 +63,7 @@ const ContentSchema = new Schema({
     },
     attachments: {
         type: [
-            {type: AttachmentModel}
+            String
         ],
         required: false,
         default: []

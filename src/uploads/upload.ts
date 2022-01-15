@@ -83,8 +83,8 @@ export async function uploadFileEndpoint(req: express.Request & {user?: ILoggedI
     var _hash = createHash("sha512");
     const _hashInStream = createReadStream(uploadpath);
     _hashInStream.pipe(_hash);
+    await onStreamEnd(_hashInStream);
     const hash = _hash.digest("hex");
-    //await onStreamEnd(_hash);
     
     //const index = (globalThis.staticConfig.get("storage") as YAMLSeq).items.find((v,i,a) => v.toJSON().id == target.id);
 
@@ -94,13 +94,14 @@ export async function uploadFileEndpoint(req: express.Request & {user?: ILoggedI
         original_mime_type: type,
         index: target.id,
         app: req.user?.appId,
-        user: req.user?.userId
+        user: req.user?.userId,
+        snowflake: tempname
     });
 
     // TODO TOO: check if it exists and skip rewriting the file
     //await fs.writeFile(target.path+"/"+hash+extension, file);
     await fs.rename(uploadpath, target.path+"/"+hash+extension);
-    const url = "/_gridless/media/view/"+target.id+"/"+hash+extension;
+    const url = "/_gridless/media/view/"+target.id+"/"+hash+extension+"?id="+tempname;
 
     return res.status(201).type("json").send({url});
 

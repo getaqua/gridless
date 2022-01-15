@@ -16,7 +16,7 @@ export interface Application extends mongoose.Document {
 /**
  * schema that represents the User database model
  */
-const ApplicationSchema = new mongoose.Schema({
+export const ApplicationSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,

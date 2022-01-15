@@ -9,6 +9,7 @@ import { ExtSnowflakeGenerator } from "extended-snowflake";
 import { Types } from "mongoose";
 import { OutOfScopeError, PermissionDeniedError } from "src/handling/graphql";
 import { Attachment, AttachmentModel } from "src/db/models/attachmentModel";
+import { mapContent } from "./map";
 
 const log = debug("gridless:content:resolver");
 
@@ -23,28 +24,7 @@ const contentResolver = {
             //if (!flow) return null;
             if (flow.following.length == 0) return [];
             return (await ContentModel.find({inFlow: {$in: flow.following as Types.ObjectId[]}}).sort({timestamp: -1}).limit(limit))
-            .map<any>(async (content) => {
-                await content.populate("author");
-                await content.populate("inFlow");
-                return {
-                    ...content.toJSON(),
-                    attachments: await Promise.all(content.attachments
-                        .map<any>(async (att) => await AttachmentModel.findOne(
-                            {$or: [{original_file: att}, {optimized_file: att}]}
-                        )).map<any>((att: Partial<Attachment>) => ({
-                            url: att.optimized_file ?? att.original_file,
-                            downloadUrl: att.original_file ?? att.optimized_file,
-                            mimeType: att.optimized_mime_type ?? att.original_mime_type,
-                            downloadMimeType: att.original_mime_type ?? att.optimized_mime_type,
-                            filename: att.filename,
-                            yours: att.user as any == auth.userId,
-                            snowflake: att.snowflake
-                        }))),
-                    inFlowId: (content.inFlow as Flow).id,
-                    timestamp: content.timestamp.toISOString(),
-                    editedTimestamp: content.editedTimestamp?.toISOString()
-                }
-            });
+            .map<any>((c) => mapContent(c, auth.userId));
         }
     },
     Mutation: {
