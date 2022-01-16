@@ -140,6 +140,11 @@ type FlowPermissions {
     delete: AllowDeny
     """Whether the user can pin Content in this Flow."""
     pin: AllowDeny
+    """
+    Whether the user can update details and settings for the Flow,
+    such as its name, profile picture, and description.
+    """
+    update: AllowDeny
 }
 
 """Flags regarding a Flow."""
