@@ -22,9 +22,11 @@ type Flow implements FlowEntity {
     parent: Flow
     members(limit: Int): [Flow!]
     content(limit: Int): [Content!]
+    effective_permissions(for: String): FlowPermissions!
 }
 type PartialFlow {
     id: String!
+    snowflake: String!
 }
 """Used in the creation of new Flows."""
 input NewFlow {

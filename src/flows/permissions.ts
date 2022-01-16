@@ -1,4 +1,4 @@
-import { Flow } from "src/db/models/flowModel";
+import { Flow, FlowModel } from "src/db/models/flowModel";
 import { User } from "src/db/models/userModel";
 
 type AllowDeny = "allow" | "deny" | null
@@ -53,6 +53,7 @@ export const ownerOverriddenPermissions: Partial<FlowPermissions> = {
 
 export async function getEffectivePermissions(user: User, flow: Flow) : Promise<FlowPermissions> {
   const userflow = await user.flow;
+  flow = await FlowModel.findOne({snowflake: flow.snowflake});
   var is_joined = flow.members.includes(userflow._id);
   var is_owner = (flow.owner as any)._id.toHexString() == user._id.toHexString();
   var member_permissions = is_joined ? flow.member_permissions[userflow._id.toHexString()] : null;

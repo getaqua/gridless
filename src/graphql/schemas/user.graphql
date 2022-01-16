@@ -18,8 +18,13 @@ as well as other user-private information.
 type ThisUser {
     """
     The User object corresponding to ThisUser.
+    You should probably use Flow instead.
     """
     user: User!
+    """
+    The Flow object corresponding to ThisUser.
+    """
+    flow: Flow!
     """
     The username the user should use for login.
     """

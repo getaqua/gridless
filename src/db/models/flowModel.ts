@@ -77,6 +77,11 @@ const FlowSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  snowflake: {
+    type: String,
+    required: true,
+    unique: true,
+  },
   alternative_ids: {
     type: [String],
     required: false,

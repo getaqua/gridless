@@ -1,9 +1,11 @@
 import debug from "debug";
+import { ExtSnowflakeGenerator } from "extended-snowflake";
 import { Types } from "mongoose";
 import { scopeCheck } from "src/auth/attachments";
 import { checkScope } from "src/auth/permissions";
 import { isValidUsername } from "src/auth/signup";
 import { CustomScope, ILoggedIn, Scopes, TokenType } from "src/auth/UserModel"
+import { mapContent } from "src/content/map";
 import { Content, ContentModel } from "src/db/models/contentModel";
 import { Flow, FlowModel, getFlow } from "src/db/models/flowModel"
 import { getUserFlow, getUserFlowId, User, UserModel } from "src/db/models/userModel";
@@ -13,14 +15,18 @@ import { flowPresets } from "./presets";
 
 const log = debug("gridless:flow:resolver");
 
+const esg = new ExtSnowflakeGenerator(0);
+
 const flowResolver = {
     Query: {
         getFlow: async function (_, {id}: { id: string }, {auth}: { auth: ILoggedIn },) {
-            var flow = await (await getFlow(id)).populate("owner, parent");
+            var flow = await getFlow(id);
             if (!(checkScope(auth, Scopes.FlowViewPrivate) || flow.public_permissions.view == "allow")) throw new OutOfScopeError("getFlow", Scopes.FlowViewPrivate);
             if (!flow) return null;
+            await flow.populate("parent");
+            const perms = (await getEffectivePermissions(await UserModel.findById(auth.userId), flow));
             if (!(flow.members.includes((await (await UserModel.findById(auth.userId)).flow)._id) || flow.public_permissions.view == "allow") 
-            && (await getEffectivePermissions(await UserModel.findById(auth.userId), flow)).view == "allow") return null;
+            && perms.view == "allow") return null;
             return {...flow.toObject(), id: flow.id};
         },
         getFollowedFlows: async function (_, data, {auth}: { auth: ILoggedIn }) {
@@ -48,16 +54,12 @@ const flowResolver = {
             if (!(flow.members.includes((await (await UserModel.findById(auth.userId)).flow)._id) || flow.public_permissions.read == "allow") 
             && (await getEffectivePermissions(await UserModel.findById(auth.userId), flow as any)).read == "allow") return null;
             return (await ContentModel.find({inFlow: new Types.ObjectId(flow._id)}).sort({timestamp: -1}).limit(limit))
-            .map<any>(async (content) => {
-                await content.populate("author");
-                return {
-                    ...content.toJSON(),
-                    inFlowId: flow.id,
-                    timestamp: content.timestamp.toISOString(),
-                    editedTimestamp: content.editedTimestamp?.toISOString()
-                }
-            });
-        }
+            .map<any>((c) => mapContent(c, auth.userId));
+        },
+        effective_permissions: async function (flow: Partial<Flow>, _, {auth}: { auth: ILoggedIn }) {
+            //if (!flow) return null;
+            return await getEffectivePermissions(await UserModel.findById(auth.userId), flow as any);
+        },
     },
     Mutation: {
         createFlow: async function (_, {flow, ownerId}: { flow: Partial<Flow> & { preset: string }, ownerId?: string }, {auth}: { auth: ILoggedIn }) {

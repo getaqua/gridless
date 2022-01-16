@@ -9,8 +9,11 @@ import { needsExtraSteps } from './extrasteps';
 import { Flow, FlowModel } from 'src/db/models/flowModel';
 import { flowPresets } from 'src/flows/presets';
 import { Types } from 'mongoose';
+import { ExtSnowflakeGenerator } from 'extended-snowflake';
 
 const log = debug("gridless:auth:signup");
+
+const esg = new ExtSnowflakeGenerator(0);
 
 export async function endpoint(req: express.Request, res: express.Response, next: express.NextFunction) {
     if (!req.body?.["username"] || !req.body?.["password"]) {
@@ -52,6 +55,7 @@ export async function endpoint(req: express.Request, res: express.Response, next
         members: [_newFlowId],
         following: [_newFlowId],
         ...flowPresets["channel"],
+        snowflake: esg.next()
     } as Flow);
     await flow.save();
 

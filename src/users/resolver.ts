@@ -1,5 +1,6 @@
 import { ILoggedIn } from "src/auth/UserModel";
-import { UserModel } from "src/db/models/userModel";
+import { getUserFlow, UserModel } from "src/db/models/userModel";
+import { getEffectivePermissions } from "src/flows/permissions";
 
 const userResolver = {
     Query: {
@@ -11,6 +12,16 @@ const userResolver = {
                 username: user.username,
                 tokenPermissions: context.auth.scopes
             }
+        }
+    },
+    ThisUser: {
+        async flow(parent, args, {auth}: {auth: ILoggedIn}) {
+            var flow = await getUserFlow(auth.userId);
+            if (!flow) return null;
+            //await flow.populate("parent");
+            //if (!(flow.members.includes() || flow.public_permissions.view == "allow") 
+            //&& (await getEffectivePermissions(await UserModel.findById(auth.userId), flow)).view == "allow") return null;
+            return {...flow.toObject(), id: flow.id};
         }
     }
 }

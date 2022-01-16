@@ -158,11 +158,3 @@ type SystemInfo {
     """
     name: String!
 }
-
-# =============
-# Query Helpers
-# =============
-type GetUserResponse {
-    error: Error
-    data: User
-}
