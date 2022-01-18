@@ -94,6 +94,7 @@ const flowResolver = {
             const effectivePermissions = await getEffectivePermissions(await UserModel.findById(auth.userId), flow);
             if (effectivePermissions.update == "deny") return null;
             await flow.updateOne({$set: data});
+            /* , $unset: Array.from(data as unknown as any).filter(([key, value]) => (value == "")) */
             return await (await getFlow(id)).populate("owner");
         },
         joinFlow: async function (_, {id, inviteCode}: { id: string, inviteCode: string }, {auth}: { auth: ILoggedIn }) {

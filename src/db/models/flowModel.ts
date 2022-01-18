@@ -85,7 +85,7 @@ const FlowSchema = new mongoose.Schema({
   alternative_ids: {
     type: [String],
     required: false,
-    unique: true,
+    unique: false, // this is dangerous, I know
   },
   name: {
     type: String,

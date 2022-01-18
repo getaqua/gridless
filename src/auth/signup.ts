@@ -46,16 +46,18 @@ export async function endpoint(req: express.Request, res: express.Response, next
     });
     await user.save();
     const _newFlowId = new Types.ObjectId();
+    const _newFlowSnowflake = esg.next();
     const flow = new FlowModel({
         _id: _newFlowId,
         name: req.body?.["username"],
         // email: email,
+        alternative_ids: [_newFlowSnowflake],
         id: "//"+req.body?.["username"],
         owner: user._id,
         members: [_newFlowId],
         following: [_newFlowId],
         ...flowPresets["channel"],
-        snowflake: esg.next()
+        snowflake: _newFlowSnowflake
     } as Flow);
     await flow.save();
 
@@ -100,12 +102,9 @@ export async function isValidUsername(username: string): Promise<"SUCCESS" | "IN
     if (username.includes("/+/")) return "INVALID_USERNAME";
     // save the database checks for last!
     // If a previous check fails, these don't need to be run.
-    if (await UserModel.exists({username})) return "USERNAME_TAKEN";
-    if (await UserModel.exists({"$or": [
-        {id: "//"+username}, {alternative_ids: "//"+username}
-    ]}) || await FlowModel.exists({"$or": [
-        {id: "//"+username}, {alternative_ids: "//"+username}
-    ]})) return "USERNAME_TAKEN";
+    if (await UserModel.count({"username": username})) return "USERNAME_TAKEN";
+    if (await FlowModel.count({"id": "//"+username})) return "USERNAME_TAKEN";
+    if (await FlowModel.count({"alternative_ids": "//"+username})) return "USERNAME_TAKEN";
     // all tests pass! it's a valid username.
     return "SUCCESS";
 }
