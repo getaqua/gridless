@@ -1,5 +1,5 @@
 import { ApolloServer, AuthenticationError } from 'apollo-server-express';
-import { makeExecutableSchema } from 'apollo-server';
+//import { makeExecutableSchema } from 'apollo-server';
 import { mergeTypeDefs, mergeResolvers } from '@graphql-tools/merge';
 import jsonwebtoken, { JsonWebTokenError } from 'jsonwebtoken';
 import userSchema from './schemas/user.graphql';
@@ -13,6 +13,9 @@ import { ILoggedIn, TokenType } from '../auth/UserModel';
 import flowResolver from 'src/flows/resolver';
 import systemResolver from './system';
 import contentResolver from 'src/content/resolver';
+import { GraphQLSchema } from 'graphql';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
 
 const log = debug("gridless:graphql");
 
@@ -23,21 +26,26 @@ const schema = makeExecutableSchema({
   typeDefs: types,
   resolvers: resolvers,
   resolverValidationOptions: {
-    requireResolversForResolveType: false,
+    //requireResolversForResolveType: false,
   },
-  allowUndefinedInResolve: true,
 });
 
 export const server = new ApolloServer({
   schema: schema,
-  playground: true,
+  //playground: true,
   introspection: true,
-  tracing: true,
-  engine: {
-    debugPrintReports: true,
-  },
+  //tracing: true,
+  // engine: {
+  //   debugPrintReports: true,
+  // },
   //mockEntireSchema: true,
   //validationRules: [],
+  apollo: {
+    graphVariant: "app"
+  },
+  plugins: [
+    ApolloServerPluginLandingPageLocalDefault({ footer: false })
+  ],
   
   context: ({ req }) => {
     const token = req.query['access_token'] || req.signedCookies['jwt'] || req.get("Authorization")?.replace("Bearer ", "")?.replace("Bot ", "");
@@ -63,14 +71,7 @@ export const server = new ApolloServer({
         };
       } catch(e) {
         log(e);
-        return {
-          auth: {
-            tokenType: TokenType.INVALID,
-            userId: "",
-            appId: "",
-            scopes: []
-          } as ILoggedIn
-        }
+        throw new AuthenticationError('The token is invalid.');
       }
     } else throw new AuthenticationError('You must be logged in.');
   },

@@ -1,3 +1,38 @@
+type Query {
+    """
+    Get a Flow. Returns null/None if it doesn't exist,
+    or if you don't have permission to access it.
+    """
+    getFlow(id: String!): Flow
+    """Get a list of the Flows you follow or subscribe to."""
+    getFollowedFlows: [Flow!]
+    """Get a list of the Flows you are a member of."""
+    getJoinedFlows: [Flow!]
+}
+type Mutation {
+    """Creates a Flow, returning null if it fails
+    and the new Flow if it succeeds."""
+    createFlow(flow: NewFlow, parentId: String): Flow
+    """Updates a Flow, returning null if it fails
+    and the updated Flow if it succeeds."""
+    updateFlow(id: String!, data: PatchedFlow!): Flow
+    """Joins a Flow, returning null if it fails 
+    and the joined Flow if it succeeds."""
+    joinFlow(id: String!, inviteCode: String): Flow
+    """Deletes a Flow, returning false if it fails
+    and true if it succeeds."""
+    deleteFlow(id: String!): Boolean!
+    """Leaves a Flow, returning false if it fails
+    and true if it succeeds."""
+    leaveFlow(id: String!): Boolean!
+    """Follow or subscribe to a Flow, returning false if it fails
+    and true if it succeeds."""
+    followFlow(id: String!): Boolean!
+    """Unfollow or unsubscribe to a Flow, returning false if it fails
+    and true if it succeeds."""
+    unfollowFlow(id: String!): Boolean!
+}
+
 """
 A Flow is a collection of Members, Content, and Rooms,
 along with access controls, badges, and posting as the Flow.
@@ -11,15 +46,16 @@ type Flow implements FlowEntity {
     tagline: String
     description: String
     id: ID!
-    alternative_ids: [String!]!
+    alternative_ids: [String!]! @deprecated
     snowflake: String!
     # Coming soon, maybe: display settings, and such
     public_permissions: FlowPermissions!
     joined_permissions: FlowPermissions!
     member_permissions: Dict
-    badges: Badge
+    #badges: Badge
     owner: PartialFlow!
     parent: Flow
+    is_joined: Boolean!
     members(limit: Int): [Flow!]
     content(limit: Int): [Content!]
     effective_permissions(for: String): FlowPermissions!

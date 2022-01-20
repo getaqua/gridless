@@ -20,7 +20,7 @@ type ThisUser {
     The User object corresponding to ThisUser.
     You should probably use Flow instead.
     """
-    user: User!
+    user: User! @deprecated(reason: "Use `flow` instead.")
     """
     The Flow object corresponding to ThisUser.
     """

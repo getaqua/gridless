@@ -45,9 +45,10 @@ globalThis.staticConfig = staticConfig;
   app.engine('nj', consolidate.nunjucks);
   app.set('view engine', 'j2');
   app.set('views', __dirname+ '/views');
-  app.use("/_gridless", cookieParser(globalThis.staticConfig.get("auth").get("secret")), routes());
-  app.locals.sitename = globalThis.staticConfig.get("sitename") || "Aqua",
-  graphql.applyMiddleware({ app, path: "/_gridless/graphql" });
+  app.use("/_gridless", cookieParser(globalThis.staticConfig.get("auth").get("secret")), await routes());
+  app.locals.sitename = globalThis.staticConfig.get("sitename") || "Aqua";
+  // await graphql.start();
+  // graphql.applyMiddleware({ app, path: "/_gridless/graphql" });
 
   const port = process.env.PORT || staticConfig.get("server.port") || 3000;
   app.listen(port, () => {

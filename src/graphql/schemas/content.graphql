@@ -1,3 +1,26 @@
+type Query {
+    # """
+    # Get Content. Returns null if it doesn't exist,
+    # or if you don't have read permission in the Flow
+    # this Content was posted in.
+    # """
+    # getContent(id: String!): Content
+    """Get a list of the most recent Content published by
+    Flows you follow or subscribe to."""
+    getFollowedContent(limit: Int): [Content!]
+}
+type Mutation {
+    """Posts Content to a Flow, returning null if it fails
+    and the new Content if it succeeds."""
+    postContent(to: String!, data: NewContent): Content
+    """Edits given Content by its snowflake, returning null if it fails
+    and the updated Content if it succeeds."""
+    updateContent(id: String!, data: EditedContent): Content
+    """Deletes Content, returning false if it fails
+    and true if it succeeds."""
+    deleteContent(snowflake: String!): Boolean!
+}
+    
 type Content {
     # Body
     "The text of this Content."

@@ -24,10 +24,11 @@ const flowResolver = {
             if (!(checkScope(auth, Scopes.FlowViewPrivate) || flow.public_permissions.view == "allow")) throw new OutOfScopeError("getFlow", Scopes.FlowViewPrivate);
             if (!flow) return null;
             await flow.populate("parent");
+            const userflow = (await (await UserModel.findById(auth.userId)).flow);
             const perms = (await getEffectivePermissions(await UserModel.findById(auth.userId), flow));
-            if (!(flow.members.includes((await (await UserModel.findById(auth.userId)).flow)._id) || flow.public_permissions.view == "allow") 
+            if (!(flow.members.includes(userflow._id) || flow.public_permissions.view == "allow") 
             && perms.view == "allow") return null;
-            return {...flow.toObject(), id: flow.id};
+            return {...flow.toObject(), is_joined: flow.members.includes(userflow._id), id: flow.id};
         },
         getFollowedFlows: async function (_, data, {auth}: { auth: ILoggedIn }) {
             const flow = await getUserFlow(auth.userId);

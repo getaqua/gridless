@@ -7,60 +7,11 @@ type Query {
     """
     getMe: ThisUser
     """
-    Get a Flow. Returns null/None if it doesn't exist,
-    or if you don't have permission to access it.
-    """
-    getFlow(id: String!): Flow
-    """
     System information about the gridless server.
     """
-    getSystemInfo: SystemInfo!
-    # """
-    # Get Content. Returns null if it doesn't exist,
-    # or if you don't have read permission in the Flow
-    # this Content was posted in.
-    # """
-    # getContent(id: String!): Content
-    """Get a list of the most recent Content published by
-    Flows you follow or subscribe to."""
-    getFollowedContent(limit: Int): [Content!]
-    """Get a list of the Flows you follow or subscribe to."""
-    getFollowedFlows: [Flow!]
-    """Get a list of the Flows you are a member of."""
-    getJoinedFlows: [Flow!]
+    getSystemInfo: SystemInfo!    
 }
-type Mutation {
-    """Creates a Flow, returning null if it fails
-    and the new Flow if it succeeds."""
-    createFlow(flow: NewFlow, parentId: String): Flow
-    """Updates a Flow, returning null if it fails
-    and the updated Flow if it succeeds."""
-    updateFlow(id: String!, data: PatchedFlow!): Flow
-    """Joins a Flow, returning null if it fails 
-    and the joined Flow if it succeeds."""
-    joinFlow(id: String!, inviteCode: String): Flow
-    """Deletes a Flow, returning false if it fails
-    and true if it succeeds."""
-    deleteFlow(id: String!): Boolean!
-    """Leaves a Flow, returning false if it fails
-    and true if it succeeds."""
-    leaveFlow(id: String!): Boolean!
-    """Follow or subscribe to a Flow, returning false if it fails
-    and true if it succeeds."""
-    followFlow(id: String!): Boolean!
-    """Unfollow or unsubscribe to a Flow, returning false if it fails
-    and true if it succeeds."""
-    unfollowFlow(id: String!): Boolean!
-    """Posts Content to a Flow, returning null if it fails
-    and the new Content if it succeeds."""
-    postContent(to: String!, data: NewContent): Content
-    """Edits given Content by its snowflake, returning null if it fails
-    and the updated Content if it succeeds."""
-    updateContent(id: String!, data: EditedContent): Content
-    """Deletes Content, returning false if it fails
-    and true if it succeeds."""
-    deleteContent(snowflake: String!): Boolean!
-}
+# type Mutation {}
 
 # ================
 # Basic primitives
@@ -158,3 +109,6 @@ type SystemInfo {
     """
     name: String!
 }
+directive @deprecated(
+  reason: String = "No longer supported"
+) on FIELD_DEFINITION | ENUM_VALUE

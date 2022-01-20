@@ -24,7 +24,7 @@ const registrationDisabledCheck = (req, res, next) => {
     else res.status(501).render("autherror.j2", {messages: ["Registration is disabled."]});
 }
 
-export default function routes() {
+export default async function routes() {
     const globalProps = {
         //sitename: globalThis.staticConfig.get("sitename"),
         banner: "/_gridless/static/gridlesslogo.png" // TODO: get this from the config, maybe?
@@ -97,8 +97,17 @@ export default function routes() {
     router.get("/media/download/:index/:filename", viewFileEndpoint);
 
     // GraphQL middlewares
-    devgql.applyMiddleware({app: router as Application, path: "/developers", disableHealthCheck: true});
-    gql.applyMiddleware({app: router as Application, path: "/graphql"});
+    await Promise.all([
+        devgql.start(),
+        gql.start()
+    ]);
+    router.use("/developers",
+        devgql.getMiddleware({disableHealthCheck: true, cors: {origin: false}, path: "/"})
+    );
+    router.use("/graphql",
+        gql.getMiddleware({cors: {origin: "*"}, path: "/"}),
+        (req, res, next) => res.sendStatus(418)
+    );
 
     // Healthcheck
     router.get("/healthcheck", (req, res, next) => res.type("txt").send("OK"));

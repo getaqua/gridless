@@ -1,10 +1,11 @@
-import { ApolloServer, AuthenticationError, makeExecutableSchema } from 'apollo-server-express';
+import { ApolloServer, AuthenticationError } from 'apollo-server-express';
 import jsonwebtoken from 'jsonwebtoken';
 import { randomBytes } from 'crypto';
 import { ILoggedIn, TokenType } from 'src/auth/UserModel';
 import { Application, ApplicationModel } from 'src/db/models/applicationModel';
 import { ESMap } from 'typescript';
 import devschema from './schema.gql';
+import { makeExecutableSchema } from '@graphql-tools/schema';
 
 const resolver = {
     Query: {
@@ -68,19 +69,22 @@ const resolver = {
 const schema = makeExecutableSchema({
     typeDefs: devschema,
     resolvers: resolver,
-    resolverValidationOptions: {
-        requireResolversForResolveType: false,
-    },
-    allowUndefinedInResolve: true,
+    // resolverValidationOptions: {
+    //     requireResolversForResolveType: false,
+    // },
+    // allowUndefinedInResolve: true,
 });
 
 export const server = new ApolloServer({
     schema: schema,
-    playground: false,
+    // playground: false,
     introspection: true,
-    tracing: false,
-    engine: {
-      debugPrintReports: true,
+    // tracing: false,
+    // engine: {
+    //   debugPrintReports: true,
+    // },
+    apollo: {
+        graphVariant: "devpanel"
     },
     
     context: ({req}) => {
