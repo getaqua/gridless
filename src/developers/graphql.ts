@@ -1,4 +1,4 @@
-import { ApolloServer, makeExecutableSchema } from 'apollo-server-express';
+import { ApolloServer, AuthenticationError, makeExecutableSchema } from 'apollo-server-express';
 import jsonwebtoken from 'jsonwebtoken';
 import { randomBytes } from 'crypto';
 import { ILoggedIn, TokenType } from 'src/auth/UserModel';
@@ -104,13 +104,7 @@ export const server = new ApolloServer({
                 } as ILoggedIn,
             };
         } catch(e) {
-            return {
-                auth: {
-                    tokenType: TokenType.INVALID,
-                    userId: "",
-                    appId: ""
-                } as ILoggedIn
-            }
+            throw new AuthenticationError('You must be logged in.');
         }
         }
     }

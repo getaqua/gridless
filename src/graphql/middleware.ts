@@ -1,4 +1,4 @@
-import { ApolloServer } from 'apollo-server-express';
+import { ApolloServer, AuthenticationError } from 'apollo-server-express';
 import { makeExecutableSchema } from 'apollo-server';
 import { mergeTypeDefs, mergeResolvers } from '@graphql-tools/merge';
 import jsonwebtoken, { JsonWebTokenError } from 'jsonwebtoken';
@@ -72,12 +72,6 @@ export const server = new ApolloServer({
           } as ILoggedIn
         }
       }
-    } else return {
-      auth: {
-        tokenType: TokenType.INVALID,
-        userId: "",
-        appId: ""
-      } as ILoggedIn
-    }
+    } else throw new AuthenticationError('You must be logged in.');
   },
 });

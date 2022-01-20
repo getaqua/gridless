@@ -97,7 +97,7 @@ export default function routes() {
     router.get("/media/download/:index/:filename", viewFileEndpoint);
 
     // GraphQL middlewares
-    devgql.applyMiddleware({app: router as Application, path: "/developers", disableHealthCheck: true});    
+    devgql.applyMiddleware({app: router as Application, path: "/developers", disableHealthCheck: true});
     gql.applyMiddleware({app: router as Application, path: "/graphql"});
 
     // Healthcheck
