@@ -30,15 +30,15 @@ const contentResolver = {
         }
     },
     Mutation: {
-        postContent: async function (_, {to, data}: { to: string, data: Partial<Content> & {attachments: string[]}}, {auth}: {auth: ILoggedIn}) {
+        postContent: async function (_, {to, data}: { to: string, data: Partial<Content> & {attachments: string[]}}, {auth, userflow}: IContext) {
             if (!checkScope(auth, Scopes.FlowContentPost)) throw new OutOfScopeError("postContent", Scopes.FlowContentPost);
             const flow = await getFlow(to);
-            const user = await UserModel.findById(auth.userId);
-            const userflow = await user.flow;
-            const effectivePermissions = await getEffectivePermissions(user, flow);
+            //const user = await UserModel.findById(auth.userId);
+            //const userflow = await user.flow;
+            const effectivePermissions = await getEffectivePermissions(userflow, flow);
             if (effectivePermissions.post == "deny") throw new PermissionDeniedError("postContent", "post");
-            const attachments = data.attachments?.filter((v,i,a) => typeof v == "string" && v.startsWith("/_gridless/media/view/")) ?? [];
             // If all checks pass...
+            const attachments = data.attachments?.filter((v,i,a) => typeof v == "string" && v.startsWith("/_gridless/media/view/")) ?? [];
             const newContent = new ContentModel({
                 ...data,
                 attachments,
