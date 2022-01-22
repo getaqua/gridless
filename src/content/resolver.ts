@@ -10,6 +10,8 @@ import { Types } from "mongoose";
 import { OutOfScopeError, PermissionDeniedError } from "src/handling/graphql";
 import { Attachment, AttachmentModel } from "src/db/models/attachmentModel";
 import { mapContent } from "./map";
+import { flowToQuery } from "src/flows/query";
+import { IContext } from "src/global";
 
 const log = debug("gridless:content:resolver");
 
@@ -17,14 +19,14 @@ const esg = new ExtSnowflakeGenerator(0);
 
 const contentResolver = {
     Query: {
-        getFollowedContent: async function (_, {limit = 100}: { limit?: number }, {auth}: { auth: ILoggedIn }) {
+        getFollowedContent: async function (_, {limit = 100}: { limit?: number }, {auth, userflow}: IContext) {
             const flow = await getUserFlow(auth.userId);
             if (!(checkScope(auth, Scopes.FlowViewPrivate))) throw new OutOfScopeError("getFollowedContent", Scopes.FlowViewPrivate);
             if (!(checkScope(auth, Scopes.FlowReadPrivate))) throw new OutOfScopeError("getFollowedContent", Scopes.FlowReadPrivate);
             //if (!flow) return null;
             if (flow.following.length == 0) return [];
             return (await ContentModel.find({inFlow: {$in: flow.following as Types.ObjectId[]}}).sort({timestamp: -1}).limit(limit))
-            .map<any>((c) => mapContent(c, auth.userId));
+            .map<any>((c) => mapContent(c, userflow));
         }
     },
     Mutation: {
@@ -50,7 +52,7 @@ const contentResolver = {
             return {
                 ...newContent.toJSON(),
                 inFlowId: flow.id,
-                author: userflow.toJSON(),
+                author: flowToQuery(userflow, userflow),
                 timestamp: newContent.timestamp.toISOString(),
                 editedTimestamp: newContent.editedTimestamp?.toISOString()
             };
@@ -71,7 +73,7 @@ const contentResolver = {
             return {
                 ...content.toJSON(),
                 inFlowId: (content.inFlow as Flow).id,
-                author: userflow.toJSON(),
+                author: flowToQuery(userflow, userflow),
                 timestamp: content.timestamp.toISOString(),
                 editedTimestamp: content.editedTimestamp?.toISOString()
             };

@@ -16,6 +16,8 @@ import contentResolver from 'src/content/resolver';
 import { GraphQLSchema } from 'graphql';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
+import { getUserFlow } from 'src/db/models/userModel';
+import { IContext } from 'src/global';
 
 const log = debug("gridless:graphql");
 
@@ -47,8 +49,9 @@ export const server = new ApolloServer({
     ApolloServerPluginLandingPageLocalDefault({ footer: false })
   ],
   
-  context: ({ req }) => {
+  context: async ({ req }) => {
     const token = req.query['access_token'] || req.signedCookies['jwt'] || req.get("Authorization")?.replace("Bearer ", "")?.replace("Bot ", "");
+    let auth: ILoggedIn;
     if (token) {
       try {
         const jwt: {
@@ -57,22 +60,22 @@ export const server = new ApolloServer({
           bot: boolean,
           scopes: string[]
         } = jsonwebtoken.verify(token, globalThis.staticConfig.get("auth").get("secret")) as any;
-        return {
-          auth: {
-            userId: jwt.uid,
-            appId: jwt.aid,
-            tokenType: jwt.aid ? 
-              jwt.bot === true ? TokenType.BOTTOKEN
-              : TokenType.APPTOKEN
-            : req.signedCookies['jwt'] == token ? TokenType.COOKIE
-            : TokenType.INVALID,
-            scopes: jwt.scopes
-          } as ILoggedIn,
+        auth = {
+          userId: jwt.uid,
+          appId: jwt.aid,
+          tokenType: jwt.aid ? 
+            jwt.bot === true ? TokenType.BOTTOKEN
+            : TokenType.APPTOKEN
+          : req.signedCookies['jwt'] == token ? TokenType.COOKIE
+          : TokenType.INVALID,
+          scopes: jwt.scopes
         };
       } catch(e) {
         log(e);
         throw new AuthenticationError('The token is invalid.');
       }
     } else throw new AuthenticationError('You must be logged in.');
+    let userflow = await getUserFlow(auth.userId);
+    return {auth, userflow} as IContext;
   },
 });

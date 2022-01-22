@@ -1,5 +1,5 @@
 import { Flow, FlowModel } from "src/db/models/flowModel";
-import { User } from "src/db/models/userModel";
+import { User, UserModel } from "src/db/models/userModel";
 
 type AllowDeny = "allow" | "deny" | null
 export interface FlowPermissions {
@@ -51,14 +51,16 @@ export const ownerOverriddenPermissions: Partial<FlowPermissions> = {
   update: "allow"
 }
 
-export async function getEffectivePermissions(user: User, flow: Flow) : Promise<FlowPermissions> {
-  const userflow = await user.flow;
+export async function getEffectivePermissions(user: User | Flow, flow: Flow) : Promise<FlowPermissions> {
+  const userflow = user instanceof FlowModel ? user : await (user as User).flow;
+  const userId = user instanceof UserModel ? user._id : (userflow.owner as any)._id;
+  // shouldn't have to do this vvv
   flow = await FlowModel.findOne({snowflake: flow.snowflake});
   var is_joined = flow.members.includes(userflow._id);
-  var is_owner = (flow.owner as any)._id.toHexString() == user._id.toHexString();
+  var is_owner = (flow.owner as any)._id.toHexString() == userId.toHexString();
   var member_permissions = is_joined ? flow.member_permissions[userflow._id.toHexString()] : null;
   var defaults = (is_joined ? flow.joined_permissions : flow.public_permissions as any).toJSON();
-  var fallback: FlowPermissions = is_joined ? (fallbackJoinedFlowPermissions && {join: "allow"} as FlowPermissions) : fallbackPublicFlowPermissions;
+  var fallback: FlowPermissions = is_joined ? ({...fallbackJoinedFlowPermissions, join: "allow"} as FlowPermissions) : fallbackPublicFlowPermissions;
   return {
     ...fallback,
     ...defaults,

@@ -10,9 +10,13 @@ type Query {
     getJoinedFlows: [Flow!]
 }
 type Mutation {
-    """Creates a Flow, returning null if it fails
-    and the new Flow if it succeeds."""
-    createFlow(flow: NewFlow, parentId: String): Flow
+    """
+    Creates a Flow, returning null if it fails
+    and the new Flow if it succeeds.
+    
+    Sets the user's Flow as its parent by default.
+    """
+    createFlow(flow: NewFlow!, parentId: String): Flow
     """Updates a Flow, returning null if it fails
     and the updated Flow if it succeeds."""
     updateFlow(id: String!, data: PatchedFlow!): Flow
@@ -56,7 +60,9 @@ type Flow implements FlowEntity {
     owner: PartialFlow!
     parent: Flow
     is_joined: Boolean!
+    is_following: Boolean!
     members(limit: Int): [Flow!]
+    member_count: Int!
     content(limit: Int): [Content!]
     effective_permissions(for: String): FlowPermissions!
 }

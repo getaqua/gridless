@@ -1,3 +1,4 @@
+import { ApolloError, UserInputError } from "apollo-server-core";
 import debug from "debug";
 import { ExtSnowflakeGenerator } from "extended-snowflake";
 import { Types } from "mongoose";
@@ -9,9 +10,11 @@ import { mapContent } from "src/content/map";
 import { Content, ContentModel } from "src/db/models/contentModel";
 import { Flow, FlowModel, getFlow } from "src/db/models/flowModel"
 import { getUserFlow, getUserFlowId, User, UserModel } from "src/db/models/userModel";
+import { IContext } from "src/global";
 import { OutOfScopeError } from "src/handling/graphql";
 import { getEffectivePermissions } from "./permissions";
 import { flowPresets } from "./presets";
+import { flowToQuery } from "./query";
 
 const log = debug("gridless:flow:resolver");
 
@@ -19,35 +22,39 @@ const esg = new ExtSnowflakeGenerator(0);
 
 const flowResolver = {
     Query: {
-        getFlow: async function (_, {id}: { id: string }, {auth}: { auth: ILoggedIn },) {
+        getFlow: async function (_, {id}: { id: string }, {auth, userflow}: IContext) {
             var flow = await getFlow(id);
             if (!(checkScope(auth, Scopes.FlowViewPrivate) || flow.public_permissions.view == "allow")) throw new OutOfScopeError("getFlow", Scopes.FlowViewPrivate);
             if (!flow) return null;
             await flow.populate("parent");
-            const userflow = (await (await UserModel.findById(auth.userId)).flow);
+            //const userflow = (await (await UserModel.findById(auth.userId)).flow);
             const perms = (await getEffectivePermissions(await UserModel.findById(auth.userId), flow));
             if (!(flow.members.includes(userflow._id) || flow.public_permissions.view == "allow") 
             && perms.view == "allow") return null;
-            return {...flow.toObject(), is_joined: flow.members.includes(userflow._id), id: flow.id};
+            //return {...flow.toObject(), is_joined: flow.members.includes(userflow._id), following: [], id: flow.id};
+            return flowToQuery(flow, userflow);
         },
-        getFollowedFlows: async function (_, data, {auth}: { auth: ILoggedIn }) {
-            const flow = await getUserFlow(auth.userId);
-            await flow.populate("following");
-            return flow.following.map((v: Flow, i,a) => ({...v.toObject(), id: v.id}));
+        getFollowedFlows: async function (_, data, {auth, userflow}: IContext) {
+            //const flow = await getUserFlow(auth.userId);
+            await userflow.populate("following");
+            //return flow.following.map((v: Flow, i,a) => ({...v.toObject(), id: v.id}));
+            return userflow.following.map((v: Flow, i,a) => flowToQuery(v, userflow));
         },
-        getJoinedFlows: async function (_, data, {auth}: { auth: ILoggedIn }) {
-            const flow = await getUserFlow(auth.userId);
-            var flows = await FlowModel.find({"members": flow._id});
-            return flows.map((v: Flow, i,a) => ({...v.toObject(), id: v.id}));
+        getJoinedFlows: async function (_, data, {auth, userflow}: IContext) {
+            //const flow = await getUserFlow(auth.userId);
+            var flows = await FlowModel.find({"members": userflow._id});
+            //return flows.map((v: Flow, i,a) => ({...v.toObject(), id: v.id}));
+            return flows.map((v: Flow, i,a) => flowToQuery(v, userflow));
         }
     },
     Flow: {
-        members: async function ({_id}: {_id: Types.ObjectId}, {limit}: { limit?: number }, {auth}: { auth: ILoggedIn }) {
+        members: async function ({_id}: {_id: Types.ObjectId}, {limit}: { limit?: number }, {auth, userflow}: IContext) {
             var flow = await FlowModel.findById(_id).populate("members");
             if (Math.abs(limit) != limit) limit = 0;
-            return flow.members.slice(limit > 0 ? -(limit) : 0);
+            return flow.members.slice(limit > 0 ? -(limit) : 0)
+            .map((v: Flow, i,a) => flowToQuery(v, userflow));
         },
-        content: async function (flow: Partial<Flow>, {limit = 100}: { limit?: number }, {auth}: { auth: ILoggedIn }) {
+        content: async function (flow: Partial<Flow>, {limit = 100}: { limit?: number }, {auth, userflow}: IContext) {
             if (!(checkScope(auth, Scopes.FlowViewPrivate) || flow.public_permissions.view == "allow")) return null;
             if (!(checkScope(auth, Scopes.FlowReadPrivate) || 
                 (flow.public_permissions.read == "allow" && checkScope(auth, Scopes.FlowReadPublic)))) return null;
@@ -55,48 +62,58 @@ const flowResolver = {
             if (!(flow.members.includes((await (await UserModel.findById(auth.userId)).flow)._id) || flow.public_permissions.read == "allow") 
             && (await getEffectivePermissions(await UserModel.findById(auth.userId), flow as any)).read == "allow") return null;
             return (await ContentModel.find({inFlow: new Types.ObjectId(flow._id)}).sort({timestamp: -1}).limit(limit))
-            .map<any>((c) => mapContent(c, auth.userId));
+            .map<any>((c) => mapContent(c, userflow));
         },
         effective_permissions: async function (flow: Partial<Flow>, _, {auth}: { auth: ILoggedIn }) {
             //if (!flow) return null;
             return await getEffectivePermissions(await UserModel.findById(auth.userId), flow as any);
         },
+        is_following: async function (flow: Partial<Flow>, _, {auth, userflow}: IContext) {
+            // TODO: check scopes and/or permissions
+            return userflow.following.includes(flow._id);
+        },
     },
     Mutation: {
-        createFlow: async function (_, {flow, ownerId}: { flow: Partial<Flow> & { preset: string }, ownerId?: string }, {auth}: { auth: ILoggedIn }) {
+        createFlow: async function (_, {flow, ownerId}: { flow: Partial<Flow> & { preset: string }, ownerId?: string }, {auth, userflow}: IContext) {
             if (!checkScope(auth, Scopes.FlowNew)) throw new OutOfScopeError("createFlow", Scopes.FlowNew);
             if (!await isValidUsername(flow.id)) return null;
             // if all checks pass...
             log("Creating new Flow.");
             var parent: Flow;
             if (ownerId) {
-                parent = await getFlow(ownerId);
+                try {
+                    parent = await getFlow(ownerId);
+                    if ((await getEffectivePermissions(userflow, parent)).update == "allow") throw Error();
+                } catch(e) {
+                    throw new UserInputError("The Flow you specified was not found.");
+                }
             } else {
-                var _user = await UserModel.findById(auth.userId);
-                parent = await _user.flow;
+                //var _user = await UserModel.findById(auth.userId);
+                parent = userflow;
             }
-            var owner = parent?._id.toHexString();
+            var owner = parent._id.toHexString();
             var doc: Partial<Flow> = {
                 ...flowPresets[flow.preset],
                 ...flow,
                 parent: parent, owner: parent.owner,
                 members: [await (parent.owner as User).flow],
                 id: "//"+flow.id,
+                snowflake: esg.next(),
                 alternative_ids: ["//"+flow.id]
             };
             //return {...await (await FlowModel.create(doc)).toJSON(), id: doc.id};
             var newFlow = await FlowModel.create(doc);
             newFlow = await newFlow.populate("owner");
-            return {...newFlow.toJSON(), id: doc.id};
+            return flowToQuery(newFlow, userflow);
         },
-        updateFlow: async function (_, {id, data}: { id: string, data: Partial<Flow> }, {auth}: { auth: ILoggedIn }) {
+        updateFlow: async function (_, {id, data}: { id: string, data: Partial<Flow> }, {auth, userflow}: IContext) {
             if (!checkScope(auth, Scopes.FlowUpdate)) throw new OutOfScopeError("updateFlow", Scopes.FlowUpdate);
             const flow = await getFlow(id);
-            const effectivePermissions = await getEffectivePermissions(await UserModel.findById(auth.userId), flow);
+            const effectivePermissions = await getEffectivePermissions(userflow, flow);
             if (effectivePermissions.update == "deny") return null;
             await flow.updateOne({$set: data});
             /* , $unset: Array.from(data as unknown as any).filter(([key, value]) => (value == "")) */
-            return await (await getFlow(id)).populate("owner");
+            return flowToQuery(await (await getFlow(id)).populate("owner"), userflow);
         },
         joinFlow: async function (_, {id, inviteCode}: { id: string, inviteCode: string }, {auth}: { auth: ILoggedIn }) {
             if (!checkScope(auth, Scopes.FlowJoin)) return null;

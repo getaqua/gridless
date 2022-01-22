@@ -1,10 +1,10 @@
 type Query {
-    # """
-    # Get Content. Returns null if it doesn't exist,
-    # or if you don't have read permission in the Flow
-    # this Content was posted in.
-    # """
-    # getContent(id: String!): Content
+    """
+    Get Content. Returns null if it doesn't exist,
+    or if you don't have read permission in the Flow
+    this Content was posted in.
+    """
+    getContent(id: String!): Content
     """Get a list of the most recent Content published by
     Flows you follow or subscribe to."""
     getFollowedContent(limit: Int): [Content!]

@@ -1,8 +1,9 @@
 import { Attachment, AttachmentModel } from "src/db/models/attachmentModel";
 import { Content } from "src/db/models/contentModel";
 import { Flow } from "src/db/models/flowModel";
+import { flowToQuery } from "src/flows/query";
 
-export async function mapContent(content: Partial<Content>, userId?: string) {
+export async function mapContent(content: Partial<Content>, userflow: Flow) {
     await content.populate("author");
     await content.populate("inFlow");
 
@@ -15,12 +16,13 @@ export async function mapContent(content: Partial<Content>, userId?: string) {
         mimeType: att.optimized_mime_type ?? att.original_mime_type,
         downloadMimeType: att.original_mime_type ?? att.optimized_mime_type,
         filename: att.filename,
-        yours: att.user as any == userId,
+        yours: att.user as any == userflow.owner,
         snowflake: att.snowflake
     }));
     
     return {
         ...content.toJSON(),
+        author: flowToQuery(content.author as Flow, userflow),
         attachments,
         inFlowId: (content.inFlow as Flow).id,
         timestamp: content.timestamp.toISOString(),
