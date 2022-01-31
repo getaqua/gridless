@@ -42,6 +42,8 @@ export enum Scopes {
     FlowReadPublic = "flow.read.public",
     FlowReadPrivate = "flow.read.private",
     FlowContentPost = "flow.content.post",
+    /** The client is allowed to post and act on behalf of the user's Flows. */
+    FlowImpersonate = "flow.impersonate",
     FlowContentManage = "flow.content.manage",
     /** The user is allowed all permissions inherently. */
     Client = "client"

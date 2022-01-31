@@ -38,7 +38,8 @@ export const flowPresets: Record<string, Partial<Flow>> = {
         joined_permissions: {
             post: 'allow',
             pin: 'deny',
-            delete: 'deny'
+            delete: 'deny',
+            anonymous: 'force'
         }
     },
     channel: {
@@ -53,7 +54,8 @@ export const flowPresets: Record<string, Partial<Flow>> = {
         joined_permissions: {
             post: 'allow',
             pin: 'allow',
-            delete: 'allow'
+            delete: 'allow',
+            anonymous: 'force'
         }
     },
     anonymous_group: {
@@ -69,6 +71,7 @@ export const flowPresets: Record<string, Partial<Flow>> = {
             view: 'allow',
             delete: 'deny',
             pin: 'allow',
+            anonymous: 'force'
         }
     },
     blog: {
@@ -99,6 +102,7 @@ export const flowPresets: Record<string, Partial<Flow>> = {
             view: 'allow',
             delete: 'deny',
             pin: 'allow',
+            anonymous: 'deny'
         }
     }
 }

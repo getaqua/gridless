@@ -151,19 +151,15 @@ type Badge {
 enum AllowDeny {
     allow
     deny
-}
-"""Used by the Join permission."""
-enum AllowDenyRequest {
-    allow
-    deny
     request
+    force
 }
 type FlowPermissions {
     """
     Whether a user can join the Flow. 
     Only applicable for public_permissions.
     """
-    join: AllowDenyRequest
+    join: AllowDeny
     """Whether the user can post Content to this Flow."""
     post: AllowDeny
     """Whether the user can read Content posted to this Flow."""
@@ -188,6 +184,8 @@ type FlowPermissions {
     such as its name, profile picture, and description.
     """
     update: AllowDeny
+    """Whether the user can post anonymously in the Flow."""
+    anonymous: AllowDeny
 }
 
 """Flags regarding a Flow."""

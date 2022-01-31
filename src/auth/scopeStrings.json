@@ -53,6 +53,10 @@
         "name": "Post Content to your Flows",
         "icon": "mdi:text-box"
     },
+    "flow.impersonate": {
+        "name": "Post and perform actions on behalf of your Flows",
+        "icon": "mdi:incognito"
+    },
     "flow.content.manage": {
         "name": "Pin, edit, and delete Content in your Flows",
         "icon": "mdi:pin",

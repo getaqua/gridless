@@ -26,6 +26,10 @@ export interface FlowPermissions {
   /** Whether the user can change settings in this Flow.
    * The owner inherently has this permission set to `allow`. */
   update: AllowDeny
+  /** Whether the user can post on behalf of the Flow.
+   * An appropriate client scope is required to use this permission
+   * when it is set to `allow`, but not if it is `force`. */
+  anonymous: "force" | AllowDeny
 }
 
 export const fallbackPublicFlowPermissions: FlowPermissions = {
@@ -35,7 +39,8 @@ export const fallbackPublicFlowPermissions: FlowPermissions = {
   pin: "deny",
   join: "request",
   delete: "deny",
-  update: "deny"
+  update: "deny",
+  anonymous: "deny"
 };
 export const fallbackJoinedFlowPermissions: Omit<FlowPermissions, "join"> = {
   view: "allow",
@@ -43,7 +48,8 @@ export const fallbackJoinedFlowPermissions: Omit<FlowPermissions, "join"> = {
   post: "allow",
   pin: "allow",
   delete: "deny",
-  update: "deny"
+  update: "deny",
+  anonymous: "deny"
 };
 export const ownerOverriddenPermissions: Partial<FlowPermissions> = {
   delete: "allow",

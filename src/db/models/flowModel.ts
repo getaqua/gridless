@@ -51,7 +51,7 @@ export interface Flow extends mongoose.Document {
 const AllowDeny = {
   type: String,
   // All possible settings for a Flow permission.
-  enum: ["allow", "deny", "request"],
+  enum: ["allow", "deny", "request", "force"],
   required: false
 }
 
@@ -62,6 +62,9 @@ const FlowPermissionSchema = new mongoose.Schema({
   read: AllowDeny,
   view: AllowDeny,
   delete: AllowDeny,
+  pin: AllowDeny,
+  update: AllowDeny,
+  anonymous: AllowDeny
 });
 
 /**

@@ -16,6 +16,8 @@ export interface Content extends Document {
     author: MaybePopulated<Flow>
     /** The Flow this Content was posted in, used for discovery. */
     inFlow: MaybePopulated<Flow>
+    /** Whether to show `inFlow` as the `author`. */
+    anonymous: boolean
     /** The time this was posted at. */
     timestamp: Date
     /** The time of the last edit to this Content. */
@@ -47,6 +49,11 @@ const ContentSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "flows",
         required: true
+    },
+    anonymous: {
+        type: Boolean,
+        required: true,
+        default: false
     },
     timestamp: {
         type: Schema.Types.Date,

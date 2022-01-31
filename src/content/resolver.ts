@@ -37,6 +37,10 @@ const contentResolver = {
             //const userflow = await user.flow;
             const effectivePermissions = await getEffectivePermissions(userflow, flow);
             if (effectivePermissions.post == "deny") throw new PermissionDeniedError("postContent", "post");
+            if (data.anonymous == true && effectivePermissions.anonymous != "force") {
+                if (effectivePermissions.anonymous == "deny") throw new PermissionDeniedError("postContent anonymously", "anonymous");
+                if (!checkScope(auth, Scopes.FlowImpersonate)) throw new OutOfScopeError("postContent anonymously", Scopes.FlowImpersonate);
+            }
             // If all checks pass...
             const attachments = data.attachments?.filter((v,i,a) => typeof v == "string" && v.startsWith("/_gridless/media/view/")) ?? [];
             const newContent = new ContentModel({
@@ -45,17 +49,19 @@ const contentResolver = {
                 timestamp: new Date(Date.now()),
                 author: userflow._id,
                 inFlow: flow._id,
+                anonymous: effectivePermissions.anonymous == "force" || data.anonymous || false,
                 pinned: false,
                 snowflake: esg.next()
             });
             await newContent.save();
-            return {
-                ...newContent.toJSON(),
-                inFlowId: flow.id,
-                author: flowToQuery(userflow, userflow),
-                timestamp: newContent.timestamp.toISOString(),
-                editedTimestamp: newContent.editedTimestamp?.toISOString()
-            };
+            // return {
+            //     ...newContent.toJSON(),
+            //     inFlowId: flow.id,
+            //     author: flowToQuery(userflow, userflow),
+            //     timestamp: newContent.timestamp.toISOString(),
+            //     editedTimestamp: newContent.editedTimestamp?.toISOString()
+            // };
+            return mapContent(newContent, userflow);
         },
         updateContent: async function (_, {id, data}: { id: string, data: Partial<Content>}, {auth}: {auth: ILoggedIn}) {
             if (!checkScope(auth, Scopes.FlowContentPost)) throw new OutOfScopeError("updateContent", Scopes.FlowContentPost);
@@ -70,13 +76,7 @@ const contentResolver = {
             if (data.text) content.text = data.text;
             content.editedTimestamp = new Date(Date.now());
             await content.save();
-            return {
-                ...content.toJSON(),
-                inFlowId: (content.inFlow as Flow).id,
-                author: flowToQuery(userflow, userflow),
-                timestamp: content.timestamp.toISOString(),
-                editedTimestamp: content.editedTimestamp?.toISOString()
-            };
+            return mapContent(content, userflow);
         },
         deleteContent: async function (_, {snowflake}: {snowflake: string}, {auth}: {auth: ILoggedIn}) {
             if (!checkScope(auth, Scopes.FlowContentManage)) return false;

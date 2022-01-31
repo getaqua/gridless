@@ -22,7 +22,10 @@ export async function mapContent(content: Partial<Content>, userflow: Flow) {
     
     return {
         ...content.toJSON(),
-        author: flowToQuery(content.author as Flow, userflow),
+        author: content.anonymous 
+        ? flowToQuery(content.inFlow as Flow, userflow) 
+        : flowToQuery(content.author as Flow, userflow),
+        yours: (content.author as Flow).snowflake == userflow.snowflake,
         attachments,
         inFlowId: (content.inFlow as Flow).id,
         timestamp: content.timestamp.toISOString(),

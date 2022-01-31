@@ -35,6 +35,11 @@ type Content {
     author: Flow!
     "The ID of the Flow this Content was posted in, if you need to look it up."
     inFlowId: String!
+    """
+    Whether or not this post is yours. Good for when you posted anonymously
+    but need to know if you can edit or delete it.
+    """
+    yours: Boolean!
     "The ISO-8601 timestamp of this Content's original posting."
     timestamp: Date!
     "Whether or not the Content has been edited."
@@ -55,6 +60,8 @@ input NewContent {
     #"The original post of this Content, if it Forwards other Content."
     #origin: Content
     attachments: [String!]
+    "Whether to hide the author's identity behind the current Flow when posting."
+    anonymous: Boolean
 }
 
 input EditedContent {
