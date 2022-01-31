@@ -45,6 +45,7 @@ export interface Flow extends mongoose.Document {
   snowflake: String
   /** The Flows this Flow follows. */
   following: MaybePopulated<Flow>[]
+  display_flags: String[]
 }
 
 const AllowDeny = {
@@ -148,6 +149,12 @@ const FlowSchema = new mongoose.Schema({
       ref: "flows",
     },
     required: false
+  },
+  display_flags: {
+    type: Array,
+    of: String,
+    default: [],
+    required: false,
   }
 });
 

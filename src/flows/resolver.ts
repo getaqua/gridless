@@ -11,7 +11,7 @@ import { Content, ContentModel } from "src/db/models/contentModel";
 import { Flow, FlowModel, getFlow } from "src/db/models/flowModel"
 import { getUserFlow, getUserFlowId, User, UserModel } from "src/db/models/userModel";
 import { IContext } from "src/global";
-import { OutOfScopeError } from "src/handling/graphql";
+import { OutOfScopeError, PermissionDeniedError } from "src/handling/graphql";
 import { getEffectivePermissions } from "./permissions";
 import { flowPresets } from "./presets";
 import { flowToQuery } from "./query";
@@ -76,14 +76,20 @@ const flowResolver = {
     Mutation: {
         createFlow: async function (_, {flow, ownerId}: { flow: Partial<Flow> & { preset: string }, ownerId?: string }, {auth, userflow}: IContext) {
             if (!checkScope(auth, Scopes.FlowNew)) throw new OutOfScopeError("createFlow", Scopes.FlowNew);
-            if (!await isValidUsername(flow.id)) return null;
+            const _uvalid = await isValidUsername(flow.id);
+            if (_uvalid != "SUCCESS") throw new UserInputError(
+                _uvalid == "USERNAME_TAKEN" ? "This ID is not available."
+                : _uvalid == "INVALID_USERNAME" ? "The ID is invalid."
+                : "Unknown error processing ID.", 
+                {"id_code": _uvalid}
+            );
             // if all checks pass...
             log("Creating new Flow.");
             var parent: Flow;
             if (ownerId) {
                 try {
                     parent = await getFlow(ownerId);
-                    if ((await getEffectivePermissions(userflow, parent)).update == "allow") throw Error();
+                    if ((await getEffectivePermissions(userflow, parent)).update == "allow") throw new PermissionDeniedError("createFlow", "update");
                 } catch(e) {
                     throw new UserInputError("The Flow you specified was not found.");
                 }
@@ -96,7 +102,7 @@ const flowResolver = {
                 ...flowPresets[flow.preset],
                 ...flow,
                 parent: parent, owner: parent.owner,
-                members: [await (parent.owner as User).flow],
+                members: [userflow],
                 id: "//"+flow.id,
                 snowflake: esg.next(),
                 alternative_ids: ["//"+flow.id]
@@ -131,14 +137,11 @@ const flowResolver = {
             await flow.save();
             return flow;
         },
-        deleteFlow: async function (_, {id}: { id: string }, {auth}: { auth: ILoggedIn }) {
+        deleteFlow: async function (_, {id}: { id: string }, {auth, userflow}: IContext) {
             if (!checkScope(auth, Scopes.FlowUpdate)) return false;
-            var [flow, ufid] = await Promise.all([
-                getFlow(id),
-                getUserFlowId(auth.userId)
-            ]);
+            var flow = await getFlow(id);
             if (!flow) return false;
-            if ((flow.owner as any)._id != ufid) return false;
+            if ((flow.owner as any)._id != auth.userId) return false;
             await flow.deleteOne();
             return true;
         },

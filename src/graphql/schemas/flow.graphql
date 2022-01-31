@@ -65,6 +65,7 @@ type Flow implements FlowEntity {
     member_count: Int!
     content(limit: Int): [Content!]
     effective_permissions(for: String): FlowPermissions!
+    display_flags: [String!]!
 }
 type PartialFlow {
     id: String!
