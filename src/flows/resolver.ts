@@ -24,12 +24,12 @@ const flowResolver = {
     Query: {
         getFlow: async function (_, {id}: { id: string }, {auth, userflow}: IContext) {
             var flow = await getFlow(id);
-            if (!(checkScope(auth, Scopes.FlowViewPrivate) || flow.public_permissions.view == "allow")) throw new OutOfScopeError("getFlow", Scopes.FlowViewPrivate);
+            if (!(checkScope(auth, Scopes.FlowViewPrivate) || flow.public_permissions.view != "deny")) throw new OutOfScopeError("getFlow", Scopes.FlowViewPrivate);
             if (!flow) return null;
             await flow.populate("parent");
             //const userflow = (await (await UserModel.findById(auth.userId)).flow);
             const perms = (await getEffectivePermissions(await UserModel.findById(auth.userId), flow));
-            if (!(flow.members.includes(userflow._id) || flow.public_permissions.view == "allow") 
+            if (!(flow.members.includes(userflow._id) || flow.public_permissions.view != "deny") 
             && perms.view == "allow") return null;
             //return {...flow.toObject(), is_joined: flow.members.includes(userflow._id), following: [], id: flow.id};
             return flowToQuery(flow, userflow);
