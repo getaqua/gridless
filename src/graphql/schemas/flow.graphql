@@ -107,10 +107,10 @@ input PatchedFlow {
     tagline: String
     """Permissions for users who have not joined the Flow.
     Permissions given will be patched on top of the existing permissions."""
-    public_permissions: Dict
+    public_permissions: UpdatedFlowPermissions
     """Default permissions for users who _have_ joined the Flow.
     Permissions given will be patched on top of the existing permissions."""
-    joined_permissions: Dict
+    joined_permissions: UpdatedFlowPermissions
 }
 """
 A preset with which to configure a Flow's initial settings.
@@ -185,6 +185,16 @@ type FlowPermissions {
     """
     update: AllowDeny
     """Whether the user can post anonymously in the Flow."""
+    anonymous: AllowDeny
+}
+input UpdatedFlowPermissions {
+    join: AllowDeny
+    post: AllowDeny
+    read: AllowDeny
+    view: AllowDeny
+    delete: AllowDeny
+    pin: AllowDeny
+    update: AllowDeny
     anonymous: AllowDeny
 }
 

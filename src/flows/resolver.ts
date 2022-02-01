@@ -59,14 +59,13 @@ const flowResolver = {
             if (!(checkScope(auth, Scopes.FlowReadPrivate) || 
                 (flow.public_permissions.read == "allow" && checkScope(auth, Scopes.FlowReadPublic)))) return null;
             if (!flow) return null;
-            if (!(flow.members.includes((await (await UserModel.findById(auth.userId)).flow)._id) || flow.public_permissions.read == "allow") 
-            && (await getEffectivePermissions(await UserModel.findById(auth.userId), flow as any)).read == "allow") return null;
+            if ((await getEffectivePermissions(userflow, flow as any)).read != "allow") throw new PermissionDeniedError("getFlow.content", "read");
             return (await ContentModel.find({inFlow: new Types.ObjectId(flow._id)}).sort({timestamp: -1}).limit(limit))
             .map<any>((c) => mapContent(c, userflow));
         },
-        effective_permissions: async function (flow: Partial<Flow>, _, {auth}: { auth: ILoggedIn }) {
+        effective_permissions: async function (flow: Partial<Flow>, _, {auth, userflow}: IContext) {
             //if (!flow) return null;
-            return await getEffectivePermissions(await UserModel.findById(auth.userId), flow as any);
+            return await getEffectivePermissions(userflow, flow as any);
         },
         is_following: async function (flow: Partial<Flow>, _, {auth, userflow}: IContext) {
             // TODO: check scopes and/or permissions
@@ -122,7 +121,7 @@ const flowResolver = {
             return flowToQuery(await (await getFlow(id)).populate("owner"), userflow);
         },
         joinFlow: async function (_, {id, inviteCode}: { id: string, inviteCode: string }, {auth}: { auth: ILoggedIn }) {
-            if (!checkScope(auth, Scopes.FlowJoin)) return null;
+            if (!checkScope(auth, Scopes.FlowJoin)) throw new OutOfScopeError("joinFlow", Scopes.FlowJoin);
             var [flow, ufid, user] = await Promise.all([
                 getFlow(id),
                 getUserFlowId(auth.userId),
