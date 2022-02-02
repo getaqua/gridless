@@ -12,7 +12,7 @@ import { Flow, FlowModel, getFlow } from "src/db/models/flowModel"
 import { getUserFlow, getUserFlowId, User, UserModel } from "src/db/models/userModel";
 import { IContext } from "src/global";
 import { OutOfScopeError, PermissionDeniedError } from "src/handling/graphql";
-import { getEffectivePermissions } from "./permissions";
+import { getEffectivePermissions, verifyPermissionValues } from "./permissions";
 import { flowPresets } from "./presets";
 import { flowToQuery } from "./query";
 
@@ -116,6 +116,8 @@ const flowResolver = {
             const flow = await getFlow(id);
             const effectivePermissions = await getEffectivePermissions(userflow, flow);
             if (effectivePermissions.update == "deny") return null;
+            if (data.public_permissions) verifyPermissionValues(data.public_permissions, "public_permissions");
+            if (data.joined_permissions) verifyPermissionValues(data.joined_permissions, "joined_permissions");
             await flow.updateOne({$set: data});
             /* , $unset: Array.from(data as unknown as any).filter(([key, value]) => (value == "")) */
             return flowToQuery(await (await getFlow(id)).populate("owner"), userflow);

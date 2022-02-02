@@ -1,3 +1,4 @@
+import { UserInputError } from "apollo-server-core";
 import { Flow, FlowModel } from "src/db/models/flowModel";
 import { User, UserModel } from "src/db/models/userModel";
 
@@ -72,5 +73,18 @@ export async function getEffectivePermissions(user: User | Flow, flow: Flow) : P
     ...defaults,
     ...member_permissions,
     ...(is_owner ? ownerOverriddenPermissions : {})
+  }
+}
+
+/** For responding to GraphQL queries that update permission values. */
+export function verifyPermissionValues(permissions: Partial<FlowPermissions>, where?: string): void {
+  const _where = where ? " in "+where : "";
+  for (const key in permissions) {
+    if (permissions[key] == "allow" || permissions[key] == "deny") continue;
+    else if (key == "join" && permissions[key] != "request") 
+      throw new UserInputError(`Permission "join"${_where} cannot have value ${permissions[key]}. Valid values are: allow, deny, request`);
+    else if (key == "anonymous" && permissions[key] != "force") 
+      throw new UserInputError(`Permission "anonymous"${_where} cannot have value ${permissions[key]}. Valid values are: allow, deny, force`);
+    else throw new UserInputError(`Permission "${key}"${_where} cannot have value ${permissions[key]}. Valid values are: allow, deny`);
   }
 }
