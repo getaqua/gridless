@@ -1,16 +1,21 @@
-import { Attachment, AttachmentModel } from "src/db/models/attachmentModel";
-import { Content } from "src/db/models/contentModel";
-import { Flow } from "src/db/models/flowModel";
+// import { Attachment, AttachmentModel } from "src/db/models/attachmentModel";
+// import { Content } from "src/db/models/contentModel";
+// import { Flow } from "src/db/models/flowModel";
+import { Attachment, Content, Flow } from "@prisma/client";
 import { flowToQuery } from "src/flows/query";
+import { db } from "src/server";
 
-export async function mapContent(content: Partial<Content>, userflow: Flow) {
-    await content.populate("author");
-    await content.populate("inFlow");
+export async function mapContent(content: Partial<Content> & {
+    inFlow: Flow, attachments: Attachment[]}, userflow: Flow) {
+    //await content.populate("author");
+    //await content.populate("inFlow");
 
-    const attachments = (await Promise.all(content.attachments
-    .map<any>(async (att) => await AttachmentModel.findOne(
-        {$or: [{snowflake: (att as string).replace(/^.*\?id\=/,"")}, {original_file: att}, {optimized_file: att}]}
-    )))).map<any>((att: Partial<Attachment>) => ({
+    const attachments = content.attachments
+    // (await Promise.all(content.attachments
+    // .map<any>(async (att) => await AttachmentModel.findOne(
+    //     {$or: [{snowflake: (att as string).replace(/^.*\?id\=/,"")}, {original_file: att}, {optimized_file: att}]}
+    // ))))
+    .map<any>((att: Partial<Attachment>) => ({
         url: `/_gridless/media/view/${att.index}/` + (att.optimized_file ?? att.original_file),
         downloadUrl: `/_gridless/media/download/${att.index}/` + (att.original_file ?? att.optimized_file),
         mimeType: att.optimized_mime_type ?? att.original_mime_type,
@@ -21,11 +26,11 @@ export async function mapContent(content: Partial<Content>, userflow: Flow) {
     }));
     
     return {
-        ...content.toJSON(),
+        ...content,
         author: content.anonymous 
-        ? flowToQuery(content.inFlow as Flow, userflow) 
-        : flowToQuery(content.author as Flow, userflow),
-        yours: (content.author as Flow).snowflake == userflow.snowflake,
+        ? flowToQuery(content.inFlow as Flow, userflow)
+        : flowToQuery(await db.flow.findUnique({where: {snowflake: content.authorId}}) as Flow, userflow),
+        yours: content.authorId == userflow.snowflake,
         attachments,
         inFlowId: (content.inFlow as Flow).id,
         timestamp: content.timestamp.toISOString(),
