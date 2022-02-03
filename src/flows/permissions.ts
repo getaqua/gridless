@@ -1,6 +1,6 @@
+import { Flow, FlowMember, MembershipState, Prisma } from "@prisma/client";
 import { UserInputError } from "apollo-server-core";
-import { Flow, FlowModel } from "src/db/models/flowModel";
-import { User, UserModel } from "src/db/models/userModel";
+import { db } from "src/server";
 
 type AllowDeny = "allow" | "deny" | null
 export interface FlowPermissions {
@@ -33,6 +33,19 @@ export interface FlowPermissions {
   anonymous: "force" | AllowDeny
 }
 
+export function permsOf(entity: Flow): {public: Partial<FlowPermissions>, joined: Omit<Partial<FlowPermissions>, "join">};
+export function permsOf(entity: FlowMember): Partial<FlowPermissions>;
+export function permsOf(entity: Flow | FlowMember): any {
+  if ("memberId" in entity) {
+    return entity.permissions as unknown as FlowPermissions ?? {};
+  } else {
+    return {
+      public: entity.publicPermissions as unknown as FlowPermissions ?? {},
+      joined: entity.joinedPermissions as unknown as FlowPermissions ?? {}
+    }
+  }
+}
+
 export const fallbackPublicFlowPermissions: FlowPermissions = {
   view: "allow",
   read: "allow",
@@ -58,15 +71,30 @@ export const ownerOverriddenPermissions: Partial<FlowPermissions> = {
   update: "allow"
 }
 
-export async function getEffectivePermissions(user: User | Flow, flow: Flow) : Promise<FlowPermissions> {
-  const userflow = user instanceof FlowModel ? user : await (user as User).flow;
-  const userId = user instanceof UserModel ? user._id : (userflow.owner as any)._id;
-  // shouldn't have to do this vvv
-  flow = await FlowModel.findOne({snowflake: flow.snowflake});
-  var is_joined = flow.members.includes(userflow._id);
-  var is_owner = (flow.owner as any)._id.toHexString() == userId.toHexString();
-  var member_permissions = is_joined ? flow.member_permissions[userflow._id.toHexString()] : null;
-  var defaults = (is_joined ? flow.joined_permissions : flow.public_permissions as any).toJSON();
+// export async function getEffectivePermissions(user: User | Flow, flow: Flow) : Promise<FlowPermissions> {
+//   const userflow = user instanceof FlowModel ? user : await (user as User).flow;
+//   const userId = user instanceof UserModel ? user._id : (userflow.owner as any)._id;
+//   // shouldn't have to do this vvv
+//   flow = await FlowModel.findOne({snowflake: flow.snowflake});
+//   var is_joined = flow.members.includes(userflow._id);
+//   var is_owner = (flow.owner as any)._id.toHexString() == userId.toHexString();
+//   var member_permissions = is_joined ? flow.member_permissions[userflow._id.toHexString()] : null;
+//   var defaults = (is_joined ? flow.joined_permissions : flow.public_permissions as any).toJSON();
+//   var fallback: FlowPermissions = is_joined ? ({...fallbackJoinedFlowPermissions, join: "allow"} as FlowPermissions) : fallbackPublicFlowPermissions;
+//   return {
+//     ...fallback,
+//     ...defaults,
+//     ...member_permissions,
+//     ...(is_owner ? ownerOverriddenPermissions : {})
+//   }
+// }
+export async function getEffectivePermissions(flow: Flow, member: FlowMember | null) : Promise<FlowPermissions> {
+  var _member: FlowMember; 
+  if ("memberId" in member) _member = member;
+  var is_joined = member.state == MembershipState.JOINED ?? false;
+  var is_owner = member.owner;
+  var member_permissions = is_joined ? member.permissions as unknown as FlowPermissions : null;
+  var defaults = (is_joined ? flow.joinedPermissions : flow.publicPermissions) as unknown as FlowPermissions;
   var fallback: FlowPermissions = is_joined ? ({...fallbackJoinedFlowPermissions, join: "allow"} as FlowPermissions) : fallbackPublicFlowPermissions;
   return {
     ...fallback,

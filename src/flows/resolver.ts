@@ -1,18 +1,20 @@
+import { Flow, FlowMember, MembershipState, Prisma, PrismaPromise } from "@prisma/client";
 import { ApolloError, UserInputError } from "apollo-server-core";
 import debug from "debug";
 import { ExtSnowflakeGenerator } from "extended-snowflake";
-import { Types } from "mongoose";
-import { scopeCheck } from "src/auth/attachments";
+//import { scopeCheck } from "src/auth/attachments";
 import { checkScope } from "src/auth/permissions";
 import { isValidUsername } from "src/auth/signup";
 import { CustomScope, ILoggedIn, Scopes, TokenType } from "src/auth/UserModel"
 import { mapContent } from "src/content/map";
-import { Content, ContentModel } from "src/db/models/contentModel";
-import { Flow, FlowModel, getFlow } from "src/db/models/flowModel"
-import { getUserFlow, getUserFlowId, User, UserModel } from "src/db/models/userModel";
+import { flowById, getFlow, getFlowMember } from "src/db/types";
+//import { Content, ContentModel } from "src/db/models/contentModel";
+//import { Flow, FlowModel, getFlow } from "src/db/models/flowModel";
+//import { getUserFlow, getUserFlowId, User, UserModel } from "src/db/models/userModel";
 import { IContext } from "src/global";
 import { OutOfScopeError, PermissionDeniedError } from "src/handling/graphql";
-import { getEffectivePermissions, verifyPermissionValues } from "./permissions";
+import { db } from "src/server";
+import { FlowPermissions, getEffectivePermissions, permsOf, verifyPermissionValues } from "./permissions";
 import { flowPresets } from "./presets";
 import { flowToQuery } from "./query";
 
@@ -23,36 +25,50 @@ const esg = new ExtSnowflakeGenerator(0);
 const flowResolver = {
     Query: {
         getFlow: async function (_, {id}: { id: string }, {auth, userflow}: IContext) {
-            var flow = await getFlow(id);
-            if (!(checkScope(auth, Scopes.FlowViewPrivate) || flow.public_permissions.view != "deny")) throw new OutOfScopeError("getFlow", Scopes.FlowViewPrivate);
+            var flow = await db.flow.findFirst({where: flowById(id), include: {parent: true}, rejectOnNotFound: false});
+            var usermember = await getFlowMember(userflow, flow);
+            if (!(checkScope(auth, Scopes.FlowViewPrivate) || (permsOf(flow).public.view != "deny"))) throw new OutOfScopeError("getFlow", Scopes.FlowViewPrivate);
             if (!flow) return null;
-            await flow.populate("parent");
+            //await flow.populate("parent");
             //const userflow = (await (await UserModel.findById(auth.userId)).flow);
-            const perms = (await getEffectivePermissions(await UserModel.findById(auth.userId), flow));
-            if (!(flow.members.includes(userflow._id) || flow.public_permissions.view != "deny") 
+            const perms = (await getEffectivePermissions(flow, usermember));
+            if (!(usermember.state == MembershipState.JOINED || permsOf(flow).public.view != "deny") 
             && perms.view == "allow") return null;
             //return {...flow.toObject(), is_joined: flow.members.includes(userflow._id), following: [], id: flow.id};
             return flowToQuery(flow, userflow);
         },
         getFollowedFlows: async function (_, data, {auth, userflow}: IContext) {
             //const flow = await getUserFlow(auth.userId);
-            await userflow.populate("following");
+            //await userflow.populate("following");
+            const _following = await db.flow.findUnique({where: {snowflake: userflow.snowflake}, select: {following: true}}).following()
             //return flow.following.map((v: Flow, i,a) => ({...v.toObject(), id: v.id}));
-            return userflow.following.map((v: Flow, i,a) => flowToQuery(v, userflow));
+            return _following.map((v: Flow, i,a) => flowToQuery(v, userflow));
         },
         getJoinedFlows: async function (_, data, {auth, userflow}: IContext) {
             //const flow = await getUserFlow(auth.userId);
-            var flows = await FlowModel.find({"members": userflow._id});
+            var flows = await db.flow.findMany({
+                where: {
+                    members: {
+                        some: {
+                            state: MembershipState.JOINED,
+                            memberId: userflow.snowflake
+                        }
+                    }
+                }
+            });
             //return flows.map((v: Flow, i,a) => ({...v.toObject(), id: v.id}));
             return flows.map((v: Flow, i,a) => flowToQuery(v, userflow));
         }
     },
     Flow: {
-        members: async function ({_id}: {_id: Types.ObjectId}, {limit}: { limit?: number }, {auth, userflow}: IContext) {
-            var flow = await FlowModel.findById(_id).populate("members");
+        members: async function ({snowflake}: Partial<Flow>, {limit}: { limit?: number }, {auth, userflow}: IContext) {
+            //var flow = await FlowModel.findById(_id).populate("members");
             if (Math.abs(limit) != limit) limit = 0;
-            return flow.members.slice(limit > 0 ? -(limit) : 0)
-            .map((v: Flow, i,a) => flowToQuery(v, userflow));
+            //return flow.members.slice(limit > 0 ? -(limit) : 0)
+            return (await db.flow.findUnique({where: {snowflake}, select: {members: true}})
+            .members({take: limit ?? 100, include: {member: true}}))
+            .map((v: any,i,a) => flowToQuery(v.member(), userflow));
+            // TODO: set up this to return the FlowMember object
         },
         content: async function (flow: Partial<Flow>, {limit = 100}: { limit?: number }, {auth, userflow}: IContext) {
             if (!(checkScope(auth, Scopes.FlowViewPrivate) || flow.public_permissions.view == "allow")) return null;

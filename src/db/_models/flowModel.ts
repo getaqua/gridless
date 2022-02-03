@@ -56,7 +56,6 @@ const AllowDeny = {
 }
 
 const FlowPermissionSchema = new mongoose.Schema({
-  // Mongoose will not validate the values of 
   join: AllowDeny,
   post: AllowDeny,
   read: AllowDeny,
