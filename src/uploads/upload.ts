@@ -5,11 +5,11 @@ import { createReadStream, createWriteStream } from "fs";
 import { checkScope } from "src/auth/permissions";
 import { ILoggedIn, Scopes } from "src/auth/UserModel";
 import { LocalStorageConfigEntry } from "./config";
-import { AttachmentModel } from "src/db/models/attachmentModel";
 import { ExtSnowflakeGenerator } from "extended-snowflake";
 import { Stream } from "stream";
 import formidable, { File } from 'formidable';
 import { ReadStream } from "fs";
+import { db } from "src/server";
 
 const esg = new ExtSnowflakeGenerator(0);
 
@@ -88,15 +88,15 @@ export async function uploadFileEndpoint(req: express.Request & {user?: ILoggedI
     
     //const index = (globalThis.staticConfig.get("storage") as YAMLSeq).items.find((v,i,a) => v.toJSON().id == target.id);
 
-    await AttachmentModel.create({
+    await db.attachment.create({data: {
         filename: ogfilename,
         original_file: hash+extension,
         original_mime_type: type,
-        index: target.id,
+        index: parseInt(target.id),
         app: req.user?.appId,
         user: req.user?.userId,
         snowflake: tempname
-    });
+    }});
 
     // TODO TOO: check if it exists and skip rewriting the file
     //await fs.writeFile(target.path+"/"+hash+extension, file);
