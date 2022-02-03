@@ -16,8 +16,9 @@ import contentResolver from 'src/content/resolver';
 import { GraphQLSchema } from 'graphql';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
-import { getUserFlow } from 'src/db/models/userModel';
+//import { getUserFlow } from 'src/db/models/userModel';
 import { IContext } from 'src/global';
+import { db } from 'src/server';
 
 const log = debug("gridless:graphql");
 
@@ -75,7 +76,7 @@ export const server = new ApolloServer({
         throw new AuthenticationError('The token is invalid.');
       }
     } else throw new AuthenticationError('You must be logged in.');
-    let userflow = await getUserFlow(auth.userId);
+    let userflow = await db.flow.findFirst({where: {parent: null, owner: auth.userId}});
     return {auth, userflow} as IContext;
   },
 });

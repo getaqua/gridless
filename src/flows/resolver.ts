@@ -66,8 +66,8 @@ const flowResolver = {
             if (Math.abs(limit) != limit) limit = 0;
             //return flow.members.slice(limit > 0 ? -(limit) : 0)
             return (await db.flow.findUnique({where: {snowflake}, select: {members: true}})
-            .members({take: limit ?? 100, include: {member: true}}))
-            .map((v: any,i,a) => flowToQuery(v.member(), userflow));
+            .members({take: limit ?? 100, select: {member: true}}))
+            .map((v,i,a) => flowToQuery(v.member, userflow));
             // TODO: set up this to return the FlowMember object
         },
         content: async function (flow: Partial<Flow>, {limit = 100}: { limit?: number }, {auth, userflow}: IContext) {
@@ -90,15 +90,10 @@ const flowResolver = {
         },
         is_following: async function (flow: Partial<Flow>, _, {auth, userflow}: IContext) {
             // TODO: check scopes and/or permissions
-            const _following = db.flow.findUnique({
-                where: {snowflake: userflow.snowflake}, 
-                select: {
-                    following: true,
-                },
-            });
-            return (await _following.following({
-                where: {snowflake: flow.snowflake}
-            })).length > 0;
+            return await db.flow.count({where: {AND: [
+                flowById(flow.snowflake),
+                {followedBy: {some: {snowflake: userflow.snowflake}}}
+            ]}}) > 0;
         },
     },
     Mutation: {
