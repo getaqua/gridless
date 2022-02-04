@@ -2,7 +2,7 @@
 
 import { NextFunction, Request, Response } from "express";
 import jsonwebtoken from 'jsonwebtoken';
-import { UserModel } from "src/db/models/userModel";
+import { db } from "src/server";
 import { checkScope } from "./permissions";
 import { ILoggedIn, Scopes, TokenType } from "./UserModel";
 
@@ -31,8 +31,8 @@ export function ensureLoggedIn(using: TokenType | null = null) {
                 : req.signedCookies.jwt == _token ? TokenType.COOKIE
                 : TokenType.INVALID
             } as ILoggedIn;
-            const _user = await UserModel.countDocuments({_id: user.userId, authorizedAppCIDs: token["client_id"]});
-            const isAppAuthorized = _user == 1;
+            const _authorizedCount = await db.user.count({where: {snowflake: user.userId, authorizedAppCIDs: token["client_id"]}});
+            const isAppAuthorized = _authorizedCount > 0;
             if (user.tokenType == TokenType.APPTOKEN && !isAppAuthorized) return next("gridless:expiredtoken");
             if (user.tokenType == TokenType.INVALID) return next("gridless:invalidtoken");
             if (using != null && using != user.tokenType) return next("gridless:wrongtokentype");
