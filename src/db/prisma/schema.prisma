@@ -167,7 +167,7 @@ model Application {
 }
 
 model SystemConfig {
-  singleton Int  @id @default(0) @ignore
+  singleton Int  @id @default(0)
   auth      Json
 }
 
