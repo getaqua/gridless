@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import jsonwebtoken from 'jsonwebtoken';
 import { db } from "src/server";
 import { checkScope } from "./permissions";
-import { ILoggedIn, Scopes, TokenType } from "./UserModel";
+import { ILoggedIn, Scopes, TokenType } from "./types";
 
 /// Determine if the user is logged in with the given method.
 /// The user ID is available at `req.user`.

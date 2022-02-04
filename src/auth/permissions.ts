@@ -1,4 +1,4 @@
-import { CustomScope, ILoggedIn, Scopes, TokenType } from "./UserModel";
+import { CustomScope, ILoggedIn, Scopes, TokenType } from "./types";
 
 export function checkScope(auth: ILoggedIn, scope: Scopes | CustomScope) {
     // Conditions in which a given scope is always granted.

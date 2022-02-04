@@ -1,5 +1,5 @@
 import { ApolloError } from "apollo-server-express";
-import { Scopes } from "src/auth/UserModel";
+import { Scopes } from "src/auth/types";
 
 /** The application is missing the scope 
  * required for a feature it tried to use. */

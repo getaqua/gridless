@@ -3,7 +3,7 @@ import { createHash } from "crypto";
 import fs from "fs/promises";
 import { createReadStream, createWriteStream } from "fs";
 import { checkScope } from "src/auth/permissions";
-import { ILoggedIn, Scopes } from "src/auth/UserModel";
+import { ILoggedIn, Scopes } from "src/auth/types";
 import { LocalStorageConfigEntry } from "./config";
 import { ExtSnowflakeGenerator } from "extended-snowflake";
 import { Stream } from "stream";

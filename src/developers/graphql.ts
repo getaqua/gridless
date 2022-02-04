@@ -1,8 +1,7 @@
 import { ApolloServer, AuthenticationError } from 'apollo-server-express';
 import jsonwebtoken from 'jsonwebtoken';
 import { randomBytes } from 'crypto';
-import { ILoggedIn, TokenType } from 'src/auth/UserModel';
-import { Application, ApplicationModel } from 'src/db/models/applicationModel';
+import { ILoggedIn, TokenType } from 'src/auth/types';
 import { ESMap } from 'typescript';
 import devschema from './schema.gql';
 import { makeExecutableSchema } from '@graphql-tools/schema';

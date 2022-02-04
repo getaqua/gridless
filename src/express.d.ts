@@ -1,4 +1,4 @@
-import { ILoggedIn } from "./auth/UserModel";
+import { ILoggedIn } from "./auth/types";
 
 declare global {
     namespace Express {

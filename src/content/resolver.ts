@@ -1,6 +1,6 @@
 import debug from "debug";
 import { checkScope } from "src/auth/permissions";
-import { ILoggedIn, Scopes } from "src/auth/UserModel";
+import { ILoggedIn, Scopes } from "src/auth/types";
 import { getEffectivePermissions } from "src/flows/permissions";
 import { ExtSnowflakeGenerator } from "extended-snowflake";
 import { OutOfScopeError, PermissionDeniedError } from "src/handling/graphql";

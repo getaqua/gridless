@@ -4,7 +4,7 @@ import express from 'express';
 import debug from 'debug';
 import fs from 'fs/promises';
 import jsonwebtoken from 'jsonwebtoken';
-import { ILoggedIn } from './UserModel';
+import { ILoggedIn } from './types';
 import { Application } from '@prisma/client';
 import { db } from 'src/server';
 

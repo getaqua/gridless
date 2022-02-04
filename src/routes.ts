@@ -13,7 +13,7 @@ import { getAuthConfig } from './db/models/authConfigModel';
 import { extraStepsMiddleware } from './auth/extrasteps';
 import { server as devgql } from './developers/graphql';
 import { server as gql } from './graphql/middleware';
-import { TokenType } from './auth/UserModel';
+import { TokenType } from './auth/types';
 import { uploadFileEndpoint } from './uploads/upload';
 import { viewFileEndpoint } from './uploads/download';
 

@@ -1,4 +1,3 @@
-import { ILoggedIn } from "src/auth/UserModel";
 import { getEffectivePermissions } from "src/flows/permissions";
 import { flowToQuery } from "src/flows/query";
 import flowResolver from "src/flows/resolver";

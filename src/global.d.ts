@@ -1,6 +1,6 @@
 import { Flow } from "@prisma/client";
 import { Document } from "yaml";
-import { ILoggedIn } from "./auth/UserModel";
+import { ILoggedIn } from "./auth/types";
 import { FlowPermissions } from "./flows/permissions";
 // import { AuthConfigPage } from "./db/models/authConfigModel";
 // import { Flow } from "./db/models/flowModel";

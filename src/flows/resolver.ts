@@ -5,7 +5,7 @@ import { ExtSnowflakeGenerator } from "extended-snowflake";
 //import { scopeCheck } from "src/auth/attachments";
 import { checkScope } from "src/auth/permissions";
 import { isValidUsername } from "src/auth/signup";
-import { CustomScope, ILoggedIn, Scopes, TokenType } from "src/auth/UserModel"
+import { CustomScope, ILoggedIn, Scopes, TokenType } from "src/auth/types"
 import { mapContent } from "src/content/map";
 import { flowById, getFlow, getFlowMember } from "src/db/types";
 //import { Content, ContentModel } from "src/db/models/contentModel";

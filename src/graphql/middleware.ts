@@ -9,7 +9,7 @@ import errorSchema from './schemas/errors.graphql';
 import flowSchema from './schemas/flow.graphql';
 import userResolver from '../users/resolver';
 import debug from 'debug';
-import { ILoggedIn, TokenType } from '../auth/UserModel';
+import { ILoggedIn, TokenType } from '../auth/types';
 import flowResolver from 'src/flows/resolver';
 import systemResolver from './system';
 import contentResolver from 'src/content/resolver';
