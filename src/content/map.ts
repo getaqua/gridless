@@ -1,7 +1,7 @@
 // import { Attachment, AttachmentModel } from "src/db/models/attachmentModel";
 // import { Content } from "src/db/models/contentModel";
 // import { Flow } from "src/db/models/flowModel";
-import { Attachment, Content, Flow } from "@prisma/client";
+import { Attachment, Content, Flow } from "src/db/prisma/client";
 import { flowToQuery } from "src/flows/query";
 import { db } from "src/server";
 

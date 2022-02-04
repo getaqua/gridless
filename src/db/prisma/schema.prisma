@@ -2,7 +2,9 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x"]
+  output        = "client"
 }
 
 datasource db {
@@ -83,6 +85,10 @@ model User {
   /// in the near future.
   authorizedAppCIDs String[]
   flow              Flow     @relation(fields: [id], references: [id])
+
+  // These are used as a fallback when Redis is not set up.
+  currentlyAuthorizingToken  String? @unique
+  currentlyAuthorizingScopes String[]
 }
 
 model Content {

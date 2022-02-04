@@ -59,6 +59,7 @@ const resolver = {
                 data: {
                     snowflake: esg.next(),
                     owner: context.auth.userId,
+                    client_id: "AQUA-"+randomBytes(36).toString("hex"),
                     ...data
                 }
             });

@@ -1,4 +1,4 @@
-import { Flow, FlowMember, Prisma } from '@prisma/client'
+import { Flow, FlowMember, Prisma } from 'src/db/prisma/client'
 import { FlowPermissions } from 'src/flows/permissions'
 import { db } from 'src/server'
 

@@ -1,4 +1,7 @@
 -- CreateEnum
+CREATE TYPE "MembershipState" AS ENUM ('JOINED', 'KICKED', 'BANNED', 'LEFT');
+
+-- CreateEnum
 CREATE TYPE "ApplicationType" AS ENUM ('CLIENT', 'BOT');
 
 -- CreateTable
@@ -20,12 +23,25 @@ CREATE TABLE "Flow" (
 );
 
 -- CreateTable
+CREATE TABLE "FlowMember" (
+    "state" "MembershipState",
+    "permissions" JSONB NOT NULL,
+    "owner" BOOLEAN NOT NULL DEFAULT false,
+    "flowId" TEXT NOT NULL,
+    "memberId" TEXT NOT NULL,
+
+    CONSTRAINT "FlowMember_pkey" PRIMARY KEY ("flowId","memberId")
+);
+
+-- CreateTable
 CREATE TABLE "User" (
     "snowflake" TEXT NOT NULL,
     "id" TEXT NOT NULL,
     "username" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "authorizedAppCIDs" TEXT[],
+    "currentlyAuthorizingToken" TEXT,
+    "currentlyAuthorizingScopes" TEXT[],
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("snowflake")
 );
@@ -103,6 +119,9 @@ CREATE UNIQUE INDEX "User_id_key" ON "User"("id");
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "User_currentlyAuthorizingToken_key" ON "User"("currentlyAuthorizingToken");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Application_client_id_key" ON "Application"("client_id");
 
 -- CreateIndex
@@ -119,6 +138,12 @@ CREATE INDEX "_AttachmentToContent_B_index" ON "_AttachmentToContent"("B");
 
 -- AddForeignKey
 ALTER TABLE "Flow" ADD CONSTRAINT "Flow_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "Flow"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "FlowMember" ADD CONSTRAINT "FlowMember_flowId_fkey" FOREIGN KEY ("flowId") REFERENCES "Flow"("snowflake") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "FlowMember" ADD CONSTRAINT "FlowMember_memberId_fkey" FOREIGN KEY ("memberId") REFERENCES "Flow"("snowflake") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "User" ADD CONSTRAINT "User_id_fkey" FOREIGN KEY ("id") REFERENCES "Flow"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

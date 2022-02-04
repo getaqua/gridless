@@ -9,7 +9,7 @@ import { flowToQuery } from "src/flows/query";
 import { IContext } from "src/global";
 import { db } from "src/server";
 import { flowById, getFlowMember } from "src/db/types";
-import { Content, Prisma } from "@prisma/client";
+import { Content, Prisma } from "src/db/prisma/client";
 
 const log = debug("gridless:content:resolver");
 

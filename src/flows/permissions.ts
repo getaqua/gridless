@@ -1,4 +1,4 @@
-import { Flow, FlowMember, MembershipState, Prisma } from "@prisma/client";
+import { Flow, FlowMember, MembershipState, Prisma } from "src/db/prisma/client";
 import { UserInputError } from "apollo-server-core";
 import { db } from "src/server";
 

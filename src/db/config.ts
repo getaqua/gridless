@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "src/db/prisma/client";
 import { db } from "src/server";
 
 /// The authorization configuration for 
@@ -19,17 +19,22 @@ export function getAuthConfig(): AuthConfig {
     if (document == null) {
       let _am = await generateDefaultConfig();
       globalThis.__authConfigCache = _am.auth;
-    } else globalThis.__authConfigCache = document;
+    } else globalThis.__authConfigCache = document.auth;
   });
-  return globalThis.__authConfigCache;
+  return {
+    ...defaults.auth,
+    ...globalThis.__authConfigCache
+  }
 }
 
 function generateDefaultConfig() {
   return db.systemConfig.create({
-    data: {
-      auth: {
-        registrationEnabled: true
-      }
-    }
+    data: defaults as any
   });
+}
+
+const defaults = {
+  auth: {
+    registrationEnabled: true
+  } as AuthConfig
 }

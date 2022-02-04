@@ -1,4 +1,4 @@
-import { Flow, FlowMember, MembershipState, Prisma, PrismaPromise } from "@prisma/client";
+import { Flow, FlowMember, MembershipState, Prisma, PrismaPromise } from "src/db/prisma/client";
 import { ApolloError, UserInputError } from "apollo-server-core";
 import debug from "debug";
 import { ExtSnowflakeGenerator } from "extended-snowflake";
@@ -17,6 +17,7 @@ import { db } from "src/server";
 import { FlowPermissions, getEffectivePermissions, permsOf, verifyPermissionValues } from "./permissions";
 import { flowPresets } from "./presets";
 import { flowToQuery } from "./query";
+import { mapMember } from "./member";
 
 const log = debug("gridless:flow:resolver");
 
@@ -26,9 +27,9 @@ const flowResolver = {
     Query: {
         getFlow: async function (_, {id}: { id: string }, {auth, userflow}: IContext) {
             var flow = await db.flow.findFirst({where: flowById(id), /*include: {parent: true},*/ rejectOnNotFound: false});
-            var usermember = await getFlowMember(userflow, flow);
             if (!(checkScope(auth, Scopes.FlowViewPrivate) || (permsOf(flow).public.view != "deny"))) throw new OutOfScopeError("getFlow", Scopes.FlowViewPrivate);
             if (!flow) return null;
+            var usermember = await getFlowMember(userflow, flow);
             //await flow.populate("parent");
             //const userflow = (await (await UserModel.findById(auth.userId)).flow);
             const perms = (await getEffectivePermissions(flow, usermember));
@@ -65,10 +66,7 @@ const flowResolver = {
             //var flow = await FlowModel.findById(_id).populate("members");
             if (Math.abs(limit) != limit) limit = 0;
             //return flow.members.slice(limit > 0 ? -(limit) : 0)
-            return (await db.flow.findUnique({where: {snowflake}, select: {members: true}})
-            .members({take: limit ?? 100, select: {member: true}}))
-            .map((v,i,a) => flowToQuery(v.member, userflow));
-            // TODO: set up this to return the FlowMember object
+            return (await db.flowMember.findMany({where: {flowId: snowflake}})).map(mapMember);
         },
         content: async function (flow: Partial<Flow>, {limit = 100}: { limit?: number }, {auth, userflow}: IContext) {
             if (!(checkScope(auth, Scopes.FlowViewPrivate) || permsOf(flow as Flow).public.view == "allow")) return null;
@@ -84,11 +82,11 @@ const flowResolver = {
             }))
             .map<any>((c) => mapContent(c, userflow));
         },
-        effective_permissions: async function (flow: Partial<Flow>, _, {auth, userflow}: IContext) {
+        effectivePermissions: async function (flow: Partial<Flow>, _, {auth, userflow}: IContext) {
             //if (!flow) return null;
             return await getEffectivePermissions(userflow, flow as any);
         },
-        is_following: async function (flow: Partial<Flow>, _, {auth, userflow}: IContext) {
+        isFollowing: async function (flow: Partial<Flow>, _, {auth, userflow}: IContext) {
             // TODO: check scopes and/or permissions
             return await db.flow.count({where: {AND: [
                 flowById(flow.snowflake),
@@ -125,19 +123,26 @@ const flowResolver = {
             var doc: Prisma.FlowCreateArgs = {
                 data: {
                     ...flowPresets[flow.preset],
-                    ...flow,
+                    ...flow as any,
                     members: {
                         create: {
-                            member: userflow,
+                            member: {
+                                connect: {snowflake: userflow.snowflake}
+                            },
+                            memberId: userflow.snowflake,
                             owner: true,
+                            permissions: {},
                             state: MembershipState.JOINED
                         }
                     },
-                    parent: parent, owner: parent.owner,
+                    parent: {
+                        connect: {snowflake: parent.snowflake}
+                    },
+                    owner: parent.owner,
                     //members: [userflow],
                     id: "//"+flow.id,
                     snowflake: esg.next(),
-                    alternative_ids: ["//"+flow.id]
+                    //alternative_ids: ["//"+flow.id]
                 }
             };
             //return {...await (await FlowModel.create(doc)).toJSON(), id: doc.id};

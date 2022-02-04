@@ -1,4 +1,4 @@
-import { Flow } from "@prisma/client";
+import { Flow } from "src/db/prisma/client";
 import { Document } from "yaml";
 import { ILoggedIn } from "./auth/types";
 import { FlowPermissions } from "./flows/permissions";

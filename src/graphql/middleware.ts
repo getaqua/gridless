@@ -7,6 +7,7 @@ import rootSchema from './schemas/root.graphql';
 import contentSchema from './schemas/content.graphql';
 import errorSchema from './schemas/errors.graphql';
 import flowSchema from './schemas/flow.graphql';
+import flowMemberSchema from './schemas/member.graphql';
 import userResolver from '../users/resolver';
 import debug from 'debug';
 import { ILoggedIn, TokenType } from '../auth/types';
@@ -19,11 +20,12 @@ import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
 //import { getUserFlow } from 'src/db/models/userModel';
 import { IContext } from 'src/global';
 import { db } from 'src/server';
+import { memberResolver } from 'src/flows/member';
 
 const log = debug("gridless:graphql");
 
-const types = mergeTypeDefs([userSchema, flowSchema, rootSchema, contentSchema, errorSchema]);
-const resolvers = mergeResolvers([userResolver, flowResolver, systemResolver, contentResolver]);
+const types = mergeTypeDefs([userSchema, flowMemberSchema, flowSchema, rootSchema, contentSchema, errorSchema]);
+const resolvers = mergeResolvers([userResolver, memberResolver, flowResolver, systemResolver, contentResolver]);
 
 const schema = makeExecutableSchema({
   typeDefs: types,

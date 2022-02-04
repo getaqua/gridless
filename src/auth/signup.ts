@@ -8,6 +8,8 @@ import { needsExtraSteps } from './extrasteps';
 import { flowPresets } from 'src/flows/presets';
 import { ExtSnowflakeGenerator } from 'extended-snowflake';
 import { db } from 'src/server';
+import { getFlowMember } from 'src/db/types';
+import { MembershipState } from 'src/db/prisma/client';
 
 const log = debug("gridless:auth:signup");
 
@@ -72,9 +74,17 @@ export async function endpoint(req: express.Request, res: express.Response, next
                     //alternative_ids: [_newFlowSnowflake],
                     id: "//"+req.body?.["username"],
                     owner: _newUserSnowflake,
-                    members: [_newUserSnowflake],
-                    following: [_newUserSnowflake],
-                    ...flowPresets["channel"],
+                    //members: [_newUserSnowflake],
+                    members: {
+                        create: {
+                            memberId: _newUserSnowflake,
+                            owner: true,
+                            permissions: {},
+                            state: MembershipState.JOINED
+                        }
+                    },
+                    //following: [_newUserSnowflake],
+                    ...flowPresets["channel"] as any,
                     snowflake: _newUserSnowflake
                 }
             }

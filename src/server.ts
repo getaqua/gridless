@@ -1,6 +1,6 @@
 import 'graphql-import-node';
 //import Mongoose, { ConnectOptions } from 'mongoose';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from 'src/db/prisma/client';
 import express from 'express';
 import * as yaml from 'yaml';
 import * as fs from 'fs';
@@ -9,8 +9,6 @@ import routes from './routes';
 import cookieParser from 'cookie-parser';
 import consolidate from 'consolidate';
 import chalk from 'chalk';
-import { server as graphql } from './graphql/middleware';
-//import { getAuthConfig } from './db/models/authConfigModel';
 
 const log = debug("gridless:initserver");
 
@@ -20,7 +18,8 @@ globalThis.staticConfig = staticConfig;
 
 log("Starting database...");
 export var db: PrismaClient = new PrismaClient({
-  errorFormat: "pretty"
+  rejectOnNotFound: false,
+  //errorFormat: "pretty"
 });
 
 (async () => {

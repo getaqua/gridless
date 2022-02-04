@@ -43,29 +43,27 @@ along with access controls, badges, and posting as the Flow.
 """
 type Flow implements FlowEntity {
     name: String!
-    avatar_url: String
+    avatarUrl: String
     "Banners display above or behind the name and/or avatar of the Flow."
-    banner_url: String
+    bannerUrl: String
     "Taglines are 64 characters or less, and are often displayed above the description."
     tagline: String
     description: String
     id: ID!
-    alternative_ids: [String!]! @deprecated
     snowflake: String!
     # Coming soon, maybe: display settings, and such
-    public_permissions: FlowPermissions!
-    joined_permissions: FlowPermissions!
-    member_permissions: Dict
+    publicPermissions: FlowPermissions!
+    joinedPermissions: FlowPermissions!
     #badges: Badge
     owner: PartialFlow!
     parent: Flow
-    is_joined: Boolean!
-    is_following: Boolean!
-    members(limit: Int): [Flow!]
-    member_count: Int!
+    isJoined: Boolean!
+    isFollowing: Boolean!
+    members(limit: Int): [FlowMember!]
+    memberCount: Int!
     content(limit: Int): [Content!]
-    effective_permissions(for: String): FlowPermissions!
-    display_flags: [String!]!
+    effectivePermissions(for: String): FlowPermissions!
+    displayFlags: [String!]!
 }
 type PartialFlow {
     id: String!
@@ -92,7 +90,7 @@ input NewFlow {
     """
     The avatar or profile picture for the Flow.
     """
-    avatar_url: String
+    avatarUrl: String
 }
 input PatchedFlow {
     """The Flow's name."""
@@ -100,17 +98,17 @@ input PatchedFlow {
     """The Flow's description."""
     description: String
     """The avatar or profile picture for the Flow."""
-    avatar_url: String
+    avatarUrl: String
     "Banners display above or behind the name and/or avatar of the Flow."
-    banner_url: String
+    bannerUrl: String
     "Taglines are 64 characters or less, and are often displayed above the description."
     tagline: String
     """Permissions for users who have not joined the Flow.
     Permissions given will be patched on top of the existing permissions."""
-    public_permissions: UpdatedFlowPermissions
+    publicPermissions: UpdatedFlowPermissions
     """Default permissions for users who _have_ joined the Flow.
     Permissions given will be patched on top of the existing permissions."""
-    joined_permissions: UpdatedFlowPermissions
+    joinedPermissions: UpdatedFlowPermissions
 }
 """
 A preset with which to configure a Flow's initial settings.
@@ -157,7 +155,7 @@ enum AllowDeny {
 type FlowPermissions {
     """
     Whether a user can join the Flow. 
-    Only applicable for public_permissions.
+    Only applicable for publicPermissions.
     """
     join: AllowDeny
     """Whether the user can post Content to this Flow."""

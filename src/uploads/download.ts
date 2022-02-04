@@ -7,7 +7,7 @@ import debug from "debug";
 import chalk from "chalk";
 //import { Attachment, AttachmentModel } from "src/db/models/attachmentModel";
 import { fileURLToPath } from "url";
-import { Attachment } from "@prisma/client";
+import { Attachment } from "src/db/prisma/client";
 import { db } from "src/server";
 
 const log = debug("gridless:media");

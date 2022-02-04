@@ -7,7 +7,6 @@ type User implements FlowEntity {
     name: String!
     nickname: String
     id: ID!
-    alternative_ids: [String!]!
 }
 
 """
