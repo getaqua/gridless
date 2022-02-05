@@ -2,6 +2,8 @@
 // import { Content } from "src/db/models/contentModel";
 // import { Flow } from "src/db/models/flowModel";
 import { Attachment, Content, Flow } from "src/db/prisma/client";
+import { getFlowMember } from "src/db/types";
+import { mapMember } from "src/flows/member";
 import { flowToQuery } from "src/flows/query";
 import { db } from "src/server";
 
@@ -27,9 +29,12 @@ export async function mapContent(content: Partial<Content> & {
     
     return {
         ...content,
-        author: content.anonymous 
-        ? flowToQuery(content.inFlow as Flow, userflow)
-        : flowToQuery(await db.flow.findUnique({where: {snowflake: content.authorId}}) as Flow, userflow),
+        // author: content.anonymous 
+        // ? flowToQuery(content.inFlow as Flow, userflow)
+        // : flowToQuery(await db.flow.findUnique({where: {snowflake: content.authorId}}) as Flow, userflow),
+        author: content.anonymous
+        ? mapMember(await getFlowMember(content.inFlow, content.inFlow))
+        : mapMember(await getFlowMember(await db.flow.findUnique({where: {snowflake: content.authorId}}) as Flow, content.inFlow)),
         yours: content.authorId == userflow.snowflake,
         attachments,
         inFlowId: (content.inFlow as Flow).id,

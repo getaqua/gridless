@@ -35,7 +35,10 @@ const contentResolver = {
             //return (await ContentModel.find({inFlow: {$in: flow.following as Types.ObjectId[]}}).sort({timestamp: -1}).limit(limit))
             return (await db.content.findMany({
                 where: {inFlowId: {in: following.following.map((v) => v.snowflake)}},
-                include: {attachments: true, inFlow: true}
+                include: {attachments: true, inFlow: true},
+                orderBy: {
+                    timestamp: "desc"
+                }
             }))
             .map<any>((c) => mapContent(c, userflow));
         }
@@ -63,7 +66,13 @@ const contentResolver = {
                         }))
                     },
                     timestamp: new Date(Date.now()),
-                    authorId: userflow.snowflake,
+                    //authorId: userflow.snowflake,
+                    author: {
+                        connect: {flowId_memberId: {
+                            flowId: flow.snowflake,
+                            memberId: userflow.snowflake
+                        }}
+                    },
                     inFlow: {
                         connect: {
                             snowflake: flow.snowflake   

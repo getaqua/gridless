@@ -41,8 +41,6 @@ model Flow {
   displayFlags      String[]
   /// Content posted in the Flow.
   content           Content[]    @relation("ContentToFlow")
-  /// Content posted BY the Flow.
-  authoredContent   Content[]    @relation("ContentToAuthorFlow") @ignore
   members           FlowMember[] @relation("MemberOfFlow")
   memberOf          FlowMember[] @relation("FlowToMember")
 }
@@ -55,6 +53,10 @@ model FlowMember {
   permissions Json
   /// Whether this member is the owner of the Flow.
   owner       Boolean          @default(false)
+
+  // ===  LINKED  === //
+  /// Content posted BY the Flow.
+  authoredContent Content[] @relation("ContentToAuthor")
 
   // === METADATA === //
   /// The Flow that this member is a member of.
@@ -87,7 +89,7 @@ model User {
   flow              Flow     @relation(fields: [id], references: [id])
 
   // These are used as a fallback when Redis is not set up.
-  currentlyAuthorizingToken  String? @unique
+  currentlyAuthorizingToken  String?  @unique
   currentlyAuthorizingScopes String[]
 }
 
@@ -102,23 +104,23 @@ model Content {
 
   // === METADATA === //
   /// A unique identifier for this Content.
-  snowflake       String    @id
+  snowflake       String      @id
   /// Whether or not the Content is pinned.
-  pinned          Boolean   @default(false)
+  pinned          Boolean     @default(false)
   /// The author of this Content.
-  author          Flow?     @relation("ContentToAuthorFlow", fields: [authorId], references: [snowflake], onDelete: SetNull)
+  author          FlowMember? @relation("ContentToAuthor", fields: [inFlowId, authorId], references: [flowId, memberId], onDelete: SetNull)
   authorId        String
   /// The Flow this Content was posted in.
   /// This is how Content is found.
-  inFlow          Flow      @relation("ContentToFlow", fields: [inFlowId], references: [snowflake], onDelete: Cascade)
+  inFlow          Flow        @relation("ContentToFlow", fields: [inFlowId], references: [snowflake], onDelete: Cascade)
   inFlowId        String
   /// Whether to show `inFlow` as the `author` in the API.
-  anonymous       Boolean   @default(false)
+  anonymous       Boolean     @default(false)
   /// The time this was posted at. This should never be changed.
-  timestamp       DateTime  @default(now())
+  timestamp       DateTime    @default(now())
   /// The time of the last edit to this Content. This should change with every `updateContent` call.
   editedTimestamp DateTime?
-  forwardedBy     Content[] @relation("ContentToOrigin") @ignore
+  forwardedBy     Content[]   @relation("ContentToOrigin") @ignore
 }
 
 model Attachment {

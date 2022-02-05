@@ -73,7 +73,7 @@ const flowResolver = {
             if (!(checkScope(auth, Scopes.FlowReadPrivate) || 
                 (permsOf(flow as Flow).public.read == "allow" && checkScope(auth, Scopes.FlowReadPublic)))) return null;
             if (!flow) return null;
-            if ((await getEffectivePermissions(userflow, flow as any)).read != "allow") throw new PermissionDeniedError("getFlow.content", "read");
+            if ((await getEffectivePermissions(flow as any, await getFlowMember(userflow, flow as any))).read != "allow") throw new PermissionDeniedError("getFlow.content", "read");
             return (await db.content.findMany({
                 where: {inFlowId: flow.snowflake}, 
                 take: limit,
@@ -84,7 +84,7 @@ const flowResolver = {
         },
         effectivePermissions: async function (flow: Partial<Flow>, _, {auth, userflow}: IContext) {
             //if (!flow) return null;
-            return await getEffectivePermissions(userflow, flow as any);
+            return await getEffectivePermissions(flow as any, await getFlowMember(userflow, flow as any));
         },
         isFollowing: async function (flow: Partial<Flow>, _, {auth, userflow}: IContext) {
             // TODO: check scopes and/or permissions
@@ -93,6 +93,26 @@ const flowResolver = {
                 {followedBy: {some: {snowflake: userflow.snowflake}}}
             ]}}) > 0;
         },
+        isJoined: async function (flow: Partial<Flow>, _, {auth, userflow}: IContext) {
+            // TODO: check scopes and/or permissions
+            return await db.flowMember.count({where: {
+                flowId: flow.snowflake,
+                memberId: userflow.snowflake
+            }}) > 0;
+        },
+        // following: async function (flow: Partial<Flow>, _, {auth, userflow}: IContext) {
+        //     const perms = await getEffectivePermissions(flow as any, await getFlowMember(userflow, flow as any));
+        //     if (perms.update == "allow") return [];
+        //     const _following = await db.flow.findUnique({
+        //         where: {snowflake: flow.snowflake}, 
+        //         select: {
+        //             following: true,
+        //         },
+        //     });
+        //     return userflow != null 
+        //     ? (await _following.following).map((v,i,a) => v.snowflake) 
+        //     : []
+        // }
     },
     Mutation: {
         createFlow: async function (_, {flow, ownerId}: { flow: Partial<Flow> & { preset: string }, ownerId?: string }, {auth, userflow}: IContext) {
@@ -123,13 +143,13 @@ const flowResolver = {
             var doc: Prisma.FlowCreateArgs = {
                 data: {
                     ...flowPresets[flow.preset],
-                    ...flow as any,
+                    ...{...flow, preset: undefined},
                     members: {
                         create: {
                             member: {
                                 connect: {snowflake: userflow.snowflake}
                             },
-                            memberId: userflow.snowflake,
+                            //memberId: userflow.snowflake,
                             owner: true,
                             permissions: {},
                             state: MembershipState.JOINED
@@ -143,7 +163,7 @@ const flowResolver = {
                     id: "//"+flow.id,
                     snowflake: esg.next(),
                     //alternative_ids: ["//"+flow.id]
-                }
+                } as any
             };
             //return {...await (await FlowModel.create(doc)).toJSON(), id: doc.id};
             var newFlow = await db.flow.create(doc);//FlowModel.create(doc);
@@ -159,9 +179,9 @@ const flowResolver = {
             if (data.publicPermissions) verifyPermissionValues(data.publicPermissions as any, "public_permissions");
             if (data.joinedPermissions) verifyPermissionValues(data.joinedPermissions as any, "joined_permissions");
             //await flow.updateOne({$set: data});
-            const newFlow = db.flow.updateMany({where: flowById(id), data});
+            const newFlow = await db.flow.update({where: {snowflake: flow.snowflake}, data});
             /* , $unset: Array.from(data as unknown as any).filter(([key, value]) => (value == "")) */
-            return flowToQuery(newFlow[0], userflow);
+            return flowToQuery(newFlow, userflow);
         },
         joinFlow: async function (_, {id, inviteCode}: { id: string, inviteCode: string }, {auth, userflow}: IContext) {
             if (!checkScope(auth, Scopes.FlowJoin)) throw new OutOfScopeError("joinFlow", Scopes.FlowJoin);

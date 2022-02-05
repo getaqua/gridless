@@ -31,7 +31,7 @@ export function ensureLoggedIn(using: TokenType | null = null) {
                 : req.signedCookies.jwt == _token ? TokenType.COOKIE
                 : TokenType.INVALID
             } as ILoggedIn;
-            const _authorizedCount = await db.user.count({where: {snowflake: user.userId, authorizedAppCIDs: token["client_id"]}});
+            const _authorizedCount = user.tokenType == TokenType.COOKIE ? 1 : await db.user.count({where: {snowflake: user.userId, authorizedAppCIDs: {has: token["client_id"]}}});
             const isAppAuthorized = _authorizedCount > 0;
             if (user.tokenType == TokenType.APPTOKEN && !isAppAuthorized) return next("gridless:expiredtoken");
             if (user.tokenType == TokenType.INVALID) return next("gridless:invalidtoken");
