@@ -1,15 +1,15 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jsonwebtoken from 'jsonwebtoken';
-import { UserModel } from '../db/models/userModel';
 import debug from 'debug';
 import { defaultPasswordRequirements, IPasswordRequirements, passwordSymbols, usernameRequirements } from './requirements';
 import validator from 'password-validator';
 import { needsExtraSteps } from './extrasteps';
-import { Flow, FlowModel } from 'src/db/models/flowModel';
 import { flowPresets } from 'src/flows/presets';
-import { Types } from 'mongoose';
 import { ExtSnowflakeGenerator } from 'extended-snowflake';
+import { db } from 'src/server';
+import { getFlowMember } from 'src/db/types';
+import { MembershipState } from 'src/db/prisma/client';
 
 const log = debug("gridless:auth:signup");
 
@@ -38,31 +38,62 @@ export async function endpoint(req: express.Request, res: express.Response, next
         return next();
     }
     const pass = await bcrypt.hash(req.body?.["password"], 10);
-    const user = new UserModel({
-        username: req.body?.["username"],
-        // email: email,
-        id: "//"+req.body?.["username"],
-        password: pass,
-    });
-    await user.save();
-    const _newFlowId = new Types.ObjectId();
-    const _newFlowSnowflake = esg.next();
-    const flow = new FlowModel({
-        _id: _newFlowId,
-        name: req.body?.["username"],
-        // email: email,
-        alternative_ids: [_newFlowSnowflake],
-        id: "//"+req.body?.["username"],
-        owner: user._id,
-        members: [_newFlowId],
-        following: [_newFlowId],
-        ...flowPresets["channel"],
-        snowflake: _newFlowSnowflake
-    } as Flow);
-    await flow.save();
+    const _newUserSnowflake = esg.next();
+    // const user = new UserModel({
+    //     username: req.body?.["username"],
+    //     // email: email,
+    //     id: "//"+req.body?.["username"],
+    //     password: pass,
+    // });
+    // await user.save();
+    // const _newFlowId = new Types.ObjectId();
+    // const flow = new FlowModel({
+    //     _id: _newFlowId,
+    //     name: req.body?.["username"],
+    //     // email: email,
+    //     alternative_ids: [_newFlowSnowflake],
+    //     id: "//"+req.body?.["username"],
+    //     owner: user._id,
+    //     members: [_newFlowId],
+    //     following: [_newFlowId],
+    //     ...flowPresets["channel"],
+    //     snowflake: _newFlowSnowflake
+    // } as Flow);
+    // await flow.save();
+    const user = await db.user.create({
+        data: {
+            username: req.body?.["username"],
+            // email: email,
+            //id: "//"+req.body?.["username"],
+            password: pass,
+            snowflake: _newUserSnowflake,
+            flow: {
+                create: {
+                    name: req.body?.["username"],
+                    // email: email,
+                    //alternative_ids: [_newFlowSnowflake],
+                    id: "//"+req.body?.["username"],
+                    owner: _newUserSnowflake,
+                    //members: [_newUserSnowflake],
+                    members: {
+                        create: {
+                            memberId: _newUserSnowflake,
+                            owner: true,
+                            permissions: {},
+                            state: MembershipState.JOINED
+                        }
+                    },
+                    //following: [_newUserSnowflake],
+                    ...flowPresets["channel"] as any,
+                    snowflake: _newUserSnowflake
+                }
+            }
+        },
+
+    })
 
     var newToken = jsonwebtoken.sign(
-        { uid: user._id.toHexString(), regi: "new" },
+        { uid: _newUserSnowflake, regi: "new" },
         globalThis.staticConfig.get("auth").get("secret"),
         { expiresIn: '1y' }
     );
@@ -102,9 +133,9 @@ export async function isValidUsername(username: string): Promise<"SUCCESS" | "IN
     if (username.includes("/+/")) return "INVALID_USERNAME";
     // save the database checks for last!
     // If a previous check fails, these don't need to be run.
-    if (await UserModel.count({"username": username})) return "USERNAME_TAKEN";
-    if (await FlowModel.count({"id": "//"+username})) return "USERNAME_TAKEN";
-    if (await FlowModel.count({"alternative_ids": "//"+username})) return "USERNAME_TAKEN";
+    if (await db.user.count({where: {username: username}})) return "USERNAME_TAKEN";
+    if (await db.flow.count({where: {id: "//"+username}})) return "USERNAME_TAKEN";
+    //if (await db.flow.count({where: {"alternative_ids": "//"+username}})) return "USERNAME_TAKEN";
     // all tests pass! it's a valid username.
     return "SUCCESS";
 }
@@ -130,7 +161,7 @@ function isValidPassword(password: string): true | {messages: Array<string>} {
     if (passwordRequirements.maxDigits) _validator.has().not().digits(passwordRequirements.maxDigits+1);
     if (passwordRequirements.maxSymbols) _validator.has().not().symbols(passwordRequirements.maxSymbols+1);
     
-    const _validated = _validator.validate(password, {list: true})
+    const _validated = _validator.validate(password, {list: true}) as any[]
     if (_validated == []) {
         return true
     } else {

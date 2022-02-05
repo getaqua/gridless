@@ -1,4 +1,4 @@
-import { ILoggedIn } from "src/auth/UserModel";
+import { ILoggedIn } from "src/auth/types";
 import readJson from "read-package-json";
 
 const systemResolver = {

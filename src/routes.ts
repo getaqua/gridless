@@ -6,20 +6,21 @@ import debug from 'debug';
 import { urlencoded as bodyParser, json as jsonParser } from 'body-parser';
 import jwt from 'jsonwebtoken';
 import { ensureLoggedIn } from './auth/attachments';
-import { UserModel } from './db/models/userModel';
 import { errorHandler } from './handling/errors';
 import { defaultPasswordRequirements } from './auth/requirements';
-import { getAuthConfig } from './db/models/authConfigModel';
+import { getAuthConfig } from './db/config';
 import { extraStepsMiddleware } from './auth/extrasteps';
 import { server as devgql } from './developers/graphql';
 import { server as gql } from './graphql/middleware';
-import { TokenType } from './auth/UserModel';
+import { TokenType } from './auth/types';
 import { uploadFileEndpoint } from './uploads/upload';
 import { viewFileEndpoint } from './uploads/download';
+import { db } from './server';
 
 const log = debug("gridless:routes");
 
 const registrationDisabledCheck = (req, res, next) => {
+    log(getAuthConfig());
     if (getAuthConfig().registrationEnabled) next();
     else res.status(501).render("autherror.j2", {messages: ["Registration is disabled."]});
 }
@@ -59,7 +60,7 @@ export default async function routes() {
     router.post("/login", bodyParser({extended: true}) as RequestHandler, loginEndpoint);
     router.get("/success", ensureLoggedIn(), async function(req: express.Request, res: express.Response) {
         //const token = jwt.verify(req.cookies["jwt"], globalThis.staticConfig.get("auth").get("secret"));
-        return res.send({"success": true, ...req['user'], ...(await (await UserModel.findById(req['user'].userId).exec()).toJSON())});
+        return res.send({"success": true, ...req['user'], ...(await db.user.findUnique({where: {snowflake: req.user?.userId}}))});
     });
 
     router.get("/developers", ensureLoggedIn(TokenType.COOKIE), (req, res) => res.render("devpanel/main.nj", {...globalProps}));

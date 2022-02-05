@@ -3,6 +3,7 @@ coverage/
 
 # NPM
 node_modules/
+package-lock.json
 # Yarn
 .yarn/*
 !.yarn/patches
@@ -11,6 +12,9 @@ node_modules/
 !.yarn/sdks
 !.yarn/versions
 .pnp.*
+
+# Prisma generated files
+src/db/prisma/client/
 
 # Private files
 .env

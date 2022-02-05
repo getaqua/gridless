@@ -3,16 +3,15 @@
 import express from 'express';
 import debug from 'debug';
 import fs from 'fs/promises';
-import { Application, ApplicationModel } from 'src/db/models/applicationModel';
 import jsonwebtoken from 'jsonwebtoken';
-import { ILoggedIn } from './UserModel';
-import { UserModel } from 'src/db/models/userModel';
-import { Query } from 'mongoose';
+import { ILoggedIn } from './types';
+import { Application } from 'src/db/prisma/client';
+import { db } from 'src/server';
 
 const log = debug("gridless:auth:client");
 
 interface AuthorizeEndpointVariables {
-    app: Query<Application, any, any>,
+    //app: Application,
     appdata: Application,
     method?: AuthMethods,
     grant?: "code",
@@ -24,8 +23,8 @@ interface AuthorizeEndpointVariables {
 }
 
 export async function variableConfigMiddleware(req: express.Request & {user?: ILoggedIn, aevs: AuthorizeEndpointVariables}, res: express.Response, next: express.NextFunction) {
-    const app = ApplicationModel.findOne({client_id: req.query.client_id?.toString() ?? req.body?.client_id});
-    const appdata = await app.exec();
+    //const app = ApplicationModel.findOne({client_id: req.query.client_id?.toString() ?? req.body?.client_id});
+    const appdata = await db.application.findUnique({where: {client_id: req.query.client_id?.toString() ?? req.body?.client_id}});
     const method: AuthMethods = req.query["response_type"]?.toString() ?? req.body?.response_type;
     const grant: "code" = req.query["grant_type"]?.toString() ?? req.body?.grant_type;
     const code: string = req.query["code"]?.toString() ?? req.body?.code;
@@ -33,30 +32,29 @@ export async function variableConfigMiddleware(req: express.Request & {user?: IL
     const scopes: string[] = (req.query["scopes"]?.toString() ?? req.body?.scopes)?.split(",") ?? [];
     const [token, tokenerror] = code ? await verifyToken(code) : [null, null]; //jsonwebtoken.verify(code, globalThis.staticConfig.get("auth").get("secret"));
 
-    req.aevs = {app, appdata, method, grant, code, redirect_url, scopes, token, tokenerror};
+    req.aevs = {appdata, method, grant, code, redirect_url, scopes, token, tokenerror};
     return next();
 }
 
 export async function getEndpoint(req: express.Request & {user?: ILoggedIn, aevs: AuthorizeEndpointVariables}, res: express.Response, next: express.NextFunction) {
     const {appdata, code, token, method, grant, scopes, redirect_url} = req.aevs
-        // Not an error.
-        res.cookie("permitapp", appdata.id, {httpOnly: true});
-        return res.render("authorize.nj", {
-            // TODO: move scopedata file read below to a read-once global
-            scopedata: JSON.parse(await (await fs.readFile(__dirname+"/scopeStrings.json")).toString()),
-            app: appdata,
-            authcode: code,
-            scopes: token ? token?.["scopes"] : scopes,
-            authmethod: method, grant,
-            redirect_url,
-        })
-    
+    // Not an error.
+    res.cookie("permitapp", appdata.snowflake, {httpOnly: true});
+    return res.render("authorize.nj", {
+        // TODO: move scopedata file read below to a read-once global
+        scopedata: JSON.parse(await (await fs.readFile(__dirname+"/scopeStrings.json")).toString()),
+        app: appdata,
+        authcode: code,
+        scopes: token ? token?.["scopes"] : scopes,
+        authmethod: method, grant,
+        redirect_url,
+    })
 }
 
 export async function postEndpoint(req: express.Request & {user?: ILoggedIn, aevs: AuthorizeEndpointVariables}, res: express.Response, next: express.NextFunction) {
     const {appdata, code, token, method, grant, scopes, redirect_url} = req.aevs;
 
-    if (req.cookies["permitapp"] != appdata.id) {
+    if (req.cookies["permitapp"] != appdata.snowflake) {
         res.clearCookie("permitapp", {httpOnly: true});
         return res.status(400).render("autherror.j2", {messages: [
             appdata.name + " attempted to bypass the permission flow."
@@ -67,7 +65,7 @@ export async function postEndpoint(req: express.Request & {user?: ILoggedIn, aev
 
     // == GENERATE TOKEN ==
     var newToken = jsonwebtoken.sign(
-        { uid: req.user?.userId, aid: appdata.id, client_id: appdata.client_id, scopes: scopes},
+        { uid: req.user?.userId, aid: appdata.snowflake, client_id: appdata.client_id, scopes: scopes},
         globalThis.staticConfig.get("auth").get("secret"),
         { expiresIn: '1y' }
     );
@@ -91,10 +89,15 @@ export async function postEndpoint(req: express.Request & {user?: ILoggedIn, aev
             // See claimTokenEndpoint() below.
             //req.user?.userId
             if (code && token) {
-                var um = await UserModel.findById(req.user?.userId);
-                um.currentlyAuthorizingToken = code;
-                um.currentlyAuthorizingScopes = token?.["scopes"];
-                await um.save();
+                // TODO: set this to use redis if it can
+                // else:
+                await db.user.update({
+                    where: {snowflake: req.user.userId},
+                    data: {
+                        currentlyAuthorizingToken: code,
+                        currentlyAuthorizingScopes: scopes
+                    } as any,
+                });
                 return res.render("returntoapp.nj");
             } else return res.status(400).render("autherror.j2", {messages: [
                 "Authorization code required if not using redirect_uri"
@@ -110,9 +113,13 @@ export async function postEndpoint(req: express.Request & {user?: ILoggedIn, aev
                 "`show` authorization response type not allowed for applications that request the `client` special scope."
             ]});
         } else {
-            const user = await UserModel.findById(req.user?.userId);
-            user.authorizedAppCIDs.push(appdata.client_id);
-            user.save();
+            //const user = await UserModel.findById(req.user?.userId);
+            //user.authorizedAppCIDs.push(appdata.client_id);
+            //user.save();
+            await db.user.update({
+                where: {snowflake: req.user?.userId},
+                data: {authorizedAppCIDs: {push: appdata.client_id}}
+            });
             return res.render("showtoken.nj", {
                 app: appdata,
                 token: newToken
@@ -145,7 +152,7 @@ export async function preflightMiddleware(req: express.Request & {user?: ILogged
     } else if (grant == "code" && !token) {
         res.clearCookie("permitapp", {httpOnly: true});
         return res.status(400).render("autherror.j2", {messages: [
-            tokenerror.message.replace("jwt", "Authorization code")
+            tokenerror?.message.replace("jwt", "Authorization code") ?? "Authorization code missing or invalid."
         ]});
     }
     next();
@@ -156,7 +163,7 @@ export async function nonBrowserMiddleware(req: express.Request & {user?: ILogge
 
     if (req.method == "POST" && method == "code") {
         var authcode = jsonwebtoken.sign(
-            { aid: appdata.id, type: "code", scopes},
+            { aid: appdata.snowflake, type: "code", scopes},
             globalThis.staticConfig.get("auth").get("secret"),
             { expiresIn: '10m' }
         );
@@ -212,17 +219,23 @@ export async function claimTokenEndpoint(req: express.Request & {user?: ILoggedI
 
     
 
-    if ((await UserModel.countDocuments({currentlyAuthorizingToken: code})) == 1) {
-        var user = await UserModel.findOne({currentlyAuthorizingToken: code})
-        user.currentlyAuthorizingToken = "null";
-        user.currentlyAuthorizingScopes = [];
-        user.depopulate("currentlyAuthorizingToken");
-        user.depopulate("currentlyAuthorizingScopes");
-        user.authorizedAppCIDs.push(appdata.client_id);
-        await user.save();
+    if ((await db.user.count({where: {currentlyAuthorizingToken: code} as any})) == 1) {
+        // var user = await UserModel.findOne({currentlyAuthorizingToken: code})
+        // user.currentlyAuthorizingToken = "null";
+        // user.currentlyAuthorizingScopes = [];
+        // user.depopulate("currentlyAuthorizingToken");
+        // user.depopulate("currentlyAuthorizingScopes");
+        const user = await db.user.update({
+            where: {currentlyAuthorizingToken: code} as any,
+            data: {
+                authorizedAppCIDs: {push: appdata.client_id},
+                currentlyAuthorizingToken: "null",
+                currentlyAuthorizingScopes: []
+            } as any
+        });
         // == GENERATE TOKEN ==
         var newToken = jsonwebtoken.sign(
-            { uid: user._id.toHexString(), aid: appdata.id, client_id: appdata.client_id, scopes: token?.["scopes"]},
+            { uid: user.snowflake, aid: appdata.snowflake, client_id: appdata.client_id, scopes: token?.["scopes"]},
             globalThis.staticConfig.get("auth").get("secret"),
             { expiresIn: '1y' }
         );
@@ -238,7 +251,7 @@ function verifyToken(token: string) : Promise<[object | false, jsonwebtoken.Veri
     return new Promise(function (resolve, reject) {
         jsonwebtoken.verify(token, globalThis.staticConfig.get("auth").get("secret"), {}, (err, data) => {
             if (err) return resolve([false, err]);
-            return resolve([data, null]);
+            return resolve([data as object, null]);
         });
     });
 }

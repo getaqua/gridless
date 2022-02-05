@@ -1,16 +1,17 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jsonwebtoken from 'jsonwebtoken';
-import { UserModel } from '../db/models/userModel';
 import debug from 'debug';
 import { needsExtraSteps } from './extrasteps';
+import { db } from 'src/server';
 
 const log = debug("gridless:auth:login");
 
 export async function endpoint(req: express.Request, res: express.Response, next: express.NextFunction) {
     const username = req.body?.["username"];
     const password = req.body?.["password"];
-    const user = await UserModel.findOne({username});
+    //const user = await UserModel.findOne({username});
+    const user = await db.user.findUnique({where: {username}});
     if (user == null) return res.status(403).render("autherror.j2", {messages: ["Username is incorrect."], backto: "/_gridless/login"})
     if (await bcrypt.compare(password, user.password)) {
         if (needsExtraSteps("login", req)) {
@@ -19,7 +20,7 @@ export async function endpoint(req: express.Request, res: express.Response, next
     } else return res.status(403).render("autherror.j2", {messages: ["Password is incorrect."], backto: "/_gridless/login"});
     
     var newToken = jsonwebtoken.sign(
-        { uid: user._id.toHexString() },
+        { uid: user.snowflake },
         globalThis.staticConfig.get("auth").get("secret"),
         { expiresIn: '1y' }
     );

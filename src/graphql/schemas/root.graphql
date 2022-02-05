@@ -23,7 +23,6 @@ since Aqua considers users a special type of Flow.
 interface FlowEntity {
     name: String!
     id: ID!
-    alternative_ids: [String!]!
 }
 """
 A Room is a collection of Members (usually identical to its parent Flow)

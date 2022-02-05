@@ -20,7 +20,7 @@ type Mutation {
     and true if it succeeds."""
     deleteContent(snowflake: String!): Boolean!
 }
-    
+
 type Content {
     # Body
     "The text of this Content."
@@ -32,7 +32,7 @@ type Content {
     "Whether or not the Content is pinned in its Flow."
     pinned: Boolean!
     "The author of this Content."
-    author: Flow!
+    author: FlowMember!
     "The ID of the Flow this Content was posted in, if you need to look it up."
     inFlowId: String!
     """

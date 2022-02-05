@@ -5,8 +5,10 @@ import { createReadStream } from "fs";
 import { constants } from "fs";
 import debug from "debug";
 import chalk from "chalk";
-import { Attachment, AttachmentModel } from "src/db/models/attachmentModel";
+//import { Attachment, AttachmentModel } from "src/db/models/attachmentModel";
 import { fileURLToPath } from "url";
+import { Attachment } from "src/db/prisma/client";
+import { db } from "src/server";
 
 const log = debug("gridless:media");
 
@@ -29,7 +31,10 @@ export async function viewFileEndpoint(req: express.Request, res: express.Respon
       }
     }
     // the file is there and I can get to it! let's go
-    const attachment: Partial<Attachment> = await AttachmentModel.findOne(req.query["id"] ? {snowflake: req.query["id"]} : {$or: [{optimized_file: req.params["filename"]}, {original_file: req.params["filename"]}]}, {original_mime_type: 1, filename: 1});
+    const attachment: Partial<Attachment> = await db.attachment.findFirst({
+      where: req.query["id"] ? {snowflake: req.query["id"] as string ?? "fuck"} : {OR: [{optimized_file: req.params["filename"]}, {original_file: req.params["filename"]}]},
+    });
+    //await AttachmentModel.findOne(req.query["id"] ? {snowflake: req.query["id"]} : {$or: [{optimized_file: req.params["filename"]}, {original_file: req.params["filename"]}]}, {original_mime_type: 1, filename: 1});
     res.setHeader("Cache-Control", "public, max-age=2629800, immutable");
     const file = createReadStream(store.path+"/"+req.params["filename"]);
     const type = attachment.original_mime_type ?? express.static.mime.lookup(attachment.filename)[0];

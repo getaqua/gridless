@@ -1,0 +1,17 @@
+type FlowMember {
+  # Easy access fields-- inherits stuff from the member
+  name: String!
+  avatarUrl: String
+  tagline: String @deprecated(reason: "This may not be kept! Don't count on it!")
+  description: String @deprecated(reason: "This may not be kept! Don't count on it!")
+
+  # Associated flows
+  "The Flow that the member is joined to."
+  flow: Flow!
+  "The Flow corresponding to the member."
+  member: Flow!
+
+  # Member specific fields
+  #nickname: String
+  #nameColor: String
+}

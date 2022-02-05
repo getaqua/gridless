@@ -1,5 +1,5 @@
 import express from "express";
-import { getAuthConfig } from "src/db/models/authConfigModel";
+import { getAuthConfig } from "src/db/config";
 
 export function extraStepsMiddleware(req: express.Request, res: express.Response, next) {
     if (getAuthConfig().termsOfServiceUrl && !req.body?.["acceptedTerms"]) {

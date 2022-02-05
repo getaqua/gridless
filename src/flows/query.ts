@@ -1,14 +1,12 @@
-import { Flow } from "src/db/models/flowModel";
+import { Flow, FlowMember, Prisma, PrismaPromise } from "src/db/prisma/client";
 import { getEffectivePermissions } from "./permissions";
+import { db } from "../server";
+import { getFlowMember } from "src/db/types";
 
 /** Used for easily turning Flows into query responses everywhere.
  * Check permissions and existence first. */
-export async function flowToQuery(flow: Flow, userflow?: Flow) {
+export async function flowToQuery(flow: Flow, userflow?: Flow | FlowMember): Promise<any> {
   return {
-    ...flow.toObject(),
-    is_joined: userflow == null ? false : flow.members.includes(userflow._id),
-    following: userflow != null && (await getEffectivePermissions(userflow, flow)).update == "allow" 
-    ? flow.following : [],
-    id: flow.id
+    ...flow
   }
 }

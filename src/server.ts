@@ -1,5 +1,6 @@
 import 'graphql-import-node';
-import Mongoose, { ConnectOptions } from 'mongoose';
+//import Mongoose, { ConnectOptions } from 'mongoose';
+import { PrismaClient } from 'src/db/prisma/client';
 import express from 'express';
 import * as yaml from 'yaml';
 import * as fs from 'fs';
@@ -8,8 +9,6 @@ import routes from './routes';
 import cookieParser from 'cookie-parser';
 import consolidate from 'consolidate';
 import chalk from 'chalk';
-import { server as graphql } from './graphql/middleware';
-import { getAuthConfig } from './db/models/authConfigModel';
 
 const log = debug("gridless:initserver");
 
@@ -17,23 +16,34 @@ log("Reading config...");
 export const staticConfig = yaml.parseDocument(fs.readFileSync("./config.yaml").toString());
 globalThis.staticConfig = staticConfig;
 
-(async () => {  
-  log("Starting database...");
-  await Mongoose.connect(`mongodb://${staticConfig.get("database").get("username")}:${staticConfig.get("database").get("password")}@`+
-  `${staticConfig.get("database").get("host") || "127.0.0.1"}:${staticConfig.get("database").get("port") || "27017"}`, {
-    autoIndex: true,
-    bufferCommands: false,
-    appName: "Gridless by Aqua",
-    dbName: staticConfig.get("database").get("name") || "gridless"
-  }).catch((rejection) => {
-    log(chalk`{bold.red ERROR}: Database failed to connect: ${rejection.message}`);
-    //console.log(staticConfig.toJSON());
+log("Starting database...");
+export var db: PrismaClient = new PrismaClient({
+  rejectOnNotFound: false,
+  //errorFormat: "pretty"
+});
+
+(async () => {
+  // await Mongoose.connect(`mongodb://${staticConfig.get("database").get("username")}:${staticConfig.get("database").get("password")}@`+
+  // `${staticConfig.get("database").get("host") || "127.0.0.1"}:${staticConfig.get("database").get("port") || "27017"}`, {
+  //   autoIndex: true,
+  //   bufferCommands: false,
+  //   appName: "Gridless by Aqua",
+  //   dbName: staticConfig.get("database").get("name") || "gridless"
+  // }).catch((rejection) => {
+  //   log(chalk`{bold.red ERROR}: Database failed to connect: ${rejection.message}`);
+  //   //console.log(staticConfig.toJSON());
+  //   process.exit(8);
+  // }).then((mongoose) => {
+  //   // Cache config
+  //   getAuthConfig();
+  //   log(chalk`{bold.green SUCCESS}! Database connected!`);
+  // });
+  try {
+    await db.$connect();
+  } catch(e) {
+    log(chalk`{bold.red ERROR}: Database failed to connect: ${e.toString()}`);
     process.exit(8);
-  }).then((mongoose) => {
-    // Cache config
-    getAuthConfig();
-    log(chalk`{bold.green SUCCESS}! Database connected!`);
-  });
+  }
 
   const app = express();
   // registerReact(app).catch((reason) => {

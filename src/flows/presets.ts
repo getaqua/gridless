@@ -1,24 +1,24 @@
-import { Flow } from '../db/models/flowModel';
+import { Flow } from "src/db/prisma/client";
 
 export const flowPresets: Record<string, Partial<Flow>> = {
     // TODO: set display and feature options!
     community: {
-        public_permissions: {
+        publicPermissions: {
             read: 'allow',
             post: 'allow',
             join: 'allow',
             view: 'allow'
         },
-        joined_permissions: {}
+        joinedPermissions: {}
     },
     private_group: {
-        public_permissions: {
+        publicPermissions: {
             read: 'deny',
             post: 'deny',
             join: 'deny',
             view: 'deny',
         },
-        joined_permissions: {
+        joinedPermissions: {
             read: 'allow',
             post: 'allow',
             view: 'allow',
@@ -27,7 +27,7 @@ export const flowPresets: Record<string, Partial<Flow>> = {
         }
     },
     story: {
-        public_permissions: {
+        publicPermissions: {
             read: 'allow',
             view: 'allow',
             post: 'deny',
@@ -35,7 +35,7 @@ export const flowPresets: Record<string, Partial<Flow>> = {
             pin: 'deny',
             delete: 'deny'
         },
-        joined_permissions: {
+        joinedPermissions: {
             post: 'allow',
             pin: 'deny',
             delete: 'deny',
@@ -43,7 +43,7 @@ export const flowPresets: Record<string, Partial<Flow>> = {
         }
     },
     channel: {
-        public_permissions: {
+        publicPermissions: {
             read: 'allow',
             view: 'allow',
             post: 'deny',
@@ -51,7 +51,7 @@ export const flowPresets: Record<string, Partial<Flow>> = {
             pin: 'deny',
             delete: 'deny'
         },
-        joined_permissions: {
+        joinedPermissions: {
             post: 'allow',
             pin: 'allow',
             delete: 'allow',
@@ -59,13 +59,13 @@ export const flowPresets: Record<string, Partial<Flow>> = {
         }
     },
     anonymous_group: {
-        public_permissions: {
+        publicPermissions: {
             read: 'deny',
             post: 'deny',
             join: 'deny',
             view: 'deny',
         },
-        joined_permissions: {
+        joinedPermissions: {
             read: 'allow',
             post: 'allow',
             view: 'allow',
@@ -75,7 +75,7 @@ export const flowPresets: Record<string, Partial<Flow>> = {
         }
     },
     blog: {
-        public_permissions: {
+        publicPermissions: {
             read: 'allow',
             view: 'allow',
             post: 'deny',
@@ -83,20 +83,20 @@ export const flowPresets: Record<string, Partial<Flow>> = {
             pin: 'deny',
             delete: 'deny'
         },
-        joined_permissions: {
+        joinedPermissions: {
             post: 'allow',
             pin: 'allow',
             delete: 'allow'
         }
     },
     collection: {
-        public_permissions: {
+        publicPermissions: {
             read: 'deny',
             post: 'deny',
             join: 'deny',
             view: 'deny',
         },
-        joined_permissions: {
+        joinedPermissions: {
             read: 'allow',
             post: 'allow',
             view: 'allow',
