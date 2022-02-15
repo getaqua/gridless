@@ -38,19 +38,19 @@ export const flowById = (id: string) => {
 
 /// Gets the basic FlowMember object, and returns a never-joined member object
 export async function getFlowMember(member: Flow, flow: Flow): Promise<FlowMember> {
-  return db.flowMember.findUnique({
+  return await db.flowMember.findUnique({
     rejectOnNotFound: false,
     where: {flowId_memberId: {
       flowId: flow.snowflake,
       memberId: member.snowflake
     }}
-  }) ?? Promise.resolve({
+  }) || {
     flowId: flow.snowflake,
-    flow: flow,
+    //flow: flow,
     memberId: member.snowflake,
-    member: member,
+    //member: member,
     owner: false,
     permissions: {},
     state: null
-  });
+  };
 }

@@ -8,26 +8,14 @@ const log = debug("gridless:flowMember:resolver");
 export const memberResolver = {
   FlowMember: {
     async member(member: Partial<FlowMember>, args, {auth, userflow}: IContext) {
-      return flowToQuery(await db.flowMember.findUnique({
-        where: {flowId_memberId: {
-          flowId: member.flowId,
-          memberId: member.memberId
-        }},
-        select: {
-          member: true
-        }
-      }).member(), userflow);
+      return flowToQuery(await db.flow.findUnique({
+        where: {snowflake: member.memberId},
+      }), userflow);
     },
     async flow(member: Partial<FlowMember>, args, {auth, userflow}: IContext) {
-      return flowToQuery(await db.flowMember.findUnique({
-        where: {flowId_memberId: {
-          flowId: member.flowId,
-          memberId: member.memberId
-        }},
-        select: {
-          flow: true
-        }
-      }).flow(), userflow);
+      return flowToQuery(await db.flow.findUnique({
+        where: {snowflake: member.flowId},
+      }), userflow);
     }
   }
 }

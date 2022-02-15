@@ -17,6 +17,17 @@ const esg = new ExtSnowflakeGenerator(0);
 
 const contentResolver = {
     Query: {
+        getContent: async function (_, {id} : {id: string}, {auth, userflow}: IContext) {
+            const content = await db.content.findUnique({
+                where: {snowflake: id},
+                include: {attachments: true, inFlow: true},
+                // orderBy: {
+                //     timestamp: "desc"
+                // }
+            });
+            if ((await getEffectivePermissions(content.inFlow, await getFlowMember(userflow, content.inFlow))).read == "deny") return null;
+            else return await mapContent(content, userflow);
+        },
         getFollowedContent: async function (_, {limit = 100}: { limit?: number }, {auth, userflow}: IContext) {
             //const flow = await getUserFlow(auth.userId);
             if (!(checkScope(auth, Scopes.FlowViewPrivate))) throw new OutOfScopeError("getFollowedContent", Scopes.FlowViewPrivate);
